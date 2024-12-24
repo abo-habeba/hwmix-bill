@@ -1,12 +1,14 @@
 <script setup>
-import Footer from '@/layouts/components/Footer.vue'
-import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
-import NavItems from '@/layouts/components/NavItems.vue'
-import UserProfile from '@/layouts/components/UserProfile.vue'
-import logo from '@images/logo.svg?raw'
-import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue'
-import { useDisplay } from 'vuetify'
-const { smAndDown } = useDisplay()
+import Footer from '@/layouts/components/Footer.vue';
+import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue';
+import NavItems from '@/layouts/components/NavItems.vue';
+import UserProfile from '@/layouts/components/UserProfile.vue';
+import { useUserStore } from '@/stores/user';
+import logo from '@images/logo.svg?raw';
+import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue';
+import { useDisplay } from 'vuetify';
+const { smAndDown } = useDisplay();
+const userStore = useUserStore();
 </script>
 
 <template>
@@ -15,19 +17,12 @@ const { smAndDown } = useDisplay()
     <template #navbar="{ toggleVerticalOverlayNavActive }">
       <div class="d-flex h-100 align-center">
         <!-- 👉 Vertical nav toggle in overlay mode -->
-        <IconBtn
-          v-if="smAndDown"
-          class="ms-n3 d-lg-none"
-          @click="toggleVerticalOverlayNavActive(true)"
-        >
+        <IconBtn v-if="smAndDown" class="ms-n3 d-lg-none" @click="toggleVerticalOverlayNavActive(true)">
           <VIcon icon="ri-menu-line" />
         </IconBtn>
 
         <!-- 👉 Search -->
-        <div
-          class="d-flex align-center cursor-pointer"
-          style="user-select: none"
-        >
+        <div class="d-flex align-center cursor-pointer" style="user-select: none">
           <!-- 👉 Search Trigger button -->
           <IconBtn>
             <VIcon icon="ri-search-line" />
@@ -35,17 +30,18 @@ const { smAndDown } = useDisplay()
 
           <span class="d-none d-md-flex align-center text-disabled">
             <span class="me-3">Search</span>
-            <span class="meta-key">&#8984;K</span>
           </span>
         </div>
 
         <VSpacer />
+        <IconBtn to="">
+          <span v-if="userStore.user?.balance" class="d-md-flex align-center">
+            <span class="me-3">{{ userStore.user?.balance }}</span>
+          </span>
+        </IconBtn>
+        <VSpacer />
 
-        <IconBtn
-          href="https://github.com/themeselection/materio-vuetify-vuejs-admin-template-free"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <IconBtn href="https://github.com/themeselection/materio-vuetify-vuejs-admin-template-free" target="_blank" rel="noopener noreferrer">
           <VIcon icon="ri-github-fill" />
         </IconBtn>
 
@@ -60,22 +56,13 @@ const { smAndDown } = useDisplay()
     </template>
 
     <template #vertical-nav-header="{ toggleIsOverlayNavActive }">
-      <RouterLink
-        to="/"
-        class="app-logo app-title-wrapper"
-      >
+      <RouterLink to="/" class="app-logo app-title-wrapper">
         <!-- eslint-disable vue/no-v-html -->
-        <div
-          class="d-flex"
-          v-html="logo"
-        />
+        <div class="d-flex" v-html="logo" />
         <!-- eslint-enable -->
       </RouterLink>
 
-      <IconBtn
-        class="d-block d-lg-none"
-        @click="toggleIsOverlayNavActive(false)"
-      >
+      <IconBtn class="d-block d-lg-none" @click="toggleIsOverlayNavActive(false)">
         <VIcon icon="ri-close-line" />
       </IconBtn>
     </template>

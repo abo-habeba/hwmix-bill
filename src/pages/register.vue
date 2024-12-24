@@ -1,47 +1,40 @@
 <script setup>
-import { saveItem } from '@/services/api'
-import logo from '@images/logo.svg?raw'
+import { register } from '@/services/api';
+import logo from '@images/logo.svg?raw';
 
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
 
-const router = useRouter()
+const router = useRouter();
 
 const form = ref({
-  first_name: '',
+  full_name: '',
+  phone: '',
+  nickname: '',
   email: '',
   password: '',
-})
+});
 
 function registerd() {
-  saveItem('register', form.value).then(data => {
-    console.log(data)
-    localStorage.setItem('authToken', res.data.token)
-    localStorage.setItem('user', JSON.stringify(res.data.user))
-    router.push('/dashboard')
-  })
+  register('register', form.value).then(data => {
+    console.log(data);
+    localStorage.setItem('authToken', res.data.token);
+    localStorage.setItem('user', JSON.stringify(res.data.user));
+    router.push('/dashboard');
+  });
 }
 
-const isPasswordVisible = ref(false)
+const isPasswordVisible = ref(false);
 </script>
 
 <template>
   <!-- eslint-disable vue/no-v-html -->
 
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
-    <VCard
-      class="auth-card pa-4 pt-7"
-      max-width="448"
-    >
+    <VCard class="auth-card pa-4 pt-7" max-width="448">
       <VCardItem class="justify-center">
-        <RouterLink
-          to="/"
-          class="d-flex align-center gap-3"
-        >
+        <RouterLink to="/" class="d-flex align-center gap-3">
           <!-- eslint-disable vue/no-v-html -->
-          <div
-            class="d-flex"
-            v-html="logo"
-          />
+          <div class="d-flex" v-html="logo" />
         </RouterLink>
       </VCardItem>
       <VCardText class="pt-2">
@@ -50,22 +43,21 @@ const isPasswordVisible = ref(false)
 
       <VForm>
         <VRow>
-          <!-- first_name -->
+          <!-- full_name -->
           <VCol cols="12">
-            <VTextField
-              v-model="form.first_name"
-              label="الاسم الاول"
-              placeholder=" مثلا  ' هشام '  "
-            />
+            <VTextField v-model="form.full_name" label=" الاسم بالكامل " placeholder=" الاسم زي ما في البطاقة " />
+          </VCol>
+          <!-- nickname -->
+          <VCol cols="12">
+            <VTextField v-model="form.nickname" label=" اسم اللقب  " placeholder=" مثال اسم شهره , اسم دلع , اسم عيلة  " />
+          </VCol>
+          <!-- phone -->
+          <VCol cols="12">
+            <VTextField v-model="form.phone" label=" الهاتف " placeholder=" رقم الهاتف " />
           </VCol>
           <!-- email -->
           <VCol cols="12">
-            <VTextField
-              v-model="form.email"
-              label="الايميل"
-              placeholder="johndoe@email.com"
-              type="email"
-            />
+            <VTextField v-model="form.email" label="الايميل" placeholder="johndoe@email.com" type="email" />
           </VCol>
           <!-- password -->
           <VCol cols="12">
@@ -77,46 +69,22 @@ const isPasswordVisible = ref(false)
               :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
               @click:append-inner="isPasswordVisible = !isPasswordVisible"
             />
+
             <div class="d-flex align-center my-6">
-              <VCheckbox
-                id="privacy-policy"
-                v-model="form.privacyPolicies"
-                inline
-              />
-              <VLabel
-                for="privacy-policy"
-                style="opacity: 1"
-              >
+              <VCheckbox id="privacy-policy" v-model="form.privacyPolicies" inline />
+              <VLabel for="privacy-policy" style="opacity: 1">
                 <span class="me-1"> انا موافق على </span>
-                <a
-                  href="javascript:void(0)"
-                  class="text-primary"
-                >
-                  سياسة الخصوصية & الشروط
-                </a>
+                <a href="javascript:void(0)" class="text-primary"> سياسة الخصوصية & الشروط </a>
               </VLabel>
             </div>
             <!-- VBtn registerd -->
-            <VBtn
-              block
-              @click="registerd"
-            >
-              انشاء حساب
-            </VBtn>
+            <VBtn block @click="registerd"> انشاء حساب </VBtn>
           </VCol>
 
           <!-- login instead -->
-          <VCol
-            cols="12"
-            class="text-center text-base"
-          >
+          <VCol cols="12" class="text-center text-base">
             <span> هل لديك حساب بالفعل ؟ </span>
-            <RouterLink
-              class="text-primary ms-2"
-              to="login"
-            >
-              سجيل الدخول بدلا من ذلك
-            </RouterLink>
+            <RouterLink class="text-primary ms-2" to="login"> سجيل الدخول بدلا من ذلك </RouterLink>
           </VCol>
 
           <!-- <VCol

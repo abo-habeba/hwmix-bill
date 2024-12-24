@@ -1,12 +1,12 @@
 <script setup>
-import VerticalNavSectionTitle from '@/@layouts/components/VerticalNavSectionTitle.vue'
-import VerticalNavGroup from '@layouts/components/VerticalNavGroup.vue'
-import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
+import VerticalNavSectionTitle from '@/@layouts/components/VerticalNavSectionTitle.vue';
+import VerticalNavGroup from '@layouts/components/VerticalNavGroup.vue';
+import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
 </script>
 
 <template>
   <!-- 👉 NavGroup -->
-  <VerticalNavGroup
+  <!-- <VerticalNavGroup
     :item="{
       title: 'المستخدمين',
       badgeContent: '0',
@@ -22,7 +22,7 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
         icon: 'ri-group-line',
       }"
     />
-  </VerticalNavGroup>
+  </VerticalNavGroup> -->
 
   <!-- 👉 Apps & Pages -->
 
@@ -33,6 +33,27 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
   /> 
  -->
 
+  <VerticalNavLink
+    :item="{
+      title: 'المستخدمين',
+      to: { name: 'users' },
+      icon: 'ri-group-line',
+    }"
+  />
+  <VerticalNavLink
+    :item="{
+      title: 'الصلاحيات والادوار',
+      to: { name: 'roles' },
+      icon: 'ri-lock-unlock-line',
+    }"
+  />
+  <VerticalNavLink
+    :item="{
+      title: 'unauthorized',
+      to: { name: 'unauthorized' },
+      icon: 'ri-group-line',
+    }"
+  />
   <VerticalNavLink
     :item="{
       title: 'Account Settings',

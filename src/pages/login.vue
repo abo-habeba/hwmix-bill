@@ -1,47 +1,35 @@
 <script setup>
-import { saveItem } from '@/services/api'
-import logo from '@images/logo.svg?raw'
+import { login } from '@/services/api';
+import logo from '@images/logo.svg?raw';
 
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
 
-const router = useRouter()
+const router = useRouter();
 
 const form = ref({
-  email: '',
+  phone: '',
   password: '',
   remember: false,
-})
+});
 
 function logind() {
-  saveItem('login', form.value).then(data => {
-    console.log(data)
-    localStorage.setItem('authToken', data.token)
-    localStorage.setItem('user', JSON.stringify(data.user))
-    router.push('/dashboard')
-  })
+  login('login', form.value).then(() => {
+    router.push('/dashboard');
+  });
 }
 
-const isPasswordVisible = ref(false)
+const isPasswordVisible = ref(false);
 </script>
 
 <template>
   <!-- eslint-disable vue/no-v-html -->
 
   <div class="auth-wrapper d-flex align-center justify-center pa-4">
-    <VCard
-      class="auth-card pa-4 pt-7"
-      max-width="448"
-    >
+    <VCard class="auth-card pa-4 pt-7" max-width="448">
       <VCardItem class="justify-center">
-        <RouterLink
-          to="/"
-          class="d-flex align-center gap-3"
-        >
+        <RouterLink to="/" class="d-flex align-center gap-3">
           <!-- eslint-disable vue/no-v-html -->
-          <div
-            class="d-flex"
-            v-html="logo"
-          />
+          <div class="d-flex" v-html="logo" />
         </RouterLink>
       </VCardItem>
 
@@ -53,13 +41,9 @@ const isPasswordVisible = ref(false)
       <VCardText>
         <VForm @submit.prevent="() => {}">
           <VRow>
-            <!-- email -->
+            <!-- phone -->
             <VCol cols="12">
-              <VTextField
-                v-model="form.email"
-                label="الايميل"
-                type="email"
-              />
+              <VTextField v-model="form.phone" label="الهاتف او الايميل" />
             </VCol>
 
             <!-- password -->
@@ -75,57 +59,29 @@ const isPasswordVisible = ref(false)
 
               <!-- remember me checkbox -->
               <div class="d-flex align-center justify-space-between flex-wrap my-6">
-                <VCheckbox
-                  v-model="form.remember"
-                  label=" تذكرني "
-                />
+                <VCheckbox v-model="form.remember" label=" تذكرني " />
 
-                <a
-                  class="text-primary"
-                  href="javascript:void(0)"
-                >
-                  هل نسيت كلمة السر ؟
-                </a>
+                <a class="text-primary" href="javascript:void(0)"> هل نسيت كلمة السر ؟ </a>
               </div>
 
               <!-- login button -->
-              <VBtn
-                block
-                type="submit"
-                @click="logind"
-              >
-                دخول
-              </VBtn>
+              <VBtn block type="submit" @click="logind"> دخول </VBtn>
             </VCol>
 
             <!-- create account -->
-            <VCol
-              cols="12"
-              class="text-center text-base"
-            >
+            <VCol cols="12" class="text-center text-base">
               <span> لسة جديد ؟</span>
-              <RouterLink
-                class="text-primary ms-2"
-                to="/register"
-              >
-                اعمل حساب من هنا
-              </RouterLink>
+              <RouterLink class="text-primary ms-2" to="/register"> اعمل حساب من هنا </RouterLink>
             </VCol>
 
-            <VCol
-              cols="12"
-              class="d-flex align-center"
-            >
+            <VCol cols="12" class="d-flex align-center">
               <!-- <VDivider />
               <span class="mx-4">or</span>
               <VDivider /> -->
             </VCol>
 
             <!-- auth providers -->
-            <VCol
-              cols="12"
-              class="text-center"
-            >
+            <VCol cols="12" class="text-center">
               <!-- <AuthProvider /> -->
             </VCol>
           </VRow>

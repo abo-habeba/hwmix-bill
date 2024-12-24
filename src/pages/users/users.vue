@@ -1,19 +1,12 @@
 <script setup>
-import usersTable from '@/pages/users/usersTable.vue'
-import { ref } from 'vue'
-const items = ref({})
-// onMounted(() => {
-//   console.log('user')
-//   getAll('users').then(res => {
-//     console.log(res.data)
-//     items.value = res.data
-//   })
-// })
+import DataTable from '@/components/DataTable.vue';
+import AddUser from './addUser.vue';
 </script>
 <template>
-  <VCol cols="12">
-    <VCard title="المستخدمين">
-      <usersTable />
+  <VCol style="position: relative" cols="12">
+    <VCard class="pa-0" title="المستخدمين">
+      <DataTable />
     </VCard>
+    <AddUser />
   </VCol>
 </template>

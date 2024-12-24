@@ -6,7 +6,6 @@ export const routes = [
     meta: {
       title: 'الصفحة الرئيسية',
       description: 'إعادة توجيه إلى لوحة التحكم',
-      rules: [], // يمكن إضافة القواعد هنا
     },
   },
   {
@@ -16,7 +15,6 @@ export const routes = [
     meta: {
       title: 'تخطيط افتراضي',
       description: 'هذا هو التخطيط الرئيسي للتطبيق',
-      rules: [], // يمكن تطبيق قواعد عامة على التخطيط
     },
     children: [
       {
@@ -26,7 +24,6 @@ export const routes = [
         meta: {
           title: 'لوحة التحكم',
           description: 'عرض الإحصائيات والبيانات الرئيسية',
-          rules: ['auth'],
         },
       },
       {
@@ -35,8 +32,37 @@ export const routes = [
         name: 'users',
         meta: {
           title: ' المستخدمين ',
-          description: ' ادارة وتعديل المستخدمين ',
-          rules: ['auth'],
+          description: ' ادارة و تعديل المستخدمين ',
+          roles: 'users',
+        },
+      },
+      {
+        path: 'users/edit/:id?', // المسار لتعديل المستخدم مع تمرير id
+        component: () => import('@/pages/users/edit.vue'), // مكون تعديل المستخدم
+        name: 'edit-user',
+        meta: {
+          title: 'تعديل المستخدم',
+          description: 'تعديل بيانات المستخدم',
+          roles: 'users.update',
+        },
+      },
+      {
+        path: 'roles',
+        component: () => import('@/pages/role/role.vue'),
+        name: 'roles',
+        meta: {
+          title: ' الادوار والصلاحيات',
+          description: 'تعديل الادوار والصلاحيات',
+          roles: 'roles',
+        },
+      },
+      {
+        path: 'account-settings1',
+        component: () => import('@/pages/account-settings.vue'),
+        name: 'account-settings2',
+        meta: {
+          title: 'إعدادات الحساب',
+          description: 'تعديل معلومات الحساب الشخصية',
         },
       },
       {
@@ -46,7 +72,15 @@ export const routes = [
         meta: {
           title: 'إعدادات الحساب',
           description: 'تعديل معلومات الحساب الشخصية',
-          rules: ['auth'], // يتطلب تسجيل الدخول
+        },
+      },
+      {
+        path: 'unauthorized/:title?',
+        component: () => import('@/pages/unauthorized.vue'),
+        name: 'unauthorized',
+        meta: {
+          title: '',
+          description: '',
         },
       },
       {
@@ -56,7 +90,6 @@ export const routes = [
         meta: {
           title: 'الطباعة',
           description: 'عرض عناصر الطباعة والتنسيقات',
-          rules: [],
         },
       },
       {
@@ -66,7 +99,6 @@ export const routes = [
         meta: {
           title: 'الأيقونات',
           description: 'عرض الأيقونات المتاحة',
-          rules: [],
         },
       },
       {
@@ -76,7 +108,6 @@ export const routes = [
         meta: {
           title: 'البطاقات',
           description: 'عرض أشكال وتصميمات البطاقات',
-          rules: [],
         },
       },
       {
@@ -86,7 +117,6 @@ export const routes = [
         meta: {
           title: 'الجداول',
           description: 'عرض الجداول وتصميماتها',
-          rules: [],
         },
       },
       {
@@ -96,7 +126,6 @@ export const routes = [
         meta: {
           title: 'تصميم النماذج',
           description: 'عرض تنسيقات مختلفة للنماذج',
-          rules: [],
         },
       },
     ],
@@ -108,7 +137,6 @@ export const routes = [
     meta: {
       title: 'تخطيط فارغ',
       description: 'تخطيط بسيط بدون قوائم أو عناوين',
-      rules: [],
     },
     children: [
       {
@@ -118,7 +146,6 @@ export const routes = [
         meta: {
           title: 'تسجيل الدخول',
           description: 'قم بتسجيل الدخول إلى حسابك',
-          rules: ['guest'], // يتطلب أن يكون المستخدم غير مسجل الدخول
         },
       },
       {
@@ -128,7 +155,6 @@ export const routes = [
         meta: {
           title: 'إنشاء حساب',
           description: 'قم بإنشاء حساب جديد',
-          rules: ['guest'], // يتطلب أن يكون المستخدم غير مسجل الدخول
         },
       },
       {
@@ -138,9 +164,8 @@ export const routes = [
         meta: {
           title: 'صفحة غير موجودة',
           description: 'الصفحة التي تبحث عنها غير متوفرة',
-          rules: [],
         },
       },
     ],
   },
-]
+];

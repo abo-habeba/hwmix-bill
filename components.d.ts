@@ -7,10 +7,15 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AdvancedSearch: typeof import('./src/components/AdvancedSearch.vue')['default']
     CardStatisticsHorizontal: typeof import('./src/@core/components/cards/CardStatisticsHorizontal.vue')['default']
     CardStatisticsVertical: typeof import('./src/@core/components/cards/CardStatisticsVertical.vue')['default']
     CardStatisticsWithImages: typeof import('./src/@core/components/cards/CardStatisticsWithImages.vue')['default']
     ContextMenu: typeof import('./src/components/ContextMenu.vue')['default']
+    copy: typeof import('./src/components/ContextMenu copy.vue')['default']
+    DataTable: typeof import('./src/components/DataTable.vue')['default']
+    DeletedItem: typeof import('./src/components/DeletedItem.vue')['default']
+    Element: typeof import('./src/components/Element.vue')['default']
     ErrorHeader: typeof import('./src/components/ErrorHeader.vue')['default']
     MoreBtn: typeof import('./src/@core/components/MoreBtn.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
