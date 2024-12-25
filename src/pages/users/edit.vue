@@ -39,11 +39,9 @@ onMounted(() => {
         user.value = res;
         getAll('roles').then(data => {
           roles.value = data.data;
-          console.log(roles.value);
         });
       })
       .catch(e => {
-        console.log(e.data.error);
         loading.value = false;
       });
   }

@@ -14,9 +14,6 @@ const contextMenu = ref(null);
 const userAction = ref(null);
 // الدوال الخاصة بالإجراءات
 const editUser = ref(() => {
-  console.log(userAction.value);
-
-  console.log('تم تعديل المستخدم');
   colsContextMenu();
 });
 
@@ -24,13 +21,11 @@ const deletedUsers = ref(null);
 
 const deleteUser = ref(() => {
   deletedUsers.value = users.value.filter(user => selectedUsers.value.includes(user.id));
-  console.log('المستخدمون المحذوفون:', deletedUsers.value);
   appState.appState = true;
   colsContextMenu();
 });
 
 const viewUser = ref(() => {
-  console.log('تم عرض المستخدم');
   colsContextMenu();
 });
 
@@ -43,7 +38,6 @@ const userActions = ref([
 const showContextMenu = (event, { item }) => {
   event.preventDefault();
   if (selectedUsers.value.length) {
-    console.log('if length');
     userActions.value = [{ title: 'حذف', color: '#dc3545', icon: 'ri-delete-bin-line', callback: deleteUser.value }];
     // deleteUser.value
     contextMenu.value.showContextMenu(event);
@@ -95,14 +89,6 @@ function getRowProps({ item, index }) {
   };
 }
 
-const handleSearch = filters => {
-  console.log('تطبيق الفلاتر:', filters);
-  // إرسال الطلب مع الفلاتر إلى الخادم
-};
-
-const handleReset = () => {
-  console.log('تمت إعادة تعيين الفلاتر');
-};
 const filters = ref({
   name: '',
   email: '',
@@ -143,7 +129,6 @@ fetchUsers();
 
 const updateSelectedUsers = selected => {
   selectedUsers.value = selected;
-  console.log('المستخدمون المحددون:', selected);
 };
 </script>
 <template>

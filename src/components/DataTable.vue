@@ -73,10 +73,12 @@
 <script setup>
 import { getAll, saveItem } from '@/services/api';
 import { useappState } from '@/stores/appState';
-import { onMounted, ref, computed } from 'vue';
+import { computed, onMounted, ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import AdvancedSearch from './AdvancedSearch.vue';
 import DeletedItem from './DeletedItem.vue';
+import { useUserStore } from '@/stores/user';
+const userStore = useUserStore();
 const router = useRouter();
 const appState = useappState();
 const selectedUsers = ref([]);
@@ -93,6 +95,7 @@ const filters = ref({
   created_at_from: '',
   created_at_to: '',
 });
+
 const options = ref({
   page: 1,
   sortBy: [],
@@ -131,8 +134,6 @@ const deletedUsers = ref(null);
 const advancedSearch = ref(null);
 
 const editUser = ref(() => {
-  console.log(user.value.id);
-  console.log('تم تعديل المستخدم');
   router.push({ name: 'edit-user', params: { id: user.value.id } });
   colsContextMenu();
 });
@@ -143,18 +144,15 @@ const deleteUser = ref(() => {
   } else {
     deletedUsers.value = [user.value];
   }
-  console.log('المستخدمون المحذوفون:', deletedUsers.value);
   appState.appState = true;
   colsContextMenu();
 });
 const viewUser = ref(() => {
-  console.log('تم عرض المستخدم');
   colsContextMenu();
 });
 
 const activeUser = ref(() => {
   const newStatus = user.value.status === '0' ? '1' : '0';
-  console.log(user.value.status === '0' ? 'تفعيل' : 'تعطيل');
   saveItem('user', { status: newStatus }, user.value.id).then(() => {
     users.value.forEach(u => {
       if (u.id === user.value.id) {
@@ -164,18 +162,25 @@ const activeUser = ref(() => {
     colsContextMenu();
   });
 });
+// import { ref, computed, watchEffect } from 'vue';
 
-const actions = computed(() => {
+const actions = ref([]);
+
+const availableActions = computed(() => {
+  const canUpdate = userStore.can(['users.update.self', 'users.update.own', 'users.update']);
+  const canDelete = userStore.can(['users.delete.self', 'users.delete.own', 'users.delete']);
+  const canView = userStore.can(['users.show.self', 'users.show.own', 'users.show']);
+
   return [
-    !selectedUsers.value.length
+    !selectedUsers.value.length && canUpdate
       ? {
           title: user.value?.status == '1' ? 'تعطيل' : 'تفعيل',
           color: user.value?.status == '1' ? '#ffc107' : '#28a745',
-          icon: 'ri-pencil-line',
+          icon: user.value?.status == '1' ? 'ri-toggle-line' : 'ri-toggle-fill',
           callback: activeUser.value,
         }
       : null,
-    !selectedUsers.value.length
+    !selectedUsers.value.length && canUpdate
       ? {
           title: 'تعديل',
           color: '#007bff',
@@ -183,7 +188,7 @@ const actions = computed(() => {
           callback: editUser.value,
         }
       : null,
-    true // تحقق الشرط هنا
+    canDelete
       ? {
           title: 'حذف',
           color: '#dc3545',
@@ -191,7 +196,7 @@ const actions = computed(() => {
           callback: deleteUser.value,
         }
       : null,
-    !selectedUsers.value.length
+    !selectedUsers.value.length && canView
       ? {
           title: 'عرض',
           color: '#17a2b8',
@@ -199,22 +204,33 @@ const actions = computed(() => {
           callback: viewUser.value,
         }
       : null,
-  ].filter(Boolean); // إزالة القيم null
+  ].filter(Boolean);
 });
+
+watchEffect(() => {
+  if (availableActions.value.length === 0) {
+    actions.value = [
+      {
+        title: 'لا تملك إجراءات',
+        color: '#6c757d',
+        icon: 'ri-spam-3-line',
+        callback: () => {},
+      },
+    ];
+  } else {
+    actions.value = availableActions.value;
+  }
+});
+
 const removeDeletedUsers = deletedIds => {
   users.value = users.value.filter(user => !deletedIds.includes(user.id));
 };
 const contextMenu = ref(null);
 const showContextMenu = (event, { item }) => {
   user.value = item;
-  console.log('run showContextMenu', user.value);
   event.preventDefault();
   if (contextMenu.value) {
-    console.log('if Context menu');
-
     contextMenu.value.showContextMenu(event);
-  } else {
-    console.error('Context menu is not initialized.');
   }
 };
 const colsContextMenu = () => {

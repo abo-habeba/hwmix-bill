@@ -16,7 +16,6 @@ const form = ref({
 
 function registerd() {
   register('register', form.value).then(data => {
-    console.log(data);
     localStorage.setItem('authToken', res.data.token);
     localStorage.setItem('user', JSON.stringify(res.data.user));
     router.push('/dashboard');

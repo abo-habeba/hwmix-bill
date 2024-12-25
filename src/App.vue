@@ -6,12 +6,8 @@ const userStore = useUserStore();
 onMounted(() => {
   userStore
     .setAuthHeaderNew(localStorage.authToken)
-    .then(() => {
-      console.log('then app');
-    })
-    .catch(() => {
-      console.log('catch app');
-    });
+    .then(() => {})
+    .catch(() => {});
 });
 </script>
 

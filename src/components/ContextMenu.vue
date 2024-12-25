@@ -8,7 +8,15 @@
       ...menuActionStyles,
     }"
   >
-    <v-list-item v-for="action in actions" :style="{ color: action.color }" :key="action.title" :prepend-icon="action.icon" :title="action.title" @click="handleAction(action)"> </v-list-item>
+    <v-list-item
+      v-for="action in actions"
+      :style="{ color: action.color }"
+      :key="action.title"
+      :prepend-icon="action.icon"
+      :title="action.title"
+      @click="handleAction(action)"
+    >
+    </v-list-item>
   </v-list>
 </template>
 
@@ -49,7 +57,6 @@ function showContextMenu(event) {
   const menuAction = document.querySelector('#menuAction');
 
   event.preventDefault(); // منع القائمة السياقية الافتراضية
-  console.log('/////////////////////////');
   const dataTableRect = dataTable.getBoundingClientRect();
   const dataTableWidth = dataTableRect.width;
   const dataTableHeight = dataTableRect.height;

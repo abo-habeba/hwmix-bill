@@ -33,17 +33,4 @@
 <script setup>
 defineModel('modelValue', { type: Object, default: () => ({}) });
 defineProps(['fields']);
-
-function applyFilters() {
-  console.log('Filters applied:', modelValue);
-}
-
-function clearFilters() {
-  Object.keys(modelValue).forEach(key => {
-    modelValue[key] = null;
-  });
-}
-defineExpose({
-  applyFilters,
-});
 </script>

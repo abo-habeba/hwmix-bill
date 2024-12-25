@@ -38,7 +38,6 @@ function deleted() {
   const itemIds = props.dataDelete.items.map(item => item.id);
 
   deleteAll(props.api, itemIds).then(() => {
-    console.log('Item deleted ');
     emit('update-users', itemIds);
   });
   appState.appState = false;

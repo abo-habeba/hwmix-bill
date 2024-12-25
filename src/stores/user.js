@@ -22,7 +22,6 @@ export const useUserStore = defineStore('user', {
                 this.user = userRes;
               })
               .catch(error => {
-                console.log('Authentication check failed:', error.message);
                 if (error.response?.status === 401) {
                   delete axios.defaults.headers.common['Authorization'];
                   localStorage.removeItem('authToken');
@@ -35,7 +34,6 @@ export const useUserStore = defineStore('user', {
               });
           }
         } else {
-          console.log('No token provided, redirecting to login.');
           delete axios.defaults.headers.common['Authorization'];
           this.isAuth = false;
           localStorage.removeItem('authToken');
@@ -46,14 +44,37 @@ export const useUserStore = defineStore('user', {
       });
     },
     can(permission) {
-      return new Promise((resolve, reject) => {
-        if (this.user?.permissions) {
-          return this.user.permissions.includes(permission);
-        } else {
-          getOne(`user`, JSON.parse(localStorage.user).id).then(userRes => {
+      const calculatePermissions = user => {
+        const rolesPermissions = user.roles.map(role => role.permissions).flat();
+        const permissions = user.permissions;
+        return [...new Set([...rolesPermissions, ...permissions])];
+      };
+      console.log('run can', permission);
+
+      return new Promise(async (resolve, reject) => {
+        try {
+          if (this.user?.permissions) {
+            const allPermissions = calculatePermissions(this.user);
+
+            const hasPermission = Array.isArray(permission)
+              ? permission.some(perm => allPermissions.includes(perm))
+              : allPermissions.includes(permission);
+            console.log('resolve', hasPermission);
+
+            resolve(hasPermission);
+          } else {
+            const userRes = await getOne('user', JSON.parse(localStorage.user).id);
             this.user = userRes;
-            return this.user.permissions.includes(permission);
-          });
+            const allPermissions = calculatePermissions(this.user);
+
+            const hasPermission = Array.isArray(permission)
+              ? permission.some(perm => allPermissions.includes(perm))
+              : allPermissions.includes(permission);
+            console.log('resolve', hasPermission);
+            resolve(hasPermission);
+          }
+        } catch (error) {
+          reject(error);
         }
       });
     },

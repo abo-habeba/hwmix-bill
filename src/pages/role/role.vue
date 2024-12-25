@@ -135,6 +135,7 @@ import { deleteOne, getAll, getOne, saveItem } from '@/services/api';
 import { ref, onMounted, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user';
 const router = useRouter();
 const { xs } = useDisplay();
 const loading = ref(false);
@@ -146,21 +147,38 @@ const search = ref('');
 const valid = ref(false);
 const form = ref(null);
 let user = localStorage.user ? JSON.parse(localStorage.user) : 0;
-const userPermission = ref({}); // الحصول على الصلاحيات من المستخدم
+const userPermission = ref({});
 const permissionGroups = ref({});
 
-onMounted(() => {
-  getOne('user', user.id).then(user => {
-    userPermission.value = user.permissions;
-    // تحديث الصلاحيات بناءً على صلاحيات المستخدم
+const userStore = useUserStore();
+
+watch(
+  () => userStore.user,
+  () => {
+    console.log('rin watch');
+
+    userPermission.value = userStore.user.permissions || [];
     permissionGroups.value = permissionsFile
       .map(group => ({
         ...group,
         permissions: group.permissions.filter(permission => user.permissions.includes(permission.value)),
       }))
       .filter(group => group.permissions.length > 0);
-  });
-});
+  },
+  { immediate: true }
+);
+// onMounted(() => {
+//   getOne('user', user.id).then(user => {
+//     userPermission.value = user.permissions;
+//     // تحديث الصلاحيات بناءً على صلاحيات المستخدم
+//     permissionGroups.value = permissionsFile
+//       .map(group => ({
+//         ...group,
+//         permissions: group.permissions.filter(permission => user.permissions.includes(permission.value)),
+//       }))
+//       .filter(group => group.permissions.length > 0);
+//   });
+// });
 
 onMounted(async () => {
   loading.value = true;
@@ -170,7 +188,6 @@ onMounted(async () => {
       loading.value = false;
     })
     .catch(e => {
-      console.log(e.data.error);
       loading.value = false;
       if (e.data.error === 'Unauthorized') {
         // router.push({ name: 'unauthorized' });
@@ -211,7 +228,6 @@ const closeDialog = () => {
 };
 
 const editRole = item => {
-  console.log('editRole', item);
   editedItem.value = { ...item };
   dialog.value = true;
 };
@@ -223,11 +239,9 @@ const confirmDelete = item => {
 
 const saveRole = () => {
   saving.value = true;
-  console.log('editedItem', editedItem.value);
   if (!form.value.validate()) return;
   try {
     saveItem('role', editedItem.value, editedItem.value.id).then(data => {
-      console.log('data', data);
       if (editedItem.value.id) {
         let role = roles.value.find(role => role.id === data.id);
         Object.assign(role, editedItem.value);

@@ -30,17 +30,11 @@ function assignRole() {
     user_id: props.user.id,
     roles: selectedRoles.value,
   };
-  console.log(rolesAndId);
   // return;
-  saveItem('assignRole', rolesAndId)
-    .then(data => {
-      console.log(data);
-      emit('update:user', data);
-      dialogRolesEdit.value = false;
-    })
-    .catch(e => {
-      console.log(e);
-    });
+  saveItem('assignRole', rolesAndId).then(data => {
+    emit('update:user', data);
+    dialogRolesEdit.value = false;
+  });
 }
 </script>
 <template>

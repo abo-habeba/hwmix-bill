@@ -28,59 +28,45 @@ apiClient.interceptors.request.use(config => {
 // Set content-type for JSON
 apiClient.defaults.headers.post['Content-Type'] = 'application/json';
 
-// Handle response errors globally
-// apiClient.interceptors.response.use(
-//   response => response,
-//   error => {
-//     if (error.response && error.response.status === 401) {
-//       console.log('Unauthorized access, please login again.');
-//     }
-//     return Promise.reject(error);
-//   }
-// );
-
-// export default apiClient;
-
-// const userStore = useUserStore();
-
-export const getAll = (apiEndpoint, params = null) => {
+export const getAll = (apiEndpoint, params = null, log = false) => {
   const userStore = useUserStore();
   userStore.loadingApi = true;
   return new Promise((resolve, reject) => {
     apiClient
       .get(apiEndpoint, { params: params })
       .then(response => {
+        log ? console.log(` ${log}:  => `, response.data) : '';
         resolve(response.data);
         userStore.loadingApi = false;
       })
       .catch(error => {
         userStore.loadingApi = false;
-        console.log(`Error fetching all data from ${apiEndpoint}:`, error);
+        log ? console.log(` ${log}:  => `, error) : '';
         reject(error.response);
       });
   });
 };
 
-export const getOne = (apiEndpoint, id) => {
+export const getOne = (apiEndpoint, id, log = false) => {
   const userStore = useUserStore();
   userStore.loadingApi = true;
   return new Promise((resolve, reject) => {
     apiClient
       .get(`${apiEndpoint}/${id}`)
       .then(response => {
-        console.log(`fetching item with ID ${id} from ${apiEndpoint}:`, response.data.data);
         userStore.loadingApi = false;
+        log ? console.log(` ${log}:  => `, response.data) : '';
         resolve(response.data.data); // تمرير البيانات باستخدام resolve
       })
       .catch(error => {
         userStore.loadingApi = false;
-        console.log(`Error fetching item with ID ${id} from ${apiEndpoint}:`, error.message);
+        log ? console.log(` ${log}:  => `, error) : '';
         reject(error.response); // تمرير الخطأ باستخدام reject
       });
   });
 };
 
-export const saveItem = (apiEndpoint, data, id = false) => {
+export const saveItem = (apiEndpoint, data, id = false, log = false) => {
   const userStore = useUserStore();
   userStore.loadingApi = true;
   return new Promise((resolve, reject) => {
@@ -91,23 +77,25 @@ export const saveItem = (apiEndpoint, data, id = false) => {
       apiClient
         .put(apiEndpointIfId, data)
         .then(response => {
-          resolve(response.data);
           userStore.loadingApi = false;
+          log ? console.log(` ${log}:  => `, response.data) : '';
+          resolve(response.data);
         })
         .catch(error => {
           userStore.loadingApi = false;
-          console.error(`Failed to update the item with ID ${id}:`, error.response.data.message);
+          log ? console.log(` ${log}:  => `, error) : '';
           reject(error);
         });
     } else {
       apiClient
         .post(apiEndpoint, formData)
         .then(response => {
-          resolve(response.data);
           userStore.loadingApi = false;
+          log ? console.log(` ${log}:  => `, response.data) : '';
+          resolve(response.data);
         })
         .catch(error => {
-          console.error(`Failed to create a new item at endpoint: ${apiEndpoint}:`, error);
+          log ? console.log(` ${log}:  => `, error) : '';
           userStore.loadingApi = false;
           reject(error);
         });
@@ -115,21 +103,22 @@ export const saveItem = (apiEndpoint, data, id = false) => {
   });
 };
 
-export const deleteOne = (apiEndpoint, id) => {
+export const deleteOne = (apiEndpoint, id, log = false) => {
   return new Promise((resolve, reject) => {
     apiClient
       .delete(`${apiEndpoint}/${id}`)
       .then(response => {
+        log ? console.log(` ${log}:  => `, response.data) : '';
         resolve(response.data.data);
       })
       .catch(error => {
-        console.error(`Error deleting item with ID ${id} from ${apiEndpoint}:`, error.response.data.message);
+        log ? console.log(` ${log}:  => `, error) : '';
         reject(error);
       });
   });
 };
 
-export const deleteAll = (apiEndpoint, ids) => {
+export const deleteAll = (apiEndpoint, ids, log = false) => {
   return new Promise((resolve, reject) => {
     apiClient
       .post(apiEndpoint, { user_ids: ids })
@@ -137,43 +126,44 @@ export const deleteAll = (apiEndpoint, ids) => {
         resolve(response.data.data);
       })
       .catch(error => {
-        console.error(`Error deleting multiple items from ${apiEndpoint}:`, error);
+        log ? console.log(` ${log}:  => `, error) : '';
         reject(error);
       });
   });
 };
 
-export const register = (apiEndpoint, id) => {
+export const register = (apiEndpoint, id, log = false) => {
   return new Promise((resolve, reject) => {
     apiClient
       .delete(`${apiEndpoint}/${id}`)
       .then(response => {
+        log ? console.log(` ${log}:  => `, error) : '';
         resolve(response.data);
       })
       .catch(error => {
-        console.error(`Error deleting item with ID ${id} from ${apiEndpoint}:`, error.response.data.message);
+        log ? console.log(` ${log}:  => `, error) : '';
         reject(error);
       });
   });
 };
-export const login = async (apiEndpoint, data) => {
+export const login = async (apiEndpoint, data, log = false) => {
   const userStore = useUserStore();
   userStore.loadingApi = true;
   try {
     const response = await apiClient.post(apiEndpoint, data);
-    console.log('login', response.data);
 
     localStorage.setItem('authToken', response.data.token);
     localStorage.setItem('user', JSON.stringify(response.data.user));
     userStore.loadingApi = false;
+    log ? console.log(` ${log}:  => `, response.data) : '';
   } catch (error) {
     console.error(`Error logging in at ${apiEndpoint}:`, error);
     userStore.loadingApi = false;
-    throw error; // يمكن أن تستخدم reject هنا في حال كنت تستخدم promises
+    log ? console.log(` ${log}:  => `, error) : '';
   }
 };
 
-export const logOut = apiEndpoint => {
+export const logOut = (apiEndpoint, log = false) => {
   const userStore = useUserStore();
   userStore.loadingApi = true;
   return new Promise((resolve, reject) => {
@@ -184,12 +174,13 @@ export const logOut = apiEndpoint => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
         userStore.loadingApi = false;
+        log ? console.log(` ${log}:  => `, response.data) : '';
         resolve(response.data);
         location.reload();
       })
       .catch(error => {
         userStore.loadingApi = false;
-        console.error(`Error logging in at ${apiEndpoint}:`, error);
+        log ? console.log(` ${log}:  => `, error) : '';
         reject(error);
       });
   });
