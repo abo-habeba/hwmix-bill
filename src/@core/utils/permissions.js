@@ -1,4 +1,4 @@
-export const permissionsFile = [
+const permissionsLocal = [
   // admins
   {
     name: 'إدار الادمن',
@@ -69,3 +69,16 @@ export const permissionsFile = [
     ],
   },
 ];
+
+export function getLocalPermissions(remotePermissions) {
+  if (!Array.isArray(remotePermissions)) {
+    console.error('Invalid remotePermissions data:', remotePermissions);
+    return [];
+  }
+  return permissionsLocal
+    .map(group => ({
+      ...group,
+      permissions: group.permissions.filter(permission => remotePermissions.includes(permission.value)),
+    }))
+    .filter(group => group.permissions.length > 0);
+}

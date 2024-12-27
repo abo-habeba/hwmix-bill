@@ -1,15 +1,19 @@
 <script setup>
 import { getOne, saveItem, getAll } from '@/services/api';
-import { permissionsFile } from '@/@core/utils/permissions';
+// import { permissionsFile } from '@/@core/utils/permissions';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import editUserRolse from './editUserRolse.vue';
+import RoleDetails from '@/components/roles/RoleDetails.vue';
 const { xs } = useDisplay();
 const route = useRoute();
 const router = useRouter();
+const loading = ref(false);
 const userId = ref(route.params.id);
 const roles = ref(null);
+
+const roleDetail = ref(null);
 const tabs = [
   {
     title: 'بيانات الحساب',
@@ -17,7 +21,7 @@ const tabs = [
     tab: 'account',
   },
   {
-    title: 'الادوار الصلاحيات',
+    title: 'الادوار و الصلاحيات',
     icon: 'ri-lock-line',
     tab: 'role',
   },
@@ -34,14 +38,15 @@ const tab = ref(route.params.tab || tabs[0].tab);
 
 onMounted(() => {
   if (route.params.id) {
-    getOne('user', userId.value)
+    loading.value = true;
+    getOne('user', userId.value, true)
       .then(res => {
         user.value = res;
         getAll('roles').then(data => {
           roles.value = data.data;
         });
       })
-      .catch(e => {
+      .finally(e => {
         loading.value = false;
       });
   }
@@ -52,20 +57,27 @@ function sendData() {
     // router.push({ name: 'users' });
   });
 }
+
+const userRole = ref({});
+function openRoleDetails(role) {
+  if (role) {
+    userRole.value = role;
+    roleDetail.value.openDialog();
+  }
+}
 </script>
 
 <template>
   <v-card>
-    <v-tabs v-model="tab" align-tabs="center" color="deep-purple-accent-4">
+    <v-tabs class="ma-5" v-model="tab" align-tabs="center" color="deep-purple-accent-4">
       <v-tab v-for="(t, i) in tabs" :key="i" :value="t.tab" :append-icon="t.icon"> {{ t.title }}</v-tab>
     </v-tabs>
     <v-tabs-window v-model="tab">
       <v-tabs-window-item value="account">
         <VRow>
           <VCol cols="12">
-            <VCard :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'">
+            <VCard elevation="0" :loading="loading" :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'" class="ma-4">
               <VDivider />
-
               <VCardText>
                 <!-- 👉 Form -->
                 <VForm class="mt-6">
@@ -116,15 +128,16 @@ function sendData() {
         <v-card elevation="0" class="ma-4">
           <editUserRolse v-if="roles" v-model:user="user" :user="user" :roles="roles" />
           <v-card-title class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4"> ادوار المستخدم </v-card-title>
-          <v-card-text>
-            <div v-if="user?.roles">
-              <v-chip v-for="(rol, index) in user.roles" :key="index" class="ma-2" variant="outlined">
+          <v-card-text v-if="user?.roles.length > 0">
+            <span v-for="(rol, index) in user.roles" :key="index">
+              <v-chip @click="openRoleDetails(rol)" class="ma-2" variant="outlined">
                 {{ rol.name }}
               </v-chip>
-            </div>
-            <div v-else class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4">لم يتم تعين اي ادوار للمستخدم</div>
+            </span>
           </v-card-text>
+          <div v-else class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4">لم يتم تعين اي ادوار للمستخدم</div>
         </v-card>
+        <RoleDetails ref="roleDetail" :userRole="userRole" />
       </v-tabs-window-item>
     </v-tabs-window>
   </v-card>

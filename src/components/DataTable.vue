@@ -101,20 +101,6 @@ const options = ref({
   sortBy: [],
   itemsPerPage: 10,
 });
-// const props = defineProps({
-//   actions: {
-//     required: true,
-//   },
-//   fields: {
-//     required: true,
-//   },
-//   api: {
-//     required: true,
-//   },
-//   headers: {
-//     required: true,
-//   },
-// });
 const fields = ref([
   { name: 'nickname', type: 'input', label: ' اسم الشهرة ' },
   { name: 'phone', type: 'input', label: '  الهاتف ' },
@@ -165,47 +151,53 @@ const activeUser = ref(() => {
 // import { ref, computed, watchEffect } from 'vue';
 
 const actions = ref([]);
+const availableActions = ref([]);
 
-const availableActions = computed(() => {
-  const canUpdate = userStore.can(['users.update.self', 'users.update.own', 'users.update']);
-  const canDelete = userStore.can(['users.delete.self', 'users.delete.own', 'users.delete']);
-  const canView = userStore.can(['users.show.self', 'users.show.own', 'users.show']);
+watch(
+  () => user.value,
+  async newUser => {
+    if (!newUser) return;
 
-  return [
-    !selectedUsers.value.length && canUpdate
-      ? {
-          title: user.value?.status == '1' ? 'تعطيل' : 'تفعيل',
-          color: user.value?.status == '1' ? '#ffc107' : '#28a745',
-          icon: user.value?.status == '1' ? 'ri-toggle-line' : 'ri-toggle-fill',
-          callback: activeUser.value,
-        }
-      : null,
-    !selectedUsers.value.length && canUpdate
-      ? {
-          title: 'تعديل',
-          color: '#007bff',
-          icon: 'ri-pencil-line',
-          callback: editUser.value,
-        }
-      : null,
-    canDelete
-      ? {
-          title: 'حذف',
-          color: '#dc3545',
-          icon: 'ri-delete-bin-line',
-          callback: deleteUser.value,
-        }
-      : null,
-    !selectedUsers.value.length && canView
-      ? {
-          title: 'عرض',
-          color: '#17a2b8',
-          icon: 'ri-eye-line',
-          callback: viewUser.value,
-        }
-      : null,
-  ].filter(Boolean);
-});
+    const canUpdate = await userStore.can(['users.update.self', 'users.update.own', 'users.update', 'super.admin', 'company.owner']);
+    const canDelete = await userStore.can(['users.delete.self', 'users.delete.own', 'users.delete', 'super.admin', 'company.owner']);
+    const canView = await userStore.can(['users.show.self', 'users.show.own', 'users.show', 'super.admin', 'company.owner']);
+    availableActions.value = [
+      !selectedUsers.value.length && canUpdate
+        ? {
+            title: Number(newUser?.status) === 1 ? 'تعطيل' : 'تفعيل',
+            color: Number(newUser?.status) === 1 ? '#ffc107' : '#28a745',
+            icon: Number(newUser?.status) === 1 ? 'ri-toggle-line' : 'ri-toggle-fill',
+            callback: activeUser.value,
+          }
+        : null,
+      !selectedUsers.value.length && canUpdate
+        ? {
+            title: 'تعديل',
+            color: '#007bff',
+            icon: 'ri-pencil-line',
+            callback: editUser.value,
+          }
+        : null,
+      canDelete
+        ? {
+            title: 'حذف',
+            color: '#dc3545',
+            icon: 'ri-delete-bin-line',
+            callback: deleteUser.value,
+          }
+        : null,
+      !selectedUsers.value.length && canView
+        ? {
+            title: 'عرض',
+            color: '#17a2b8',
+            icon: 'ri-eye-line',
+            callback: viewUser.value,
+          }
+        : null,
+    ].filter(Boolean);
+  },
+  { immediate: true }
+);
 
 watchEffect(() => {
   if (availableActions.value.length === 0) {
@@ -228,6 +220,9 @@ const removeDeletedUsers = deletedIds => {
 const contextMenu = ref(null);
 const showContextMenu = (event, { item }) => {
   user.value = item;
+  console.log('user.value', user.value);
+  console.log('availableActions.value', availableActions.value);
+
   event.preventDefault();
   if (contextMenu.value) {
     contextMenu.value.showContextMenu(event);
@@ -253,12 +248,12 @@ async function fetchUsers() {
       sort_order: sortOrder,
       ...filters.value,
     });
-    users.value = response.data; // تحديث البيانات
+    users.value = response.data;
     total.value = response.total;
   } catch (error) {
     console.error('Error fetching users:', error);
   } finally {
-    loading.value = false; // انتهاء التحميل
+    loading.value = false;
   }
 }
 function getRowProps({ item, index }) {
@@ -270,9 +265,9 @@ function getRowProps({ item, index }) {
 </script>
 <style>
 .active-row {
-  background-color: transparent; /* لون خلفية للصف النشط */
+  background-color: transparent;
 }
 .inactive-row {
-  background-color: #ff00003c; /* لون خلفية للصف غير النشط */
+  background-color: #ff00003c;
 }
 </style>

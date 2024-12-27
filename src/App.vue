@@ -3,12 +3,12 @@ import { onMounted } from 'vue';
 import { getOne } from './services/api';
 import { useUserStore } from './stores/user';
 const userStore = useUserStore();
-onMounted(() => {
-  userStore
-    .setAuthHeaderNew(localStorage.authToken)
-    .then(() => {})
-    .catch(() => {});
-});
+// onMounted(() => {
+//   userStore
+//     .setAuthHeaderNew(localStorage.authToken)
+//     .then(() => {})
+//     .catch(() => {});
+// });
 </script>
 
 <template>

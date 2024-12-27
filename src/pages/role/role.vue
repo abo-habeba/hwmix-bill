@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { permissionsFile } from '@/@core/utils/permissions';
+import { getLocalPermissions } from '@/@core/utils/permissions';
 import { deleteOne, getAll, getOne, saveItem } from '@/services/api';
 import { ref, onMounted, watch } from 'vue';
 import { useDisplay } from 'vuetify';
@@ -146,39 +146,19 @@ const deleteDialog = ref(false);
 const search = ref('');
 const valid = ref(false);
 const form = ref(null);
-let user = localStorage.user ? JSON.parse(localStorage.user) : 0;
+// const user = ref();
 const userPermission = ref({});
 const permissionGroups = ref({});
-
 const userStore = useUserStore();
-
 watch(
   () => userStore.user,
   () => {
     console.log('rin watch');
-
     userPermission.value = userStore.user.permissions || [];
-    permissionGroups.value = permissionsFile
-      .map(group => ({
-        ...group,
-        permissions: group.permissions.filter(permission => user.permissions.includes(permission.value)),
-      }))
-      .filter(group => group.permissions.length > 0);
+    permissionGroups.value = getLocalPermissions(userPermission.value);
   },
   { immediate: true }
 );
-// onMounted(() => {
-//   getOne('user', user.id).then(user => {
-//     userPermission.value = user.permissions;
-//     // تحديث الصلاحيات بناءً على صلاحيات المستخدم
-//     permissionGroups.value = permissionsFile
-//       .map(group => ({
-//         ...group,
-//         permissions: group.permissions.filter(permission => user.permissions.includes(permission.value)),
-//       }))
-//       .filter(group => group.permissions.length > 0);
-//   });
-// });
 
 onMounted(async () => {
   loading.value = true;
