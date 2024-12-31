@@ -61,7 +61,7 @@ export const useUserStore = defineStore('user', {
       this.isAuth = false;
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      router.push('/login');
+      location.reload();
     },
 
     calculatePermissions(user) {

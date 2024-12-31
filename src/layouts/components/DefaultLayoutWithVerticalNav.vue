@@ -8,7 +8,7 @@ import logo from '@images/logo.svg?raw';
 import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue';
 import { useDisplay } from 'vuetify';
 const { smAndDown } = useDisplay();
-const userStore = useUserStore();
+const userStore = ref(useUserStore());
 </script>
 
 <template>

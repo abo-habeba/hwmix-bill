@@ -49,6 +49,13 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
   />
   <VerticalNavLink
     :item="{
+      title: 'سجل النظام',
+      to: { name: 'logs' },
+      icon: 'ri-file-list-2-line',
+    }"
+  />
+  <VerticalNavLink
+    :item="{
       title: 'unauthorized',
       to: { name: 'unauthorized' },
       icon: 'ri-group-line',

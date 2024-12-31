@@ -4,7 +4,7 @@ import { getOne, saveItem, getAll } from '@/services/api';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
-import editUserRolse from './editUserRolse.vue';
+import editUserRolse from '../../components/users/editUserRolse.vue';
 import RoleDetails from '@/components/roles/RoleDetails.vue';
 const { xs } = useDisplay();
 const route = useRoute();

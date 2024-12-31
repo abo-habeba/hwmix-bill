@@ -1,6 +1,6 @@
 <script setup>
-import DataTable from '@/components/DataTable.vue';
-import AddUser from './addUser.vue';
+import DataTable from '@/components/users/DataTable.vue';
+import AddUser from '../../components/users/addUser.vue';
 </script>
 <template>
   <VCol style="position: relative" cols="12">

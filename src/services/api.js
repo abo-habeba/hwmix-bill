@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/user';
 
 const apiClient = axios.create({
   baseURL: process.env.NODE_ENV === 'production' ? 'https://api-bill.hwnix.com/api/' : 'http://127.0.0.1:8000/api/',
+  // baseURL: 'http://127.0.0.1:8000/api/',
   headers: {
     'Cache-Control': 'no-cache',
     Pragma: 'no-cache',
@@ -142,21 +143,26 @@ export const register = (apiEndpoint, id, loading = false, log = false) => {
       });
   });
 };
-export const login = async (apiEndpoint, data, loading = false, log = false) => {
+export const login = (apiEndpoint, data, loading = false, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
-  try {
-    const response = await apiClient.post(apiEndpoint, data);
-
-    localStorage.setItem('authToken', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
-    loading ? (userStore.loadingApi = false) : '';
-    log ? console.log(` ${log}:  => `, response.data) : '';
-  } catch (error) {
-    console.error(`Error logging in at ${apiEndpoint}:`, error);
-    loading ? (userStore.loadingApi = false) : '';
-    log ? console.log(` ${log}:  => `, error) : '';
-  }
+  return new Promise((resolve, reject) => {
+    apiClient
+      .post(apiEndpoint, data)
+      .then(response => {
+        localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        loading ? (userStore.loadingApi = false) : '';
+        log ? console.log(` ${log}:  => `, response.data) : '';
+        location.reload();
+        resolve(response.data);
+      })
+      .catch(error => {
+        loading ? (userStore.loadingApi = false) : '';
+        log ? console.log(` ${log}:  => `, error) : '';
+        reject(error.response.data);
+      });
+  });
 };
 
 export const logOut = (apiEndpoint, loading = false, log = false) => {

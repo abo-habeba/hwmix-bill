@@ -27,6 +27,16 @@ export const routes = [
         },
       },
       {
+        path: 'logs',
+        component: () => import('@/pages/logs/logs.vue'),
+        name: 'logs',
+        meta: {
+          title: ' سجل الحركات ',
+          description: 'متابعة حركات السيستم',
+          // roles: 'logs',
+        },
+      },
+      {
         path: 'users',
         component: () => import('@/pages/users/users.vue'),
         name: 'users',

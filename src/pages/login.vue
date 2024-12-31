@@ -1,6 +1,7 @@
 <script setup>
 import { login } from '@/services/api';
 import logo from '@images/logo.svg?raw';
+import { ref } from 'vue';
 
 import { useRouter } from 'vue-router';
 
@@ -11,11 +12,18 @@ const form = ref({
   password: '',
   remember: false,
 });
-
+const errMessages = ref(false);
 function logind() {
-  login('login', form.value).then(() => {
-    router.push('/dashboard');
-  });
+  errMessages.value = false;
+
+  login('login', form.value)
+    .then(() => {
+      router.push('/dashboard');
+    })
+    .catch(e => {
+      console.log('catch log in', e);
+      errMessages.value = e.message;
+    });
 }
 
 const isPasswordVisible = ref(false);
@@ -42,6 +50,11 @@ const isPasswordVisible = ref(false);
         <VForm @submit.prevent="() => {}">
           <VRow>
             <!-- phone -->
+            <VCol cols="12">
+              <v-alert v-if="errMessages" color="#C51162" theme="dark" border>
+                {{ errMessages }}
+              </v-alert>
+            </VCol>
             <VCol cols="12">
               <VTextField v-model="form.phone" label="الهاتف او الايميل" />
             </VCol>

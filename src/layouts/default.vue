@@ -1,7 +1,13 @@
 <script setup>
-import { useUserStore } from '@/stores/user';
 import DefaultLayoutWithVerticalNav from './components/DefaultLayoutWithVerticalNav.vue';
+import { useUserStore } from '@/stores/user';
 const userStore = useUserStore();
+onMounted(() => {
+  // userStore
+  //   .setAuthHeaderNew(localStorage.authToken)
+  //   .then(() => {})
+  //   .catch(() => {});
+});
 </script>
 
 <template>

@@ -75,8 +75,8 @@ import { getAll, saveItem } from '@/services/api';
 import { useappState } from '@/stores/appState';
 import { computed, onMounted, ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
-import AdvancedSearch from './AdvancedSearch.vue';
-import DeletedItem from './DeletedItem.vue';
+import AdvancedSearch from '../AdvancedSearch.vue';
+import DeletedItem from '../DeletedItem.vue';
 import { useUserStore } from '@/stores/user';
 const userStore = useUserStore();
 const router = useRouter();
@@ -216,6 +216,7 @@ watchEffect(() => {
 
 const removeDeletedUsers = deletedIds => {
   users.value = users.value.filter(user => !deletedIds.includes(user.id));
+  selectedUsers.value = [];
 };
 const contextMenu = ref(null);
 const showContextMenu = (event, { item }) => {
