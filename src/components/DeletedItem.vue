@@ -1,6 +1,6 @@
 <template>
   <div class="text-center">
-    <v-dialog @contextmenu.prevent v-model="appState.appState" max-width="400" persistent>
+    <v-dialog @contextmenu.prevent v-model="appState.dialogDelete" max-width="400" persistent>
       <v-card style="color: #ff4d4f; border-color: #ff4d4f" append-icon="ri-delete-bin-line" title="هل تريد بالفعل حذف">
         <v-list class="pa-0">
           <v-list-item v-for="(item, i) in dataDelete.items" :key="i" :title="i + 1 + ' . ' + item[dataDelete.key]"> </v-list-item>
@@ -8,7 +8,7 @@
         <template v-slot:actions>
           <v-btn prepend-icon="ri-delete-bin-line" class="mx-10" @click="deleted()" style="color: #ff4d4f; border-color: #ff4d4f"> حذف </v-btn>
           <v-spacer></v-spacer>
-          <v-btn prepend-icon="ri-close-line" class="mx-10" @click="appState.appState = false" style="color: #007bff; border-color: #007bff">
+          <v-btn prepend-icon="ri-close-line" class="mx-10" @click="appState.dialogDelete = false" style="color: #007bff; border-color: #007bff">
             لا
           </v-btn>
         </template>
@@ -32,15 +32,15 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update-users']);
+const emit = defineEmits(['update-items']);
 function deleted() {
   // إنشاء مصفوفة تحتوي على جميع الـ IDs من props.dataDelete
   const itemIds = props.dataDelete.items.map(item => item.id);
 
   deleteAll(props.api, itemIds).then(() => {
-    emit('update-users', itemIds);
+    emit('update-items', itemIds);
   });
-  appState.appState = false;
+  appState.dialogDelete = false;
 }
 </script>
 

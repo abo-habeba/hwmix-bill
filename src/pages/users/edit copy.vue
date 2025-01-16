@@ -1,24 +1,23 @@
 <script setup>
 import { getOne, saveItem, getAll } from '@/services/api';
-// import { permissionsFile } from '@/@core/utils/permissions';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import editUserRolse from '../../components/users/editUserRolse.vue';
 import RoleDetails from '@/components/roles/RoleDetails.vue';
 import { useUserStore } from '@/stores/user';
+
 const { xs } = useDisplay();
 const route = useRoute();
 const router = useRouter();
 const loading = ref(false);
 const userId = ref(route.params.id);
-const roles = ref([]);
+const roles = ref(null);
 const companyIds = ref([]);
 const userCompanies = ref([]);
-const selectedCompanies = ref([]);
-const allCompanies = ref([]);
 const userStore = useUserStore();
 const roleDetail = ref(null);
+
 const tabs = [
   {
     title: 'بيانات الحساب',
@@ -38,21 +37,18 @@ const user = ref({
   email: '',
   phone: '',
   username: '',
-  roles: [],
-  companies: [],
   password: '',
 });
 
 const tab = ref(route.params.tab || tabs[0].tab);
 
 onMounted(() => {
-  mergedCompanies();
   if (route.params.id) {
     loading.value = true;
     getOne('user', userId.value, true)
       .then(res => {
         user.value = res;
-        selectedCompanies.value = res.companies;
+        userCompanies.value = user.value.companies;
         getAll('roles').then(data => {
           roles.value = data.data;
         });
@@ -63,48 +59,16 @@ onMounted(() => {
   }
 });
 
-function mergedCompanies() {
-  const allComp = [
-    ...user.value.companies.map(company => ({ ...company, disabled: false })),
-    ...userStore.user.companies.map(company => ({ ...company, disabled: true })),
-  ];
-  const uniqueCompanies = Array.from(new Map(allComp.map(company => [company.id, company])).values());
-  allCompanies.value = uniqueCompanies;
-  selectedCompanies.value = allCompanies.value.filter(c => c.id === userStore.user.company_id);
-  return uniqueCompanies;
-}
-
-function itemProps(item) {
-  return {
-    title: item.name,
-    subtitle: item.field,
-    disabled: !item.disabled,
-    // class: item.disabled ? '' : 'disabled-item',
-  };
-}
-
 function sendData() {
-  console.log('selectedCompanies', selectedCompanies.value);
-  companyIds.value = Array.from(
-    selectedCompanies.value.map(company => {
-      // إذا كان العنصر كائنًا يحتوي على خاصية id، أرجع قيمة id
-      if (typeof company === 'object' && company.id !== undefined) {
-        return company.id;
-      }
-      // إذا كان العنصر رقمًا، أرجع الرقم مباشرة
-      return company;
-    })
-  );
-  console.log('companyIds', companyIds.value);
-  // return;
+  companyIds.value = user.value.companies.map(company => company.id);
   user.value.company_id = companyIds.value.length <= 0 ? null : companyIds.value[0];
   user.value.company_ids = companyIds.value.length > 0 ? companyIds.value : null;
-  user.value.companies = null;
 
   saveItem('user', user.value, route.params.id).then(() => {
     router.go(-1);
   });
 }
+
 const userRole = ref({});
 function openRoleDetails(role) {
   if (role) {
@@ -112,6 +76,26 @@ function openRoleDetails(role) {
     roleDetail.value.openDialog();
   }
 }
+
+// إنشاء قائمة مُصفاة تجمع بين الشركات
+const filteredCompanies = computed(() => {
+  const allCompanies = [...userCompanies.value, ...userStore.user.companies];
+  const uniqueCompanies = allCompanies.filter((company, index, self) => self.findIndex(c => c.id === company.id) === index);
+  return uniqueCompanies;
+});
+
+// تحديد الشركات القابلة للتعديل
+const isCompanyEditable = company => {
+  return userStore.user.companies.some(c => c.id === company.id);
+};
+
+// تحديث v-model ليعكس الشركات المحددة
+const selectedCompanies = computed({
+  get: () => userCompanies.value,
+  set: value => {
+    userCompanies.value = value.filter(company => userStore.user.companies.some(c => c.id === company.id));
+  },
+});
 </script>
 
 <template>
@@ -153,30 +137,17 @@ function openRoleDetails(role) {
                       <VTextField v-model="user.username" label="اسم المستخدم" placeholder="اسم المستخدم" />
                     </VCol>
 
-                    <VCol cols="12">
+                    <VCol cols="12" sm="6" md="4">
                       <v-select
                         v-model="selectedCompanies"
-                        :items="allCompanies"
+                        :items="filteredCompanies"
                         label="حدد الشركة"
                         item-title="name"
                         item-value="id"
-                        item-color="red"
-                        chips
-                        closable-chips
                         multiple
-                        :item-props="itemProps"
+                        persistent-hint
+                        :readonly="!isCompanyEditable(company)"
                       ></v-select>
-                    </VCol>
-                    <v-divider style="width: 50%" :thickness="2" class="border-opacity-100" color="warning"></v-divider>
-                    <!-- 👉 password -->
-                    <VCol cols="12" sm="6" md="4">
-                      <VTextField required v-model="user.password" label=" الباسورد " placeholder="اسم المستخدم" />
-                    </VCol>
-                    <!-- 👉 Form Actions -->
-                    <VCol cols="12" class="d-flex flex-wrap gap-4">
-                      <VBtn @click="sendData"> حفظ </VBtn>
-                      <!-- reset Form -->
-                      <!-- <VBtn color="secondary" variant="outlined" type="reset" @click.prevent="resetForm"> Reset </VBtn> -->
                     </VCol>
                   </VRow>
                 </VForm>
@@ -184,21 +155,6 @@ function openRoleDetails(role) {
             </VCard>
           </VCol>
         </VRow>
-      </v-tabs-window-item>
-      <v-tabs-window-item value="role">
-        <v-card elevation="0" class="ma-4">
-          <editUserRolse v-model:user="user" :user="user" :roles="roles" />
-          <v-card-title class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4"> ادوار المستخدم </v-card-title>
-          <v-card-text v-if="user?.roles.length > 0">
-            <span v-for="(rol, index) in user.roles" :key="index">
-              <v-chip @click="openRoleDetails(rol)" class="ma-2" variant="outlined">
-                {{ rol.name }}
-              </v-chip>
-            </span>
-          </v-card-text>
-          <div v-else class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4">لم يتم تعين اي ادوار للمستخدم</div>
-        </v-card>
-        <RoleDetails ref="roleDetail" :userRole="userRole" />
       </v-tabs-window-item>
     </v-tabs-window>
   </v-card>

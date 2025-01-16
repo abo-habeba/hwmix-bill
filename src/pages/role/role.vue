@@ -8,16 +8,18 @@
           <p class="text-subtitle-1 text-medium-emphasis mt-1">قم بإدارة أدوار المستخدمين وصلاحياتهم في النظام</p>
         </div>
         <v-spacer />
-        <v-btn color="primary" prepend-icon="ri-add-line" @click="openDialog()" elevation="2" size="large"> دور جديد </v-btn>
+        <v-btn
+          v-if="userStore.can(['roles.create', 'super.admin', 'company.owner'])"
+          color="primary"
+          prepend-icon="ri-add-line"
+          @click="openDialog()"
+          elevation="2"
+          size="large"
+        >
+          دور جديد
+        </v-btn>
       </v-col>
     </v-row>
-    <!-- <v-card>
-      <v-card-title>
-        {{ userStore.user.nickname }}
-      </v-card-title>
-      <v-card-text v-for="(permission, i) in userStore.user.permissions" :key="i"> {{ permission }} </v-card-text>
-    </v-card> -->
-
     <!-- Roles Table -->
     <v-card elevation="2">
       <v-data-table
@@ -52,7 +54,7 @@
     </v-card>
 
     <!-- Role Dialog -->
-    <v-dialog :fullscreen="xs" v-model="dialog" max-width="900" persistent>
+    <v-dialog :fullscreen="xs" v-model="dialog" max-width="700" persistent>
       <v-card style="position: relative">
         <div @click="closeDialog" style="position: fixed; top: 5px; left: 5px">
           <v-btn icon="ri-close-line"> </v-btn>

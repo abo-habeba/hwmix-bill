@@ -9,11 +9,16 @@ export const useUserStore = defineStore('user', {
     userAll: null,
     isAuth: false,
     loadingApi: false,
+    permissionsList: null,
   }),
   actions: {
     async initializeUser() {
+      console.log('initializeUser');
+      console.log(this.isAuth);
+
       if (!this.isAuth) {
         await this.fetchUser();
+        console.log(!this.isAuth);
       }
     },
 
@@ -26,18 +31,18 @@ export const useUserStore = defineStore('user', {
         }
         const userId = this.getUserId();
         if (!userId) throw new Error('User ID not found');
+
         const userRes = await getOne('user', userId);
         this.user = userRes;
         this.isAuth = true;
-        this.loadingApi = false;
+        this.permissionsList = this.calculatePermissions(this.user);
       } catch (error) {
-        this.loadingApi = false;
-
-        if (error.response?.status === 401) {
+        if (error.status === 401) {
           this.logout();
         } else {
           console.error('Error fetching user:', error);
         }
+      } finally {
         this.loadingApi = false;
       }
     },
@@ -65,30 +70,43 @@ export const useUserStore = defineStore('user', {
     },
 
     calculatePermissions(user) {
-      const rolesPermissions = user.roles.map(role => role.permissions).flat();
-      const permissions = user.permissions;
-      return [...new Set([...rolesPermissions, ...permissions])];
+      // const rolesPermissions = user.roles.map(role => role.permissions).flat();
+      // console.log('Roles Permissions:', rolesPermissions);
+      // const permissions = user.permissions;
+      // this.permissionsList = [...new Set([...rolesPermissions, ...permissions])];
+      // return [...new Set([...rolesPermissions, ...permissions])];
+      this.permissionsList = user.permissions;
+      return user.permissions;
     },
 
-    async can(permission) {
-      try {
-        if (!this.user) {
-          await this.fetchUser();
-        }
-        const allPermissions = this.calculatePermissions(this.user);
-        if (Array.isArray(permission)) {
-          console.log(permission.some(perm => allPermissions.includes(perm)));
-          return permission.some(perm => allPermissions.includes(perm));
-        } else {
-          console.log(allPermissions.includes(permission));
-
-          return allPermissions.includes(permission);
-        }
-      } catch (error) {
-        console.error('Error checking permissions:', error);
+    can(permission) {
+      if (!this.permissionsList) {
+        console.warn('Permissions not calculated yet. Returning false.');
         return false;
       }
+      if (Array.isArray(permission)) {
+        return permission.some(perm => this.permissionsList.includes(perm));
+      } else {
+        return this.permissionsList.includes(permission);
+      }
     },
+
+    // async can(permission) {
+    //   try {
+    //     if (!this.user) {
+    //       await this.fetchUser();
+    //     }
+    //     const allPermissions = this.calculatePermissions(this.user);
+    //     if (Array.isArray(permission)) {
+    //       return permission.some(perm => allPermissions.includes(perm));
+    //     } else {
+    //       return allPermissions.includes(permission);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error checking permissions:', error);
+    //     return false;
+    //   }
+    // },
   },
 
   persist: true, // To persist the state even after refresh

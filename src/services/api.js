@@ -4,7 +4,6 @@ import { useUserStore } from '@/stores/user';
 
 const apiClient = axios.create({
   baseURL: process.env.NODE_ENV === 'production' ? 'https://api-bill.hwnix.com/api/' : 'http://127.0.0.1:8000/api/',
-  // baseURL: 'http://127.0.0.1:8000/api/',
   headers: {
     'Cache-Control': 'no-cache',
     Pragma: 'no-cache',
@@ -13,17 +12,31 @@ const apiClient = axios.create({
   },
 });
 
+const options = {
+  // nullsAsUndefineds: true,
+  allowEmptyArrays: true,
+};
+
 // Set Authorization dynamically
 apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('authToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // If the request contains FormData, don't set Content-Type as application/json
+  if (config.data instanceof FormData) {
+    // Remove the default 'Content-Type' to let axios set it correctly
+    delete config.headers['Content-Type'];
+  } else {
+    // Set content-type for JSON requests
+    config.headers['Content-Type'] = 'application/json';
+  }
+
   return config;
 });
 
-// Set content-type for JSON
-apiClient.defaults.headers.post['Content-Type'] = 'application/json';
+export default apiClient;
 
 export const getAll = (apiEndpoint, params = null, loading = false, log = false) => {
   const userStore = useUserStore();
@@ -67,12 +80,12 @@ export const saveItem = (apiEndpoint, data, id = false, loading = false, log = f
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
-    let formData = serialize(data);
+    const formData = serialize(data, options);
     if (id) {
       formData.append('_method', 'put');
       const apiEndpointIfId = `${apiEndpoint}/${id}`;
       apiClient
-        .put(apiEndpointIfId, data)
+        .post(apiEndpointIfId, formData)
         .then(response => {
           loading ? (userStore.loadingApi = false) : '';
           log ? console.log(` ${log}:  => `, response.data) : '';
@@ -118,7 +131,7 @@ export const deleteOne = (apiEndpoint, id, loading = false, log = false) => {
 export const deleteAll = (apiEndpoint, ids, loading = false, log = false) => {
   return new Promise((resolve, reject) => {
     apiClient
-      .post(apiEndpoint, { user_ids: ids })
+      .post(apiEndpoint, { item_ids: ids })
       .then(response => {
         resolve(response.data.data);
       })

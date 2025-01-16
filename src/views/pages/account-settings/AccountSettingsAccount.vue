@@ -1,5 +1,5 @@
 <script setup>
-import avatar1 from '@images/avatars/avatar-1.png'
+import avatar1 from '@images/avatars/avatar-1.png';
 
 const accountData = {
   avatarImg: avatar1,
@@ -15,32 +15,31 @@ const accountData = {
   language: 'English',
   timezone: '(GMT-11:00) International Date Line West',
   currency: 'USD',
-}
+};
 
-const refInputEl = ref()
-const accountDataLocal = ref(structuredClone(accountData))
-const isAccountDeactivated = ref(false)
+const refInputEl = ref();
+const accountDataLocal = ref(structuredClone(accountData));
+const isAccountDeactivated = ref(false);
 
 const resetForm = () => {
-  accountDataLocal.value = structuredClone(accountData)
-}
+  accountDataLocal.value = structuredClone(accountData);
+};
 
 const changeAvatar = file => {
-  const fileReader = new FileReader()
-  const { files } = file.target
+  const fileReader = new FileReader();
+  const { files } = file.target;
   if (files && files.length) {
-    fileReader.readAsDataURL(files[0])
+    fileReader.readAsDataURL(files[0]);
     fileReader.onload = () => {
-      if (typeof fileReader.result === 'string')
-        accountDataLocal.value.avatarImg = fileReader.result
-    }
+      if (typeof fileReader.result === 'string') accountDataLocal.value.avatarImg = fileReader.result;
+    };
   }
-}
+};
 
 // reset avatar image
 const resetAvatar = () => {
-  accountDataLocal.value.avatarImg = accountData.avatarImg
-}
+  accountDataLocal.value.avatarImg = accountData.avatarImg;
+};
 
 const timezones = [
   '(GMT-11:00) International Date Line West',
@@ -82,22 +81,9 @@ const timezones = [
   '(GMT+00:00) Edinburgh',
   '(GMT+00:00) Lisbon',
   '(GMT+00:00) London',
-]
+];
 
-const currencies = [
-  'USD',
-  'EUR',
-  'GBP',
-  'AUD',
-  'BRL',
-  'CAD',
-  'CNY',
-  'CZK',
-  'DKK',
-  'HKD',
-  'HUF',
-  'INR',
-]
+const currencies = ['USD', 'EUR', 'GBP', 'AUD', 'BRL', 'CAD', 'CNY', 'CZK', 'DKK', 'HKD', 'HUF', 'INR'];
 </script>
 
 <template>
@@ -106,53 +92,25 @@ const currencies = [
       <VCard title="Account Details">
         <VCardText class="d-flex">
           <!-- 👉 Avatar -->
-          <VAvatar
-            rounded="lg"
-            size="100"
-            class="me-6"
-            :image="accountDataLocal.avatarImg"
-          />
+          <VAvatar rounded="lg" size="100" class="me-6" :image="accountDataLocal.avatarImg" />
 
           <!-- 👉 Upload Photo -->
           <form class="d-flex flex-column justify-center gap-5">
             <div class="d-flex flex-wrap gap-2">
-              <VBtn
-                color="primary"
-                @click="refInputEl?.click()"
-              >
-                <VIcon
-                  icon="ri-upload-cloud-line"
-                  class="d-sm-none"
-                />
+              <VBtn color="primary" @click="refInputEl?.click()">
+                <VIcon icon="ri-upload-cloud-line" class="d-sm-none" />
                 <span class="d-none d-sm-block">Upload new photo</span>
               </VBtn>
 
-              <input
-                ref="refInputEl"
-                type="file"
-                name="file"
-                accept=".jpeg,.png,.jpg,GIF"
-                hidden
-                @input="changeAvatar"
-              >
+              <input ref="refInputEl" type="file" name="file" accept=".jpeg,.png,.jpg,GIF" hidden @input="changeAvatar" />
 
-              <VBtn
-                type="reset"
-                color="error"
-                variant="outlined"
-                @click="resetAvatar"
-              >
+              <VBtn type="reset" color="error" variant="outlined" @click="resetAvatar">
                 <span class="d-none d-sm-block">Reset</span>
-                <VIcon
-                  icon="ri-refresh-line"
-                  class="d-sm-none"
-                />
+                <VIcon icon="ri-refresh-line" class="d-sm-none" />
               </VBtn>
             </div>
 
-            <p class="text-body-1 mb-0">
-              Allowed JPG, GIF or PNG. Max size of 800K
-            </p>
+            <p class="text-body-1 mb-0">Allowed JPG, GIF or PNG. Max size of 800K</p>
           </form>
         </VCardText>
 
@@ -163,107 +121,47 @@ const currencies = [
           <VForm class="mt-6">
             <VRow>
               <!-- 👉 First Name -->
-              <VCol
-                md="6"
-                cols="12"
-              >
-                <VTextField
-                  v-model="accountDataLocal.firstName"
-                  placeholder="John"
-                  label="First Name"
-                />
+              <VCol md="6" cols="12">
+                <VTextField v-model="accountDataLocal.firstName" placeholder="John" label="First Name" />
               </VCol>
 
               <!-- 👉 Last Name -->
-              <VCol
-                md="6"
-                cols="12"
-              >
-                <VTextField
-                  v-model="accountDataLocal.lastName"
-                  placeholder="Doe"
-                  label="Last Name"
-                />
+              <VCol md="6" cols="12">
+                <VTextField v-model="accountDataLocal.lastName" placeholder="Doe" label="Last Name" />
               </VCol>
 
               <!-- 👉 Email -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <VTextField
-                  v-model="accountDataLocal.email"
-                  label="E-mail"
-                  placeholder="johndoe@gmail.com"
-                  type="email"
-                />
+              <VCol cols="12" md="6">
+                <VTextField v-model="accountDataLocal.email" label="E-mail" placeholder="johndoe@gmail.com" type="email" />
               </VCol>
 
               <!-- 👉 Organization -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <VTextField
-                  v-model="accountDataLocal.org"
-                  label="Organization"
-                  placeholder="ThemeSelection"
-                />
+              <VCol cols="12" md="6">
+                <VTextField v-model="accountDataLocal.org" label="Organization" placeholder="ThemeSelection" />
               </VCol>
 
               <!-- 👉 Phone -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <VTextField
-                  v-model="accountDataLocal.phone"
-                  label="Phone Number"
-                  placeholder="+1 (917) 543-9876"
-                />
+              <VCol cols="12" md="6">
+                <VTextField v-model="accountDataLocal.phone" label="Phone Number" placeholder="+1 (917) 543-9876" />
               </VCol>
 
               <!-- 👉 Address -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <VTextField
-                  v-model="accountDataLocal.address"
-                  label="Address"
-                  placeholder="123 Main St, New York, NY 10001"
-                />
+              <VCol cols="12" md="6">
+                <VTextField v-model="accountDataLocal.address" label="Address" placeholder="123 Main St, New York, NY 10001" />
               </VCol>
 
               <!-- 👉 State -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <VTextField
-                  v-model="accountDataLocal.state"
-                  label="State"
-                  placeholder="New York"
-                />
+              <VCol cols="12" md="6">
+                <VTextField v-model="accountDataLocal.state" label="State" placeholder="New York" />
               </VCol>
 
               <!-- 👉 Zip Code -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <VTextField
-                  v-model="accountDataLocal.zip"
-                  label="Zip Code"
-                  placeholder="10001"
-                />
+              <VCol cols="12" md="6">
+                <VTextField v-model="accountDataLocal.zip" label="Zip Code" placeholder="10001" />
               </VCol>
 
               <!-- 👉 Country -->
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <VCol cols="12" md="6">
                 <VSelect
                   v-model="accountDataLocal.country"
                   label="Country"
@@ -273,10 +171,7 @@ const currencies = [
               </VCol>
 
               <!-- 👉 Language -->
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <VCol cols="12" md="6">
                 <VSelect
                   v-model="accountDataLocal.language"
                   label="Language"
@@ -286,10 +181,7 @@ const currencies = [
               </VCol>
 
               <!-- 👉 Timezone -->
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <VCol cols="12" md="6">
                 <VSelect
                   v-model="accountDataLocal.timezone"
                   label="Timezone"
@@ -300,10 +192,7 @@ const currencies = [
               </VCol>
 
               <!-- 👉 Currency -->
-              <VCol
-                cols="12"
-                md="6"
-              >
+              <VCol cols="12" md="6">
                 <VSelect
                   v-model="accountDataLocal.currency"
                   label="Currency"
@@ -314,20 +203,10 @@ const currencies = [
               </VCol>
 
               <!-- 👉 Form Actions -->
-              <VCol
-                cols="12"
-                class="d-flex flex-wrap gap-4"
-              >
+              <VCol cols="12" class="d-flex flex-wrap gap-4">
                 <VBtn>Save changes</VBtn>
 
-                <VBtn
-                  color="secondary"
-                  variant="outlined"
-                  type="reset"
-                  @click.prevent="resetForm"
-                >
-                  Reset
-                </VBtn>
+                <VBtn color="secondary" variant="outlined" type="reset" @click.prevent="resetForm"> Reset </VBtn>
               </VCol>
             </VRow>
           </VForm>
@@ -340,19 +219,10 @@ const currencies = [
       <VCard title="Deactivate Account">
         <VCardText>
           <div>
-            <VCheckbox
-              v-model="isAccountDeactivated"
-              label="I confirm my account deactivation"
-            />
+            <VCheckbox v-model="isAccountDeactivated" label="I confirm my account deactivation" />
           </div>
 
-          <VBtn
-            :disabled="!isAccountDeactivated"
-            color="error"
-            class="mt-3"
-          >
-            Deactivate Account
-          </VBtn>
+          <VBtn :disabled="!isAccountDeactivated" color="error" class="mt-3"> Deactivate Account </VBtn>
         </VCardText>
       </VCard>
     </VCol>

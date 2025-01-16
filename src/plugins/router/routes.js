@@ -27,13 +27,33 @@ export const routes = [
         },
       },
       {
+        path: 'companys',
+        component: () => import('@/pages/companys/companys.vue'),
+        name: 'companys',
+        meta: {
+          title: ' الشركات ',
+          description: 'ادارة الشركات',
+          // roles: 'company',
+        },
+      },
+      {
+        path: 'company/edit/:id?',
+        component: () => import('@/pages/companys/edit.vue'),
+        name: 'edit-company',
+        meta: {
+          title: 'تعديل الشركة',
+          description: 'تعديل بيانات الشركة',
+          roles: 'companys.update',
+        },
+      },
+      {
         path: 'logs',
         component: () => import('@/pages/logs/logs.vue'),
         name: 'logs',
         meta: {
-          title: ' سجل الحركات ',
-          description: 'متابعة حركات السيستم',
-          // roles: 'logs',
+          title: ' سجل النظام ',
+          description: 'متابعة حركات النظام',
+          roles: 'logs',
         },
       },
       {
@@ -47,13 +67,13 @@ export const routes = [
         },
       },
       {
-        path: 'users/edit/:id?', // المسار لتعديل المستخدم مع تمرير id
-        component: () => import('@/pages/users/edit.vue'), // مكون تعديل المستخدم
+        path: 'users/edit/:id?',
+        component: () => import('@/pages/users/edit.vue'),
         name: 'edit-user',
         meta: {
           title: 'تعديل المستخدم',
           description: 'تعديل بيانات المستخدم',
-          roles: 'users.update',
+          roles: ['users.update', 'users.create'],
         },
       },
       {

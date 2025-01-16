@@ -88,4 +88,7 @@ onMounted(() => {
 .v-checkbox-btn.v-selection-control .v-label {
   white-space: nowrap;
 }
+.layout-page-content {
+  padding-inline: 0 !important;
+}
 </style>

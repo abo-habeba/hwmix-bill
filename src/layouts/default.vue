@@ -34,4 +34,7 @@ onMounted(() => {
 <style lang="scss">
 // As we are using `layouts` plugin we need its styles to be imported
 @use '@layouts/styles/default-layout';
+.layout-page-content {
+  padding-inline: 0 !important;
+}
 </style>

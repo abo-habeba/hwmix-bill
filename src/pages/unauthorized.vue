@@ -23,7 +23,10 @@ const goHome = () => {
       style="width: 100%; height: 100%; text-align: center; display: flex; align-items: center; justify-content: center"
     >
       <v-card class="pa-5" elevation="1">
-        <v-card-subtitle class="mb-4"> ليس لديك صلاحية للوصول إلى {{ title }}. </v-card-subtitle>
+        <v-card-subtitle class="mb-4">
+          ليس لديك صلاحية للوصول إلى <br />
+          {{ title }}.
+        </v-card-subtitle>
         <v-btn color="primary" @click="goBack" class="ma-2">الرجوع إلى الخلف</v-btn>
         <v-btn color="secondary" @click="goHome">الصفحة الرئيسية</v-btn>
       </v-card>

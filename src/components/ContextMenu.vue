@@ -1,7 +1,7 @@
 <template>
   <v-list
     id="menuAction"
-    class="pa-0"
+    class="pa-0 v-list-menu"
     :style="{
       backgroundColor: '#ededf3',
       position: 'absolute',
@@ -32,7 +32,7 @@ const props = defineProps({
 
 const handleAction = action => {
   if (typeof action.callback === 'function') {
-    action.callback(); // تنفيذ الدالة المرتبطة
+    action.callback();
   }
 };
 
@@ -69,7 +69,7 @@ function showContextMenu(event) {
 
   // حساب موضع الماوس داخل dataTable
   const menuLemitY = dataTableHeight - menuActionHeight;
-  const mouseY = event.clientY - dataTableTop;
+  const mouseY = event.clientY - dataTableTop - 20;
   const menuLemitX = dataTableWidth - menuActionWidth;
   const mouseX = event.clientX - dataTableLeft;
 
@@ -82,11 +82,12 @@ function showContextMenu(event) {
 }
 defineExpose({ showContextMenu, colsContextMenu });
 </script>
-<style scoped lang="scss">
-.v-list {
+<style lang="scss">
+.v-list-menu {
   border: 1px #c6b5d3 solid;
   border-radius: 4px;
   user-select: none;
+  z-index: 9999;
   .v-list-item {
     border-bottom: 1px #c6b5d3 solid;
     &:hover {

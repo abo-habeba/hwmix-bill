@@ -14,7 +14,7 @@ const props = defineProps({
   },
 });
 const emit = defineEmits(['update:user']);
-const userRoles = ref(props.roles);
+const roles = ref(props.roles);
 const dialogRolesEdit = ref(false);
 const selectedRoles = ref([]);
 watch(
@@ -30,8 +30,7 @@ function assignRole() {
     user_id: props.user.id,
     roles: selectedRoles.value,
   };
-  console.log(rolesAndId);
-
+  // return;
   saveItem('role/assignRole', rolesAndId).then(data => {
     emit('update:user', data);
     dialogRolesEdit.value = false;
@@ -49,14 +48,14 @@ function assignRole() {
   >
     تعديل الادوار
   </v-btn>
-  <v-dialog :fullscreen="xs" v-model="dialogRolesEdit" max-width="500">
+  <v-dialog :fullscreen="xs" v-model="dialogRolesEdit" max-width="900">
     <v-card class="pa-4">
       <v-card-title class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4">تعديل ادوار المستخدم </v-card-title>
-      <v-row class="mb-10" v-if="userRoles">
+      <v-row class="mb-10" v-if="roles">
         <v-col cols="12">
           <v-card-text class="elevation-5 pa-10">
-            <v-row v-if="userRoles">
-              <v-col class="pa-0" cols="12" xs="6" sm="6" md="4" lg="3" v-for="(role, i) in userRoles" :key="i">
+            <v-row v-if="user.roles">
+              <v-col class="pa-0" cols="12" xs="6" sm="6" md="4" lg="3" v-for="(role, i) in roles" :key="i">
                 <v-checkbox
                   v-model="selectedRoles"
                   :label="role.name"

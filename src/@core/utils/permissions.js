@@ -12,6 +12,7 @@ const permissionsLocal = [
     name: 'إدارة المستخدمين',
     permissions: [
       { value: 'users', name: 'صفحة المستخدمين' },
+
       { value: 'users.all', name: 'جميع المستخدمين' },
       { value: 'users.all.own', name: 'المستخدمين التابعين له' },
       { value: 'users.all.self', name: 'عرض المستخدم الخاص به' },
@@ -29,6 +30,30 @@ const permissionsLocal = [
       { value: 'users.delete', name: 'حذف أي مستخدم' },
       { value: 'users.delete.own', name: 'حذف المستخدمين التابعين له' },
       { value: 'users.delete.self', name: 'حذف حسابه الشخصي' },
+    ],
+  },
+  // companys
+  {
+    name: 'إدارة الشركات',
+    permissions: [
+      { value: 'companys', name: 'صفحة الشركات' },
+      { value: 'companys.all', name: 'جميع الشركات' },
+      { value: 'companys.all.own', name: 'الشركات التابعين له' },
+      { value: 'companys.all.self', name: 'عرض الشركات الخاص به' },
+
+      { value: 'companys.show', name: 'عرض تفاصيل أي شركة' },
+      { value: 'companys.show.own', name: 'عرض تفاصيل الشركات التابعين له' },
+      { value: 'companys.show.self', name: 'عرض تفاصيل الشركة الخاصه به' },
+
+      { value: 'companys.create', name: 'إنشاء شركة' },
+
+      { value: 'companys.update', name: 'تعديل أي شركة' },
+      { value: 'companys.update.own', name: 'تعديل الشركات التابعين له' },
+      { value: 'companys.update.self', name: 'تعديل الشركه الخاصه به' },
+
+      { value: 'companys.delete', name: 'حذف أي شركة' },
+      { value: 'companys.delete.own', name: 'حذف الشركات التابعين له' },
+      { value: 'companys.delete.self', name: 'حذف الشركه الخاصه به' },
     ],
   },
 
@@ -54,6 +79,30 @@ const permissionsLocal = [
       { value: 'roles.delete', name: 'حذف أي دور' },
       { value: 'roles.delete.self', name: 'حذف الأدوار الخاصه به' },
       { value: 'roles.delete.own', name: 'حذف الأدوار التابعة له' },
+    ],
+  },
+  // logs
+  {
+    name: 'إدارة السجلات',
+    permissions: [
+      { value: 'logs', name: 'صفحة السجلات' },
+
+      { value: 'logs.all', name: 'عرض جميع السجلات' },
+      { value: 'logs.all.own', name: 'عرض السجلات التابعة له' },
+      { value: 'logs.all.self', name: 'عرض السجلات الخاصة به' },
+
+      { value: 'logs.show', name: 'عرض تفاصيل أي سجل' },
+      { value: 'logs.show.own', name: 'عرض تفاصيل السجلات التابعة له' },
+      { value: 'logs.show.self', name: 'عرض تفاصيل السجلات الخاصة به' },
+
+      { value: 'logs.create', name: 'إنشاء سجل' },
+      { value: 'logs.update', name: 'تعديل سجل' },
+      { value: 'logs.update.own', name: 'تعديل السجلات التابعة له' },
+      { value: 'logs.update.self', name: 'تعديل السجلات الخاصة به' },
+
+      { value: 'logs.delete', name: 'حذف السجلات' },
+      { value: 'logs.delete.own', name: 'حذف السجلات التابعة له' },
+      { value: 'logs.delete.self', name: 'حذف السجلات الخاصة به' },
     ],
   },
   // transaction

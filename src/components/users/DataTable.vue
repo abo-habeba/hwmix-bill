@@ -1,9 +1,9 @@
 <template>
   <!-- Advanced Search -->
-  <AdvancedSearch ref="advancedSearch" v-model="filters" :fields="fields" />
+  <!-- <AdvancedSearch ref="advancedSearch" v-model="filters" :fields="fields" /> -->
   <!-- Deleted Item -->
 
-  <DeletedItem @update-users="removeDeletedUsers" api="users/delete" :dataDelete="{ items: deletedUsers, key: 'nickname' }" />
+  <DeletedItem @update-items="removeDeletedItems" api="users/delete" :dataDelete="{ items: deletedUsers, key: 'nickname' }" />
   <!-- Data Table Server -->
   <div id="dataTable" style="position: relative !important">
     <v-btn
@@ -73,7 +73,7 @@
 <script setup>
 import { getAll, saveItem } from '@/services/api';
 import { useappState } from '@/stores/appState';
-import { computed, onMounted, ref, watchEffect } from 'vue';
+import { onMounted, ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import AdvancedSearch from '../AdvancedSearch.vue';
 import DeletedItem from '../DeletedItem.vue';
@@ -130,7 +130,7 @@ const deleteUser = ref(() => {
   } else {
     deletedUsers.value = [user.value];
   }
-  appState.appState = true;
+  appState.dialogDelete = true;
   colsContextMenu();
 });
 const viewUser = ref(() => {
@@ -214,16 +214,13 @@ watchEffect(() => {
   }
 });
 
-const removeDeletedUsers = deletedIds => {
+const removeDeletedItems = deletedIds => {
   users.value = users.value.filter(user => !deletedIds.includes(user.id));
   selectedUsers.value = [];
 };
 const contextMenu = ref(null);
 const showContextMenu = (event, { item }) => {
   user.value = item;
-  console.log('user.value', user.value);
-  console.log('availableActions.value', availableActions.value);
-
   event.preventDefault();
   if (contextMenu.value) {
     contextMenu.value.showContextMenu(event);
@@ -239,7 +236,7 @@ const colsContextMenu = () => {
 async function fetchUsers() {
   const { page, itemsPerPage, sortBy } = options.value;
   const sortField = sortBy.length ? sortBy[0].key : 'id';
-  const sortOrder = sortBy.length && sortBy[0].order ? sortBy[0].order : 'asc';
+  const sortOrder = sortBy.length && sortBy[0].order ? sortBy[0].order : 'desc';
   const perPage = itemsPerPage === -1 ? total.value : itemsPerPage;
   try {
     const response = await getAll('users', {

@@ -101,7 +101,7 @@ async function fetchUsers() {
   loading.value = true;
   const { page, itemsPerPage, sortBy } = options.value;
   const sortField = sortBy.length ? sortBy[0].key : 'id';
-  const sortOrder = sortBy.length && sortBy[0].order ? sortBy[0].order : 'asc';
+  const sortOrder = sortBy.length && sortBy[0].order ? sortBy[0].order : 'desc';
 
   const perPage = itemsPerPage === -1 ? total.value : itemsPerPage;
 

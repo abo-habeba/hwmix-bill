@@ -28,6 +28,7 @@ function logout() {
               </VListItemAction>
             </template>
 
+            <VListItemTitle class="font-weight-semibold"> <span class="pl-5"> الكود </span> {{ userStore.user.id }} </VListItemTitle>
             <VListItemTitle class="font-weight-semibold"> {{ userStore.user.nickname }} </VListItemTitle>
             <VListItemSubtitle>{{ userStore.user.email }}</VListItemSubtitle>
             <VListItemTitle> <span>الرصيد </span>{{ userStore.user.balance }}</VListItemTitle>

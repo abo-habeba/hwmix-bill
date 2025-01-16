@@ -7,17 +7,18 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AddUser: typeof import('./src/components/users/addUser.vue')['default']
+    AddCompany: typeof import('./src/components/companys/addCompany.vue')['default']
+    AddUser: typeof import('./src/components/logs/addUser.vue')['default']
     AdvancedSearch: typeof import('./src/components/AdvancedSearch.vue')['default']
     CardStatisticsHorizontal: typeof import('./src/@core/components/cards/CardStatisticsHorizontal.vue')['default']
     CardStatisticsVertical: typeof import('./src/@core/components/cards/CardStatisticsVertical.vue')['default']
     CardStatisticsWithImages: typeof import('./src/@core/components/cards/CardStatisticsWithImages.vue')['default']
     ContextMenu: typeof import('./src/components/ContextMenu.vue')['default']
     copy: typeof import('./src/components/ContextMenu copy.vue')['default']
-    DataTable: typeof import('./src/components/users/DataTable.vue')['default']
+    DataTable: typeof import('./src/components/companys/DataTable.vue')['default']
     DatePicker: typeof import('./src/components/datePicker.vue')['default']
     DeletedItem: typeof import('./src/components/DeletedItem.vue')['default']
-    EditUserRolse: typeof import('./src/components/users/editUserRolse.vue')['default']
+    EditUserRolse: typeof import('./src/components/companys/editUserRolse.vue')['default']
     Element: typeof import('./src/components/Element.vue')['default']
     ErrorHeader: typeof import('./src/components/ErrorHeader.vue')['default']
     MoreBtn: typeof import('./src/@core/components/MoreBtn.vue')['default']
