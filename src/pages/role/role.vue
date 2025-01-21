@@ -9,7 +9,7 @@
         </div>
         <v-spacer />
         <v-btn
-          v-if="userStore.can(['roles.create', 'super.admin', 'company.owner'])"
+          v-if="userStore.can(['roles_create', 'super_admin', 'company_owner'])"
           color="primary"
           prepend-icon="ri-add-line"
           @click="openDialog()"

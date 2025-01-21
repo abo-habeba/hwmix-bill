@@ -43,7 +43,7 @@ export const routes = [
         meta: {
           title: 'تعديل الشركة',
           description: 'تعديل بيانات الشركة',
-          roles: 'companys.update',
+          roles: 'companys_update',
         },
       },
       {
@@ -73,7 +73,27 @@ export const routes = [
         meta: {
           title: 'تعديل المستخدم',
           description: 'تعديل بيانات المستخدم',
-          roles: ['users.update', 'users.create'],
+          roles: ['users_update', 'users_create'],
+        },
+      },
+      {
+        path: 'cashbox',
+        component: () => import('@/pages/cashboxs/cashbox.vue'),
+        name: 'cashboxs',
+        meta: {
+          title: 'الخزن',
+          description: 'إدارة وتعديل الخزن',
+          roles: 'cashbox',
+        },
+      },
+      {
+        path: 'cashboxs/edit/:id?',
+        component: () => import('@/pages/cashboxs/edit.vue'),
+        name: 'edit-cashbox',
+        meta: {
+          title: 'تعديل الخزن',
+          description: 'تعديل بيانات الخزن',
+          roles: ['cashbox_update', 'cashbox_create'],
         },
       },
       {

@@ -9,6 +9,6 @@ const userStore = useUserStore();
     <VCard class="pa-0" title=" الشركات ">
       <DataTable />
     </VCard>
-    <AddCompany v-if="userStore.can(['companys.create', 'super.admin', 'company.owner'])" />
+    <AddCompany v-if="userStore.can(['companys_create', 'super_admin', 'company_owner'])" />
   </VCol>
 </template>

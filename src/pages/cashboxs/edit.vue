@@ -18,11 +18,11 @@ const generateImagePreview = () => {
   if (image.value && image.value.type.startsWith('image/')) {
     const reader = new FileReader();
     reader.onload = e => {
-      imagePreview.value = e.target.result; // تعيين رابط المعاينة
+      imagePreview.value = e.target.result;
     };
-    reader.readAsDataURL(image.value); // قراءة الملف وتحويله إلى Base64
+    reader.readAsDataURL(image.value);
   } else {
-    imagePreview.value = null; // إعادة التعيين إذا لم يكن الملف صورة
+    imagePreview.value = null;
   }
 };
 

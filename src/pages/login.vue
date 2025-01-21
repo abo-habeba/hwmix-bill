@@ -8,7 +8,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const form = ref({
-  phone: '',
+  login: '',
   password: '',
   remember: false,
 });
@@ -49,14 +49,14 @@ const isPasswordVisible = ref(false);
       <VCardText>
         <VForm @submit.prevent="() => {}">
           <VRow>
-            <!-- phone -->
+            <!-- login -->
             <VCol cols="12">
               <v-alert v-if="errMessages" color="#C51162" theme="dark" border>
                 {{ errMessages }}
               </v-alert>
             </VCol>
             <VCol cols="12">
-              <VTextField v-model="form.phone" label="الهاتف او الايميل" />
+              <VTextField v-model="form.login" label="الهاتف او الايميل" />
             </VCol>
 
             <!-- password -->

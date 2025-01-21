@@ -36,7 +36,7 @@ const userStore = useUserStore();
  -->
 
   <VerticalNavLink
-    v-if="userStore.user && userStore.can(['users', 'super.admin', 'company.owner'])"
+    v-if="userStore.user && userStore.can(['users', 'super_admin', 'company_owner'])"
     :item="{
       title: 'المستخدمين',
       to: { name: 'users' },
@@ -44,7 +44,7 @@ const userStore = useUserStore();
     }"
   />
   <VerticalNavLink
-    v-if="userStore.user && userStore.can(['roles', 'super.admin', 'company.owner'])"
+    v-if="userStore.user && userStore.can(['roles', 'super_admin', 'company_owner'])"
     :item="{
       title: 'الصلاحيات والادوار',
       to: { name: 'roles' },
@@ -52,7 +52,7 @@ const userStore = useUserStore();
     }"
   />
   <VerticalNavLink
-    v-if="userStore.user && userStore.can(['logs', 'super.admin', 'company.owner'])"
+    v-if="userStore.user && userStore.can(['logs', 'super_admin', 'company_owner'])"
     :item="{
       title: 'سجل النظام',
       to: { name: 'logs' },
@@ -60,11 +60,21 @@ const userStore = useUserStore();
     }"
   />
   <VerticalNavLink
-    v-if="userStore.user && userStore.can(['companys', 'super.admin', 'company.owner'])"
+    v-if="userStore.user && userStore.can(['companys', 'super_admin', 'company_owner'])"
     :item="{
       title: 'الشركات',
       to: { name: 'companys' },
-      icon: 'ri-group-line',
+      icon: 'ri-community-line',
+      // icon: 'ri-building-line',
+      // icon: 'ri-bank-line',
+    }"
+  />
+  <VerticalNavLink
+    v-if="userStore.user && userStore.can(['cashbox', 'super_admin', 'company_owner'])"
+    :item="{
+      title: 'الخزن',
+      to: { name: 'cashboxs' },
+      icon: 'ri-currency-line',
     }"
   />
   <!--   
@@ -178,3 +188,10 @@ const userStore = useUserStore();
     }"
   /> -->
 </template>
+<style lang="scss">
+.nav-link {
+  a {
+    border-bottom: 2px solid #ffffff;
+  }
+}
+</style>

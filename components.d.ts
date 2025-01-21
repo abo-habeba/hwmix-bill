@@ -8,7 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AddCompany: typeof import('./src/components/companys/addCompany.vue')['default']
-    AddUser: typeof import('./src/components/logs/addUser.vue')['default']
+    AddItem: typeof import('./src/components/addItem.vue')['default']
+    AddUser: typeof import('./src/components/users/addUser.vue')['default']
     AdvancedSearch: typeof import('./src/components/AdvancedSearch.vue')['default']
     CardStatisticsHorizontal: typeof import('./src/@core/components/cards/CardStatisticsHorizontal.vue')['default']
     CardStatisticsVertical: typeof import('./src/@core/components/cards/CardStatisticsVertical.vue')['default']
