@@ -1,5 +1,6 @@
 <script setup>
 import Footer from '@/layouts/components/Footer.vue';
+import { useRouter } from 'vue-router';
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue';
 import NavItems from '@/layouts/components/NavItems.vue';
 import UserProfile from '@/layouts/components/UserProfile.vue';
@@ -12,6 +13,7 @@ import { useDisplay } from 'vuetify';
 const { smAndDown } = useDisplay();
 const userStore = ref(useUserStore());
 const companiesDialog = ref(false);
+const router = useRouter();
 const companyId = ref(null);
 const errorResponse = ref(companiesDialog.value);
 function setCompanies(id) {
@@ -34,7 +36,7 @@ function openCompaniesDialog() {
     companiesDialog.value = true;
   } else {
     console.log('else');
-    $router.push({ name: 'home-redirect' });
+    router.push({ name: 'home-redirect' });
   }
 }
 </script>
@@ -75,7 +77,7 @@ function openCompaniesDialog() {
         </div>
 
         <VSpacer />
-        <IconBtn to="">
+        <IconBtn style="width: fit-content" :to="{ name: 'cashboxs' }">
           <span v-if="userStore.user?.balance" class="d-md-flex align-center">
             <span class="me-3">{{ userStore.user?.balance }}</span>
           </span>

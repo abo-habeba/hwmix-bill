@@ -47,6 +47,7 @@ export const getAll = (apiEndpoint, params = null, loading = false, log = false)
       .then(response => {
         log ? console.log(` ${log}:  => `, response.data) : '';
         resolve(response.data);
+        return response.data;
         loading ? (userStore.loadingApi = false) : '';
       })
       .catch(error => {
@@ -117,6 +118,20 @@ export const deleteOne = (apiEndpoint, id, loading = false, log = false) => {
   return new Promise((resolve, reject) => {
     apiClient
       .delete(`${apiEndpoint}/${id}`)
+      .then(response => {
+        log ? console.log(` ${log}:  => `, response.data) : '';
+        resolve(response.data.data);
+      })
+      .catch(error => {
+        log ? console.log(` ${log}:  => `, error) : '';
+        reject(error);
+      });
+  });
+};
+export const updateItem = (apiEndpoint, loading = false, log = false) => {
+  return new Promise((resolve, reject) => {
+    apiClient
+      .put(`${apiEndpoint}`)
       .then(response => {
         log ? console.log(` ${log}:  => `, response.data) : '';
         resolve(response.data.data);

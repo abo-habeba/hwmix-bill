@@ -1,22 +1,6 @@
 <template>
-  <!-- Advanced Search -->
-  <!-- <AdvancedSearch ref="advancedSearch" v-model="filters" :fields="fields" /> -->
-  <!-- Deleted Item -->
-
-  <DeletedItem @update-items="removeDeletedItems" api="users/delete" :dataDelete="{ items: deletedUsers, key: 'nickname' }" />
   <!-- Data Table Server -->
-  <div id="dataTable" style="position: relative !important">
-    <v-btn
-      v-if="selectedUsers.length"
-      class="text-center my-2 mx-10"
-      density="compact"
-      variant="flat"
-      style="background-color: #dc3545 !important; color: white; position: absolute; top: -30px; z-index: 10"
-      prepend-icon="ri-delete-bin-line"
-      @click="deleteUser"
-    >
-      حذف عدد {{ selectedUsers.length }} من العناصر
-    </v-btn>
+  <v-container id="dataTable" style="position: relative !important">
     <v-data-table-server
       item-value="id"
       v-model:items-per-page="itemsPerPage"
@@ -29,8 +13,6 @@
       show-current-page
       :row-props="getRowProps"
       v-model="selectedUsers"
-      show-select
-      item-selectable
       loading-text=" جاري تحمل البيانات "
       no-data-text=" لا توجد بيانات "
       items-per-page-text="عدد الصفوف في الصفحة"
@@ -67,7 +49,7 @@
       </template> -->
     </v-data-table-server>
     <ContextMenu ref="contextMenu" :actions="actions" />
-  </div>
+  </v-container>
 </template>
 
 <script setup>
@@ -75,8 +57,6 @@ import { getAll, saveItem } from '@/services/api';
 import { useappState } from '@/stores/appState';
 import { onMounted, ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
-import AdvancedSearch from '../AdvancedSearch.vue';
-import DeletedItem from '../DeletedItem.vue';
 import { useUserStore } from '@/stores/user';
 const userStore = useUserStore();
 const router = useRouter();
@@ -85,7 +65,6 @@ const selectedUsers = ref([]);
 const total = ref(0);
 const users = ref([]);
 const user = ref(null);
-const itemAction = ref(null);
 const loading = ref(false);
 const itemsPerPage = ref(10);
 const filters = ref({
@@ -101,22 +80,19 @@ const options = ref({
   sortBy: [],
   itemsPerPage: 10,
 });
-const fields = ref([
-  { name: 'nickname', type: 'input', label: ' اسم الشهرة ' },
-  { name: 'phone', type: 'input', label: '  الهاتف ' },
-]);
+
 const headers = ref([
   { title: '#', key: 'index', sortable: false },
-  { title: 'الاسم', key: 'name', align: 'start' },
-  { title: 'الرصيد', key: 'balance', align: 'start' },
-  { title: 'تاريخ الإنشاء', key: 'created_at', align: 'start' },
-  { title: 'الإجراءات', key: 'action', sortable: false, align: 'center' },
+  { title: 'نوع العملية', key: 'type', align: 'start' },
+  { title: 'المبلغ', key: 'amount', align: 'start' },
+  { title: ' الرصيد قبل', key: 'balance_before', align: 'start' },
+  { title: 'الرصيد بعد', key: 'balance_after', sortable: false, align: 'center' },
+  { title: ' الوصف', key: 'description', sortable: false, align: 'center' },
 ]);
 onMounted(() => {
   fetchUsers();
 });
 const deletedUsers = ref(null);
-const advancedSearch = ref(null);
 
 const editUser = ref(() => {
   router.push({ name: 'edit-user', params: { id: user.value.id } });
@@ -238,7 +214,7 @@ async function fetchUsers() {
   const sortOrder = sortBy.length && sortBy[0].order ? sortBy[0].order : 'desc';
   const perPage = itemsPerPage === -1 ? total.value : itemsPerPage;
   try {
-    const response = await getAll('cashBoxs', {
+    const response = await getAll('/transactions/user', {
       page,
       per_page: perPage,
       sort_by: sortField,
