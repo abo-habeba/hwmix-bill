@@ -203,6 +203,7 @@ export const logOut = (apiEndpoint, loading = false, log = false) => {
         delete axios.defaults.headers.common['Authorization'];
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
+        localStorage.removeItem('products');
         loading ? (userStore.loadingApi = false) : '';
         log ? console.log(` ${log}:  => `, response.data) : '';
         resolve(response.data);

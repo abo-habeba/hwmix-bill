@@ -106,6 +106,98 @@ export const routes = [
           roles: 'roles',
         },
       },
+      // Products Routes
+      {
+        path: 'products',
+        component: () => import('@/pages/products/products.vue'),
+        name: 'products',
+        meta: {
+          title: 'المنتجات',
+          description: 'إدارة وتعديل المنتجات',
+          // roles: 'products',
+        },
+      },
+      {
+        path: 'product-variants',
+        component: () => import('@/pages/productVariants/productVariants.vue'),
+        name: 'product-variants',
+        meta: {
+          title: 'نسخ المنتجات',
+          description: 'إدارة نسخ المنتجات',
+          // roles: 'productVariants',
+        },
+      },
+      {
+        path: 'product-variant-attributes',
+        component: () => import('@/pages/productVariantAttributes/productVariantAttributes.vue'),
+        name: 'product-variant-attributes',
+        meta: {
+          title: 'خصائص نسخ المنتجات',
+          description: 'إدارة خصائص نسخ المنتجات',
+          // roles: 'productVariantAttributes',
+        },
+      },
+      {
+        path: 'attributes',
+        component: () => import('@/pages/attributes/attributes.vue'),
+        name: 'attributes',
+        meta: {
+          title: 'الخصائص',
+          description: 'إدارة وتعديل الخصائص',
+          // roles: 'attributes',
+        },
+      },
+      {
+        path: 'attribute-values',
+        component: () => import('@/pages/attributeValues/attributeValues.vue'),
+        name: 'attribute-values',
+        meta: {
+          title: 'قيم الخصائص',
+          description: 'إدارة وتعديل قيم الخصائص',
+          // roles: 'attributeValues',
+        },
+      },
+      {
+        path: 'brands',
+        component: () => import('@/pages/brands/brands.vue'),
+        name: 'brands',
+        meta: {
+          title: 'قيم الخصائص',
+          description: 'إدارة وتعديل قيم الخصائص',
+          // roles: 'attributeValues',
+        },
+      },
+      {
+        path: 'categories',
+        component: () => import('@/pages/Categories/Categories.vue'),
+        name: 'categories',
+        meta: {
+          title: 'الاقسام',
+          description: 'إدارة وتعديل الاقسام',
+          // roles: 'categories',
+        },
+      },
+      {
+        path: 'warehouses',
+        component: () => import('@/pages/warehouses/warehouses.vue'),
+        name: 'warehouses',
+        meta: {
+          title: 'المخازن',
+          description: 'إدارة المخازن',
+          // roles: 'warehouses',
+        },
+      },
+      {
+        path: 'stock',
+        component: () => import('@/pages/stock/stock.vue'),
+        name: 'stock',
+        meta: {
+          title: 'المخزون',
+          description: 'إدارة المخزون',
+          // roles: 'stock',
+        },
+      },
+
       {
         path: 'account-settings1',
         component: () => import('@/pages/account-settings.vue'),

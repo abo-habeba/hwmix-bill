@@ -34,7 +34,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update-items']);
 function deleted() {
-  // إنشاء مصفوفة تحتوي على جميع الـ IDs من props.dataDelete
   const itemIds = props.dataDelete.items.map(item => item.id);
 
   deleteAll(props.api, itemIds).then(() => {

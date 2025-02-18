@@ -1,197 +1,116 @@
 <script setup>
-import VerticalNavSectionTitle from '@/@layouts/components/VerticalNavSectionTitle.vue';
-import VerticalNavGroup from '@layouts/components/VerticalNavGroup.vue';
 import VerticalNavLink from '@layouts/components/VerticalNavLink.vue';
+import VerticalNavGroup from '@layouts/components/VerticalNavGroup.vue';
 import { useUserStore } from '@/stores/user';
+import { ref, watch } from 'vue';
+
 const userStore = useUserStore();
-</script>
+const activeItem = ref(localStorage.getItem('activeNavItem') || '');
 
-<template>
-  <!-- 👉 NavGroup -->
-  <!-- <VerticalNavGroup
-    :item="{
-      title: 'المستخدمين',
-      badgeContent: '0',
-      badgeClass: 'bg-error',
-    }"
-  >
-    <VerticalNavLink
-      :item="{
-        title: 'المستخدمين',
-        to: 'users',
-        badgeContent: '0',
-        badgeClass: 'bg-error',
-        icon: 'ri-group-line',
-      }"
-    />
-  </VerticalNavGroup> -->
+watch(activeItem, newValue => {
+  if (newValue) {
+    localStorage.setItem('activeNavItem', newValue);
+  } else {
+    localStorage.removeItem('activeNavItem');
+  }
+});
 
-  <!-- 👉 Apps & Pages -->
-
-  <!-- <VerticalNavSectionTitle
-    :item="{
-      heading: 'المستخدمين',
-    }"
-  /> 
- -->
-
-  <VerticalNavLink
-    v-if="userStore.user && userStore.can(['users', 'super_admin', 'company_owner'])"
-    :item="{
+const navItems = [
+  //users
+  {
+    type: 'link',
+    permission: ['users', 'super_admin', 'company_owner'],
+    item: {
       title: 'المستخدمين',
       to: { name: 'users' },
       icon: 'ri-group-line',
-    }"
-  />
-  <VerticalNavLink
-    v-if="userStore.user && userStore.can(['roles', 'super_admin', 'company_owner'])"
-    :item="{
+    },
+  },
+  //roles
+  {
+    type: 'link',
+    permission: ['roles', 'super_admin', 'company_owner'],
+    item: {
       title: 'الصلاحيات والادوار',
       to: { name: 'roles' },
       icon: 'ri-lock-unlock-line',
-    }"
-  />
-  <VerticalNavLink
-    v-if="userStore.user && userStore.can(['logs', 'super_admin', 'company_owner'])"
-    :item="{
+    },
+  },
+  //logs
+  {
+    type: 'link',
+    permission: ['logs', 'super_admin', 'company_owner'],
+    item: {
       title: 'سجل النظام',
       to: { name: 'logs' },
       icon: 'ri-file-list-2-line',
-    }"
-  />
-  <VerticalNavLink
-    v-if="userStore.user && userStore.can(['companys', 'super_admin', 'company_owner'])"
-    :item="{
+    },
+  },
+  //companys
+  {
+    type: 'link',
+    permission: ['companys', 'super_admin', 'company_owner'],
+    item: {
       title: 'الشركات',
       to: { name: 'companys' },
       icon: 'ri-community-line',
-      // icon: 'ri-building-line',
-      // icon: 'ri-bank-line',
-    }"
-  />
-  <VerticalNavLink
-    v-if="userStore.user && userStore.can(['cashbox', 'super_admin', 'company_owner'])"
-    :item="{
+    },
+  },
+  // cashboxs
+  {
+    type: 'link',
+    permission: ['cashbox', 'super_admin', 'company_owner'],
+    item: {
       title: 'الخزن',
       to: { name: 'cashboxs' },
       icon: 'ri-currency-line',
-    }"
-  />
-  <!--   
-  <VerticalNavLink
-    :item="{
-      title: 'Account Settings',
-      icon: 'ri-user-settings-line',
-      to: '/account-settings',
-    }"
-  /> -->
-  <!-- 
-  <VerticalNavLink
-    :item="{
-      title: 'Login',
-      icon: 'ri-login-box-line',
-      to: '/login',
-    }"
-  /> -->
-  <!--   
-  <VerticalNavLink
-    :item="{
-      title: 'Register',
-      icon: 'ri-user-add-line',
-      to: '/register',
-    }"
-  /> -->
-  <!--   
-  <VerticalNavLink
-    :item="{
-      title: 'Error',
-      icon: 'ri-information-line',
-      to: '/no-existence',
-    }"
-  /> -->
+    },
+  },
+  // group products
+  {
+    type: 'group',
+    permission: ['products', 'super_admin', 'company_owner'],
+    item: {
+      title: 'المنتجات',
+      icon: 'ri-shopping-bag-3-line',
+      children: [
+        { title: 'كل المنتجات', to: { name: 'products' }, icon: 'ri-box-3-line' },
+        { title: 'نسخ المنتجات', to: { name: 'product-variants' }, icon: 'ri-file-copy-line' },
+        { title: 'خصائص نسخ المنتجات', to: { name: 'product-variant-attributes' }, icon: 'ri-equalizer-line' },
+        { title: 'الخصائص', to: { name: 'attributes' }, icon: 'ri-settings-3-line' },
+        { title: 'قيم الخصائص', to: { name: 'attribute-values' }, icon: 'ri-list-settings-line' },
+        { title: 'العلامات التجارية', to: { name: 'brands' }, icon: 'ri-brand-line' },
+        { title: 'الاقسام', to: { name: 'categories' }, icon: 'ri-brand-line' },
+      ],
+    },
+  },
+  {
+    type: 'link',
+    permission: ['warehouses', 'super_admin', 'company_owner'],
+    item: { title: 'المخازن', to: { name: 'warehouses' }, icon: 'ri-building-line' },
+  },
+  {
+    type: 'link',
+    permission: ['stock', 'super_admin', 'company_owner'],
+    item: { title: 'المخزون', to: { name: 'stock' }, icon: 'ri-archive-line' },
+  },
+];
+</script>
 
-  <!-- 👉 User Interface -->
-  <!--    
-  <VerticalNavSectionTitle
-    :item="{
-      heading: 'User Interface',
-    }"
-  /> -->
-  <!--   
-  <VerticalNavLink
-    :item="{
-      title: 'Typography',
-      icon: 'ri-text',
-      to: '/typography',
-    }"
-  /> -->
-  <!--   
-  <VerticalNavLink
-    :item="{
-      title: 'Icons',
-      icon: 'ri-remixicon-line',
-      to: '/icons',
-    }"
-  /> -->
-  <!--   
-  <VerticalNavLink
-    :item="{
-      title: 'Cards',
-      icon: 'ri-bar-chart-box-line',
-      to: '/cards',
-    }"
-  /> -->
+<template>
+  <div>
+    <template v-for="(navItem, index) in navItems" :key="index">
+      <!-- روابط فردية -->
+      <VerticalNavLink
+        v-if="navItem.type === 'link' && userStore.user && userStore.can(navItem.permission)"
+        :item="navItem.item"
+        @update:activeItem="activeItem = $event"
+      />
 
-  <!-- 👉 Forms & Tables -->
-  <!--    
-  <VerticalNavSectionTitle
-    :item="{
-      heading: 'Forms & Tables',
-    }"
-  />
-  <VerticalNavLink
-    :item="{
-      title: 'Form Layouts',
-      icon: 'ri-layout-4-line',
-      to: '/form-layouts',
-    }"
-  />
-  <VerticalNavLink
-    :item="{
-      title: 'Tables',
-      icon: 'ri-table-alt-line',
-      to: '/tables',
-    }"
-  /> -->
-
-  <!-- 👉 Others -->
-  <!--    
-  <VerticalNavSectionTitle
-    :item="{
-      heading: 'Others',
-    }"
-  />
-  <VerticalNavLink
-    :item="{
-      title: 'Documentation',
-      icon: 'ri-article-line',
-      href: 'https://demos.themeselection.com/materio-vuetify-vuejs-admin-template/documentation/',
-      target: '_blank',
-    }"
-  />
-  <VerticalNavLink
-    :item="{
-      title: 'Raise Support',
-      href: 'https://github.com/themeselection/materio-vuetify-vuejs-admin-template-free/issues',
-      icon: 'ri-lifebuoy-line',
-      target: '_blank',
-    }"
-  /> -->
+      <!-- مجموعات روابط -->
+      <VerticalNavGroup v-if="navItem.type === 'group'" :item="navItem.item" :active-item="activeItem" @update:activeItem="activeItem = $event">
+        <VerticalNavLink v-for="(child, childIndex) in navItem.item.children" :key="childIndex" :item="child" />
+      </VerticalNavGroup>
+    </template>
+  </div>
 </template>
-<style lang="scss">
-.nav-link {
-  a {
-    border-bottom: 2px solid #ffffff;
-  }
-}
-</style>

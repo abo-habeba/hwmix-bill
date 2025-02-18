@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/user';
 import avatar1 from '@images/avatars/avatar-1.png';
 const userStore = useUserStore();
 function logout() {
-  logOut('logout');
+  logOut('logout', true, true);
 }
 </script>
 

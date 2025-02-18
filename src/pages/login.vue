@@ -16,7 +16,7 @@ const errMessages = ref(false);
 function logind() {
   errMessages.value = false;
 
-  login('login', form.value)
+  login('login', form.value, true, true)
     .then(() => {
       router.push('/dashboard');
     })

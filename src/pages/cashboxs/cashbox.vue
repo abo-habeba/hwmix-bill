@@ -1,6 +1,7 @@
 <script setup>
 import CashBoxSwitcher from '@/components/cashboxs/CashBoxSwitcher.vue';
 import DataTable from '@/components/cashboxs/transfer/DataTable.vue';
+import TransactionDialog from '@/components/cashboxs/transfer/TransactionDialog.vue';
 import { getAll, saveItem, updateItem } from '@/services/api';
 
 import { useUserStore } from '@/stores/user';
@@ -23,6 +24,12 @@ const amount = ref(null);
 const to_cashBox = ref('اختر خزنة');
 const description = ref('');
 const expand = ref(false);
+const dataTable = ref(null);
+function reloadTransactions() {
+  if (dataTable.value) {
+    dataTable.value.fetchUsers(); // 🔹 تشغيل الدالة داخل DataTable
+  }
+}
 function onInputChange() {
   loading.value = true;
   getAll('users/search', { search: searchText.value })
@@ -69,19 +76,23 @@ async function confirmOperation() {
     cashBoxId: tab.value,
     description: description.value,
   };
+
   try {
     await saveItem('cashBox/transfer', data, false, true, true).then(() => {
-      tab.value = null;
+      // tab.value = 1;
       selectedUser.value = null;
       amount.value = null;
       to_cashBox.value = null;
+      dataTable.value.fetchUsers(); // تأكد من تنفيذ هذه الدالة
     });
     await userStore.fetchUser();
-    operationDialog.value = false;
   } catch (e) {
     console.log(e);
+  } finally {
+    operationDialog.value = false; // اغلاق الحوار في النهاية
   }
 }
+
 const setDefaultCashBox = id => {
   updateItem(`user/${userStore.user.id}/cashbox/${id}/set-default`, true, true).then(res => {
     userStore.user.cashBoxes.map(box => {
@@ -131,7 +142,7 @@ const isDisabled = computed(() => {
             <v-card-actions>
               <v-btn class="ma-1" :text="!expand ? 'تحويل نقود' : 'X'" @click="expand = !expand"></v-btn>
               <v-spacer></v-spacer>
-              <CashBoxSwitcher v-if="userStore.user.cashBoxes.length > 1" :box="box" />
+              <CashBoxSwitcher v-if="userStore.user.cashBoxes.length > 1" :box="box" @operation-success="reloadTransactions" />
             </v-card-actions>
             <v-expand-transition class="pa-2">
               <div v-if="expand">
@@ -176,12 +187,12 @@ const isDisabled = computed(() => {
           </v-card>
         </v-tabs-window-item>
       </v-tabs-window>
-      <DataTable />
+      <DataTable ref="dataTable" />
     </VCard>
   </VCol>
 
   <v-dialog v-model="operationDialog" max-width="500px">
-    <v-card class="pa-5">
+    <v-card v-if="operationDialog" class="pa-5">
       <v-row>
         <v-col cols="12">
           <v-card class="mx-auto pa-2" max-width="500">
@@ -230,7 +241,7 @@ const isDisabled = computed(() => {
                   <v-card-text class="pa-0">تحويل</v-card-text>
                   <v-card-title class="pa-0">{{ amount }}</v-card-title>
                   <v-card-text class="pa-0">من {{ userStore.user.nickname }}</v-card-text>
-                  <v-card-text class="pa-0">الي {{ selectedUser.nickname }}</v-card-text>
+                  <v-card-text class="pa-0">الي {{ selectedUser?.nickname }}</v-card-text>
                 </v-col>
               </v-window-item>
               <v-window-item :value="3">

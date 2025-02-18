@@ -1,6 +1,6 @@
 <template>
-  <v-btn class="ma-2" variant="text" @click="operationDialog = true"> التحويل بين خزائنك </v-btn>
-  <v-dialog v-model="operationDialog" max-width="500px">
+  <v-btn class="ma-2" variant="text" @click="operationDialogd = true"> التحويل بين خزائنك </v-btn>
+  <v-dialog v-model="operationDialogd" max-width="500px">
     <v-card class="pa-5">
       <v-card-title class="pa-0">التحويل بين خزائنك</v-card-title>
       <v-row>
@@ -62,7 +62,7 @@
           </v-card>
         </v-col>
         <v-card-actions>
-          <v-btn text="إغلاق" prepend-icon="ri-close-line" @click="operationDialog = false"></v-btn>
+          <v-btn text="إغلاق" prepend-icon="ri-close-line" @click="operationDialogd = false"></v-btn>
           <v-spacer></v-spacer>
           <v-btn text="تأكيد" v-if="step > 1" prepend-icon="ri-check-line" @click="confirmOperation"></v-btn>
         </v-card-actions>
@@ -73,9 +73,10 @@
 <script setup>
 import { saveItem } from '@/services/api';
 import { useUserStore } from '@/stores/user';
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, defineEmits } from 'vue';
+const emit = defineEmits(['operation-success']);
 const userStore = useUserStore();
-const operationDialog = ref(false);
+const operationDialogd = ref(false);
 const selectedUser = ref(null);
 const hasBoxCash = ref(false);
 const step = ref(1);
@@ -110,7 +111,8 @@ async function confirmOperation() {
   try {
     await saveItem('cashBox/transfer', data, false, true, true);
     await userStore.fetchUser();
-    operationDialog.value = false;
+    emit('operation-success');
+    operationDialogd.value = false;
   } catch (e) {
     console.log(e);
   }

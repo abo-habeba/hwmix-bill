@@ -2,6 +2,7 @@
   <!-- Data Table Server -->
   <v-container id="dataTable" style="position: relative !important">
     <v-data-table-server
+      style="white-space: nowrap"
       item-value="id"
       v-model:items-per-page="itemsPerPage"
       v-model:options="options"
@@ -18,7 +19,7 @@
       items-per-page-text="عدد الصفوف في الصفحة"
       @update:options="fetchUsers"
       @contextmenu:row="showContextMenu"
-      @click="colsContextMenu"
+      @click:row="operationDialog"
     >
       <!-- عمود التسلسل -->
       <template #item.index="{ index }">
@@ -30,24 +31,8 @@
         <v-btn density="compact" variant="text" color="#0086CD" prepend-icon="ri-more-2-fill" @click.stop="event => showContextMenu(event, { item })">
         </v-btn>
       </template>
-
-      <!-- الصف الموسع -->
-      <!-- v-model:expanded="expanded" -->
-      <!-- <template #expanded-row="{ item, columns }">
-        <tr>
-          <td :colspan="columns.length">
-            <v-card>
-              <v-card-title>تفاصيل المستخدم</v-card-title>
-              <v-card-text>
-                <div>اسم المستخدم: {{ item.username }}</div>
-                <div>البريد الإلكتروني: {{ item.email }}</div>
-                <div>الحالة: {{ item.status }}</div>
-              </v-card-text>
-            </v-card>
-          </td>
-        </tr>
-      </template> -->
     </v-data-table-server>
+    <TransactionDialog ref="transactionDialog" :transaction="transaction" />
     <ContextMenu ref="contextMenu" :actions="actions" />
   </v-container>
 </template>
@@ -58,6 +43,8 @@ import { useappState } from '@/stores/appState';
 import { onMounted, ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
+import TransactionDialog from './TransactionDialog.vue';
+
 const userStore = useUserStore();
 const router = useRouter();
 const appState = useappState();
@@ -65,6 +52,7 @@ const selectedUsers = ref([]);
 const total = ref(0);
 const users = ref([]);
 const user = ref(null);
+const transaction = ref(null);
 const loading = ref(false);
 const itemsPerPage = ref(10);
 const filters = ref({
@@ -85,8 +73,7 @@ const headers = ref([
   { title: '#', key: 'index', sortable: false },
   { title: 'نوع العملية', key: 'type', align: 'start' },
   { title: 'المبلغ', key: 'amount', align: 'start' },
-  { title: ' الرصيد قبل', key: 'balance_before', align: 'start' },
-  { title: 'الرصيد بعد', key: 'balance_after', sortable: false, align: 'center' },
+  { title: 'التاريخ', key: 'created_at', align: 'center' },
   { title: ' الوصف', key: 'description', sortable: false, align: 'center' },
 ]);
 onMounted(() => {
@@ -193,6 +180,19 @@ const removeDeletedItems = deletedIds => {
   users.value = users.value.filter(user => !deletedIds.includes(user.id));
   selectedUsers.value = [];
 };
+const transactionDialog = ref(null);
+const operationDialog = (event, { item }) => {
+  const Item = item;
+  // const clickedItem = event.item || event;
+  // console.log(clickedItem);
+  console.log(Item);
+  transaction.value = item;
+  event.preventDefault();
+  if (transactionDialog.value) {
+    transactionDialog.value.operationDialog();
+  }
+};
+
 const contextMenu = ref(null);
 const showContextMenu = (event, { item }) => {
   user.value = item;
@@ -222,6 +222,8 @@ async function fetchUsers() {
       ...filters.value,
     });
     users.value = response.data;
+    console.log(response.data);
+
     total.value = response.total;
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -235,6 +237,7 @@ function getRowProps({ item, index }) {
     'data-index': index,
   };
 }
+defineExpose({ fetchUsers });
 </script>
 <style>
 .active-row {
