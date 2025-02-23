@@ -1,9 +1,7 @@
 <template>
   <v-container>
-    <!-- Button to open the dialog -->
     <v-btn color="primary" @click="dialog = true">اضافة خاصية جديدة</v-btn>
 
-    <!-- Attributes List -->
     <v-card class="mt-4 pa-3">
       <v-card-title> الخصائص</v-card-title>
       <v-divider></v-divider>
@@ -15,22 +13,8 @@
       </div>
     </v-card>
 
-    <!-- Add Attribute Dialog -->
-    <v-dialog v-model="dialog" max-width="500px">
-      <v-card>
-        <v-card-title>اضافة خاصية جديدة</v-card-title>
-        <v-card-text>
-          <v-text-field v-model="attribute.name" label="الاسم"></v-text-field>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="dialog = false">الغاء</v-btn>
-          <v-btn color="blue darken-1" text @click="saveAttribute">حفظ</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <AddAttribute v-model="dialog" :attributes="attributes" @attribute-saved="saveAttribute" />
 
-    <!-- Delete Confirmation Dialog -->
     <v-dialog v-model="deleteDialog" max-width="400px">
       <v-card>
         <v-card-title>تأكيد الحذف</v-card-title>
@@ -48,18 +32,18 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getAll, saveItem, deleteOne } from '@/services/api';
+import AddAttribute from '@/components/attributes/AddAttribute.vue';
+AddAttribute;
 
 const dialog = ref(false);
 const deleteDialog = ref(false);
 const confirmDeleteId = ref(null);
-const attribute = ref({ name: '' });
 const attributes = ref([]);
 
-function saveAttribute() {
-  saveItem('attribute', attribute.value, false, true, true).then(() => {
+function saveAttribute(payload) {
+  saveItem('attribute', payload, false, true, true).then(() => {
     getAttributes();
     dialog.value = false;
-    attribute.value = { name: '' };
   });
 }
 
@@ -85,3 +69,9 @@ onMounted(() => {
   getAttributes();
 });
 </script>
+
+<style scoped>
+.gap-2 {
+  gap: 8px;
+}
+</style>

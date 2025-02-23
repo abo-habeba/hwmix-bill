@@ -14,7 +14,6 @@ const brands = ref([]);
 const categories = ref([]);
 const searchCategory = ref('');
 const searchBrand = ref('');
-const searchWarehouse = ref('');
 const attributeValues = ref('');
 
 const newProduct = ref({
@@ -60,8 +59,6 @@ onMounted(() => {
   }
   getAttributes();
   getWarehouse();
-  // getCategories();
-  // getBrands();
 });
 
 function getAttributes() {
@@ -107,11 +104,17 @@ const variantTemplate = () => ({
   dimensions: '',
   tax_rate: null,
   discount: null,
-  attributes: [], // سيتم تخزين الكائنات { attribute_id, attribute_value_id }
+  attributes: [
+    {
+      attribute_id: null,
+      attribute_value_id: null,
+    },
+  ], // سيتم تخزين الكائنات { attribute_id, attribute_value_id }
 });
 
 const addVariant = () => {
-  newProduct.value.variants.push(variantTemplate());
+  // newProduct.value.variants.push(variantTemplate());
+  newProduct.value.variants.push(newProduct.value.variants[0]);
 };
 
 const removeVariant = index => {
@@ -132,7 +135,6 @@ const resetForm = () => {
     created_by: 1,
     category_id: null,
     brand_id: null,
-    warehouse_id: null,
     variants: [
       {
         attributes: [
@@ -209,27 +211,12 @@ watch(
 const submitProducts = () => {
   console.log('🚀 إرسال المنتجات:', JSON.stringify(products.value, null, 2));
 };
-
-// function customFilter(item, queryText) {
-//   if (!queryText) return true;
-//   const text = queryText.toLowerCase();
-//   return item.name.toLowerCase().includes(text);
-// }
-
 function fetchBrands(query) {
   if (!query) return;
   getAll('brands', { search: query }).then(res => {
     brands.value = res.data;
   });
 }
-
-// function fetchWarehouses(query) {
-//   if (!query) return;
-//   getAll('warehouses', { search: query }).then(res => {
-//     warehouses.value = res.data;
-//   });
-// }
-
 function fetchCategories(query) {
   if (!query) return;
   getAll('categories', { search: query }).then(res => {
@@ -237,7 +224,6 @@ function fetchCategories(query) {
     console.log(categories.value);
   });
 }
-
 const formattedCategories = computed(() => {
   const flatCategories = [];
 
@@ -276,26 +262,26 @@ function closeDialog() {
 <template>
   <v-container>
     <!-- دايلوج موحد للإضافة والتعديل -->
-    <v-dialog :fullscreen="xs" v-model="dialog" max-width="800px">
+    <v-dialog :fullscreen="xs" v-model="dialog">
       <v-card>
-        <VBtn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line" @click="dialog = false"></VBtn>
-        <v-card-title class="mt-10">
-          {{ isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد' }}
+        <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line" @click="dialog = false"></v-btn>
+        <v-card-title class="ma-5 text-center">
+          <h2>{{ isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد' }}</h2>
         </v-card-title>
         <v-card-text :class="xs ? 'px-2' : 'px-5'">
           <!-- بيانات المنتج الأساسية -->
-          <v-row>
-            <v-col cols="6">
+          <v-row class="elevation-10 my-3">
+            <v-col cols="12" md="6">
               <v-text-field v-model="newProduct.name" label="اسم المنتج" required />
             </v-col>
-            <v-col cols="6">
-              <v-text-field v-model="newProduct.slug" label="رابط المنتج" required />
+            <v-col cols="12" md="6">
+              <v-text-field v-model="newProduct.slug" label="الرابط السهل" required />
             </v-col>
             <!--is_active && featured && is_returnable -->
             <v-col cols="12">
               <v-row>
                 <v-col>
-                  <v-switch v-model="newProduct.is_active" label="فعال" />
+                  <v-switch v-model="newProduct.is_active" label="نشط" />
                 </v-col>
                 <v-col>
                   <v-switch v-model="newProduct.featured" label="مميز" />
@@ -341,7 +327,6 @@ function closeDialog() {
                     v-if="warehouses.length"
                     v-model="newProduct.warehouse_id"
                     item-value="id"
-                    :key="warehouses.length"
                     item-title="name"
                     :items="warehouses || []"
                     label="المخزن"
@@ -350,24 +335,23 @@ function closeDialog() {
               </v-row>
             </v-col>
             <v-col cols="12">
-              <v-textarea rows="1" auto-grow v-model="newProduct.description" label="الوصف" />
+              <v-textarea rows="1" auto-grow v-model="newProduct.description" label="الوصف القصير" />
             </v-col>
             <v-col cols="12">
-              <v-textarea rows="2" auto-grow v-model="newProduct.description_long" label="الوصف المطول" />
+              <v-textarea rows="2" auto-grow v-model="newProduct.description_long" label="الوصف المفصل" />
             </v-col>
           </v-row>
-          <v-divider class="my-2"></v-divider>
           <!-- بيانات المتغيرات -->
-          <v-card-title> اضافة تفاصيل المنتج</v-card-title>
-          <v-card-subtitle class="pb-2">تفاصيل مثل السعر و الصور و الخصم وما الي ذالك</v-card-subtitle>
-          <v-row v-for="(variant, vIndex) in newProduct.variants" :key="vIndex" class="mb-3">
+          <v-card-title> تفاصيل المنتج الإضافية </v-card-title>
+          <v-card-subtitle class="pb-2"> مثل السعر والصور والخصومات </v-card-subtitle>
+          <v-row class="elevation-10 my-5" v-for="(variant, vIndex) in newProduct.variants" :key="vIndex">
             <v-col cols="12">
               <!--purchase_price && retail_price && wholesale_price -->
               <v-row>
                 <v-col cols="4">
                   <v-text-field v-model="variant.purchase_price" label="سعر الشراء" type="number" />
                 </v-col>
-                <v-col class="px-0" cols="4">
+                <v-col cols="4">
                   <v-text-field v-model="variant.retail_price" label="سعر التجزئة" type="number" />
                 </v-col>
                 <v-col cols="4">
@@ -409,60 +393,58 @@ function closeDialog() {
             </v-col>
             <!-- قسم اختيار الخصائص المتعددة -->
             <v-col cols="12">
-              <v-btn variant="text" color="primary" @click="variant.attributes.push({ attribute_id: null, attribute_value_id: null })">
+              <!-- زر إضافة خاصية -->
+              <v-btn variant="text" color="primary" @click="variant.attributes.push({ attribute_id: null, attribute_value_id: null, values: [] })">
                 + إضافة خصائص
               </v-btn>
-              <v-card-subtitle>اختيار خصائص مثل اللون والحجم وما الي ذالك</v-card-subtitle>
-              <div v-for="(attr, aIndex) in variant.attributes" :key="aIndex" class="d-flex align-center mb-2">
-                <v-col cols="12">
-                  <v-row no-gutters>
-                    <v-col cols="5">
-                      <v-combobox
-                        v-model="attr.attribute_id"
-                        :items="attributes || []"
-                        item-title="name"
-                        item-value="id"
-                        label="الخاصية"
-                        class="mr-2"
-                        @update:modelValue="attr.attribute_id = $event ? $event.id : null"
-                      >
-                        <template v-slot:item="{ props, item }">
-                          <v-list-item
-                            v-bind="props"
-                            @click="
-                              () => {
-                                setAttributeValues(item);
-                                attr.attribute_value_id = null;
-                              }
-                            "
-                          >
-                          </v-list-item>
-                        </template>
-                      </v-combobox>
-                    </v-col>
-                    {{ attr.attribute_value_id }}
+              <v-card-subtitle>اختيار خصائص مثل اللون والحجم</v-card-subtitle>
 
-                    <v-col cols="5">
-                      <v-combobox
-                        v-model="attr.attribute_value_id"
-                        :items="attributeValues || []"
-                        item-title="name"
-                        item-value="id"
-                        label="اختر قيمة"
-                        class="mr-2"
-                        :return-object="false"
+              <div v-for="(attr, aIndex) in variant.attributes" :key="aIndex" class="d-flex align-center mb-2">
+                <v-col cols="5">
+                  <v-combobox
+                    v-model="attr.attribute_id"
+                    :items="attributes || []"
+                    item-title="name"
+                    item-value="id"
+                    label="الخاصية"
+                    class="mr-2"
+                    @update:modelValue="attr.attribute_id = $event ? $event.id : null"
+                  >
+                    <template v-slot:item="{ props, item }">
+                      <v-list-item
+                        v-bind="props"
+                        @click="
+                          () => {
+                            attr.attribute_value_id = null;
+                            attr.values = item.raw.values;
+                          }
+                        "
                       >
-                        <template v-slot:item="{ props, item }">
-                          <v-list-item append-icon="ri-pantone-fill" :style="{ color: item.raw.value || '' }" v-bind="props"> </v-list-item>
-                        </template>
-                      </v-combobox>
-                    </v-col>
-                    <v-col cols="2">
-                      <v-btn variant="text" class="ms-2" color="red" icon @click="variant.attributes.splice(aIndex, 1)">
-                        <v-icon>ri-delete-bin-line</v-icon>
-                      </v-btn>
-                    </v-col>
-                  </v-row>
+                      </v-list-item>
+                    </template>
+                  </v-combobox>
+                </v-col>
+
+                <v-col cols="5">
+                  <v-combobox
+                    v-model="attr.attribute_value_id"
+                    :items="attr.values || []"
+                    item-title="name"
+                    item-value="id"
+                    label="اختر قيمة"
+                    class="mr-2"
+                    :return-object="false"
+                  >
+                    <template v-slot:item="{ props, item }">
+                      <v-list-item append-icon="ri-pantone-fill" :style="{ color: item.raw.value || '' }" v-bind="props"> </v-list-item>
+                    </template>
+                  </v-combobox>
+                </v-col>
+
+                <v-col cols="2">
+                  <v-btn variant="text" class="ms-2" color="red" icon @click="variant.attributes.splice(aIndex, 1)">
+                    <v-icon>ri-delete-bin-line</v-icon>
+                  </v-btn>
                 </v-col>
               </div>
             </v-col>
@@ -470,25 +452,18 @@ function closeDialog() {
               <v-btn prepend-icon="ri-delete-bin-line" color="error" @click="removeVariant(vIndex)">حذف التفاصيل</v-btn>
             </v-col>
           </v-row>
-          <v-btn variant="text" @click="addVariant" class="mb-3">+ إضافة تفاصيل</v-btn>
+          <v-btn variant="text" @click="addVariant" class="mb-3">+ إضافة تفاصيل جديدة</v-btn>
           <v-divider class="my-4"></v-divider>
           <div style="display: flex; position: sticky; bottom: 4px; left: 0; right: 0; width: 100%">
             <v-row>
-              <v-col cols="1"></v-col>
-
               <v-col cols="4">
                 <v-btn prepend-icon="ri-close-line" color="error" @click="closeDialog"> إلغاء </v-btn>
               </v-col>
-
-              <v-col cols="1"></v-col>
-
-              <v-col cols="4">
+              <v-col cols="4" class="text-center">
                 <v-btn prepend-icon="ri-save-line" color="success" @click="saveProduct">
                   {{ isEditMode ? 'حفظ التعديلات' : 'إضافة المنتج' }}
                 </v-btn>
               </v-col>
-
-              <v-col cols="1"></v-col>
             </v-row>
           </div>
         </v-card-text>
