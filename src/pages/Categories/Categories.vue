@@ -7,11 +7,20 @@
       <v-card-title>الفئات الهرمية</v-card-title>
       <v-divider></v-divider>
       <!-- v-treeview لعرض الشجرة -->
-      <v-treeview :items="treeCategories" activatable open-on-click item-key="id" item-text="name" dense>
+      <v-treeview
+        v-if="treeCategories.length"
+        :items="treeCategories"
+        item-title="name"
+        item-value="id"
+        open-on-click
+        :item-props="getItemProps"
+        class="treeview-border ma-auto"
+        max-width="500px"
+      >
         <!-- إضافة أزرار لكل فئة -->
-        <template #prepend="{ item }">
-          <v-icon small class="mr-2" @click.stop="openAddDialog(item)"><span class="ri ri-add-line"></span></v-icon>
-          <v-icon small color="red" @click.stop="deleteCategory(item.id)"><span class="ri ri-delete-bin-6-line"></span></v-icon>
+        <template #append="{ item }">
+          <v-icon small class="ma-3" @click.stop="openAddDialog(item)">{{ 'ri-add-line' }}</v-icon>
+          <v-icon class="ma-3" small color="red" @click.stop="deleteCategory(item.id)">{{ 'ri-delete-bin-6-line' }}</v-icon>
         </template>
       </v-treeview>
     </v-card>
@@ -21,8 +30,8 @@
       <v-card>
         <v-card-title>اضافة فئة جديدة</v-card-title>
         <v-card-text>
-          <v-text-field v-model="newCategory.name" label="اسم الفئة" required></v-text-field>
-          <v-textarea v-model="newCategory.description" label="الوصف"></v-textarea>
+          <v-text-field class="pa-2" v-model="newCategory.name" label="اسم الفئة" required></v-text-field>
+          <v-textarea class="pa-2" v-model="newCategory.description" label="الوصف"></v-textarea>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -56,7 +65,7 @@ const newCategory = ref({
 function buildTree(categoriesList) {
   const map = {};
   categoriesList.forEach(category => {
-    category.children = [];
+    category.children = category.children || [];
     map[category.id] = category;
   });
   const tree = [];
@@ -64,8 +73,6 @@ function buildTree(categoriesList) {
     if (category.parent_id) {
       if (map[category.parent_id]) {
         map[category.parent_id].children.push(category);
-      } else {
-        tree.push(category);
       }
     } else {
       tree.push(category);
@@ -73,11 +80,13 @@ function buildTree(categoriesList) {
   });
   return tree;
 }
-
 function getCategories() {
   getAll('categories').then(res => {
     categories.value = res.data;
+    console.log(categories.value);
+
     treeCategories.value = buildTree(categories.value);
+    console.log(treeCategories.value);
   });
 }
 
@@ -94,13 +103,11 @@ function openAddDialog(parentCategory) {
   }
   addDialog.value = true;
 }
-
 // إغلاق حوار الإضافة وإعادة تعيين بيانات الفئة الجديدة
 function closeAddDialog() {
   addDialog.value = false;
   newCategory.value = { name: '', description: '', parent_id: null };
 }
-
 // حفظ الفئة الجديدة
 function saveCategory() {
   saveItem('category', newCategory.value, false, true, true).then(() => {
@@ -108,7 +115,6 @@ function saveCategory() {
     closeAddDialog();
   });
 }
-
 // حذف الفئة
 function deleteCategory(id) {
   if (confirm('هل أنت متأكد من حذف هذه الفئة؟')) {
@@ -117,4 +123,8 @@ function deleteCategory(id) {
     });
   }
 }
+const getItemProps = item => ({
+  expandIcon: item.children && item.children.length ? 'ri-add-line' : 'ri-checkbox-blank-circle-line',
+  collapseIcon: item.children && item.children.length ? 'ri-subtract-line' : 'ri-checkbox-blank-circle-line',
+});
 </script>
