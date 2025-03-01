@@ -139,7 +139,7 @@ export const routes = [
       },
       {
         path: 'attributes',
-        component: () => import('@/pages/attributes/attributes.vue'),
+        component: () => import('@/pages/attributes/attributes2.vue'),
         name: 'attributes',
         meta: {
           title: 'الخصائص',

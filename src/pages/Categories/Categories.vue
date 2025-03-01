@@ -90,6 +90,10 @@ function getCategories() {
   });
 }
 
+const getItemProps = item => ({
+  expandIcon: item.children && item.children.length ? 'ri-add-line' : 'ri-checkbox-blank-circle-line',
+  collapseIcon: item.children && item.children.length ? 'ri-subtract-line' : 'ri-checkbox-blank-circle-line',
+});
 onMounted(() => {
   getCategories();
 });
@@ -123,8 +127,4 @@ function deleteCategory(id) {
     });
   }
 }
-const getItemProps = item => ({
-  expandIcon: item.children && item.children.length ? 'ri-add-line' : 'ri-checkbox-blank-circle-line',
-  collapseIcon: item.children && item.children.length ? 'ri-subtract-line' : 'ri-checkbox-blank-circle-line',
-});
 </script>

@@ -1,5 +1,5 @@
 <script setup>
-import { getAll } from '@/services/api';
+import { getAll, saveItem } from '@/services/api';
 import { ref, nextTick, watch, onMounted, computed } from 'vue';
 import { useDisplay } from 'vuetify';
 
@@ -35,12 +35,10 @@ const newProduct = ref({
           attribute_value_id: null,
         },
       ],
-      barcode: '',
       dimensions: '',
       discount: null,
       expiry_date: '',
       image_url: '',
-      sku: '',
       status: 'active',
       tax_rate: null,
     },
@@ -59,6 +57,8 @@ onMounted(() => {
   }
   getAttributes();
   getWarehouse();
+  getBrands();
+  getCategories();
 });
 
 function getAttributes() {
@@ -90,14 +90,13 @@ watch(
   newProducts => {
     localStorage.setItem('products', JSON.stringify(newProducts));
     console.log(newProducts);
+    console.log('products', JSON.stringify(newProducts));
   },
   { deep: true }
 );
 
 // قالب المتغير مع كافة الحقول المطلوبة
 const variantTemplate = () => ({
-  barcode: '',
-  sku: '',
   status: 'active',
   expiry_date: '', // مثال: "2024-12-31"
   image_url: '',
@@ -114,7 +113,8 @@ const variantTemplate = () => ({
 
 const addVariant = () => {
   // newProduct.value.variants.push(variantTemplate());
-  newProduct.value.variants.push(newProduct.value.variants[0]);
+  const newVariant = JSON.parse(JSON.stringify(newProduct.value.variants[0]));
+  newProduct.value.variants.push(newVariant);
 };
 
 const removeVariant = index => {
@@ -143,12 +143,10 @@ const resetForm = () => {
             attribute_value_id: null,
           },
         ],
-        barcode: '',
         dimensions: '',
         discount: null,
         expiry_date: '',
         image_url: '',
-        sku: '',
         status: 'active',
         tax_rate: null,
       },
@@ -174,9 +172,11 @@ const openEditDialog = index => {
 const saveProduct = () => {
   if (editIndex.value !== null) {
     // تعديل المنتج
+    saveItem('product', newProduct.value, false, true, true);
     products.value[editIndex.value] = JSON.parse(JSON.stringify(newProduct.value));
   } else {
     // إضافة منتج جديد
+    saveItem('product', newProduct.value, false, true, true);
     products.value.push(JSON.parse(JSON.stringify(newProduct.value)));
   }
   resetForm();
@@ -226,11 +226,10 @@ function fetchCategories(query) {
 }
 const formattedCategories = computed(() => {
   const flatCategories = [];
-
   const formatCategory = (category, depth = 0) => {
     flatCategories.push({
       id: category.id,
-      name: `${'- '.repeat(depth)}${category.name}`,
+      name: `${''.repeat(depth)}${category.name}`,
     });
 
     if (category.children && category.children.length) {
@@ -274,9 +273,6 @@ function closeDialog() {
             <v-col cols="12" md="6">
               <v-text-field v-model="newProduct.name" label="اسم المنتج" required />
             </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field v-model="newProduct.slug" label="الرابط السهل" required />
-            </v-col>
             <!--is_active && featured && is_returnable -->
             <v-col cols="12">
               <v-row>
@@ -303,7 +299,6 @@ function closeDialog() {
                     label="الفئة"
                     @update:modelValue="newProduct.category_id = $event ? $event.id : null"
                     v-model:search="searchCategory"
-                    @update:search="fetchCategories"
                     hide-no-data
                     hide-selected
                   />
@@ -317,7 +312,6 @@ function closeDialog() {
                     label="العلامة التجارية"
                     @update:modelValue="newProduct.brand_id = $event ? $event.id : null"
                     v-model:search="searchBrand"
-                    @update:search="fetchBrands"
                     hide-no-data
                     hide-selected
                   />
@@ -367,17 +361,6 @@ function closeDialog() {
                 </v-col>
                 <v-col cols="6">
                   <v-text-field v-model="variant.discount" label="الخصم" type="number" />
-                </v-col>
-              </v-row>
-            </v-col>
-            <!-- barcode && sku -->
-            <v-col cols="12">
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field v-model="variant.barcode" label="الباركود" />
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field v-model="variant.sku" label="SKU" />
                 </v-col>
               </v-row>
             </v-col>

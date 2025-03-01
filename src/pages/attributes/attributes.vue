@@ -1,6 +1,7 @@
 <template>
   <v-container>
-    <v-btn color="primary" @click="dialog = true">اضافة خاصية جديدة</v-btn>
+    <!-- الزر لفتح الحوار -->
+    <v-btn color="primary" @click="addDialog = true">اضافة خاصية جديدة</v-btn>
 
     <v-card class="mt-4 pa-3">
       <v-card-title> الخصائص</v-card-title>
@@ -12,9 +13,10 @@
         <v-chip v-if="attributes.length === 0">لا توجد خصائص حتى الآن</v-chip>
       </div>
     </v-card>
+    <!-- تم ربط dialog مع v-model هنا -->
+    <AddAttribute :attributes="attributes" :addDialog="addDialog" @update:addDialog="savedAttribute" />
 
-    <AddAttribute v-model="dialog" :attributes="attributes" @attribute-saved="saveAttribute" />
-
+    <!-- حوار الحذف -->
     <v-dialog v-model="deleteDialog" max-width="400px">
       <v-card>
         <v-card-title>تأكيد الحذف</v-card-title>
@@ -33,25 +35,32 @@
 import { ref, onMounted } from 'vue';
 import { getAll, saveItem, deleteOne } from '@/services/api';
 import AddAttribute from '@/components/attributes/AddAttribute.vue';
-AddAttribute;
 
-const dialog = ref(false);
+const addDialog = ref(false);
 const deleteDialog = ref(false);
 const confirmDeleteId = ref(null);
 const attributes = ref([]);
 
+const savedAttribute = data => {
+  addDialog.value = data.dialog;
+  console.log(data.data);
+};
+
+// دالة حفظ الخاصية
 function saveAttribute(payload) {
   saveItem('attribute', payload, false, true, true).then(() => {
     getAttributes();
-    dialog.value = false;
+    dialog.value = false; // إغلاق الحوار بعد الحفظ
   });
 }
 
+// دالة تأكيد الحذف
 function confirmDelete(id) {
   confirmDeleteId.value = id;
   deleteDialog.value = true;
 }
 
+// دالة حذف الخاصية
 function deleteAttribute(id) {
   deleteOne('attribute', id).then(() => {
     getAttributes();
@@ -59,6 +68,7 @@ function deleteAttribute(id) {
   });
 }
 
+// دالة جلب الخصائص
 function getAttributes() {
   getAll('attributes').then(res => {
     attributes.value = res.data;

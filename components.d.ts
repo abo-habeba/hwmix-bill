@@ -19,6 +19,7 @@ declare module 'vue' {
     CardStatisticsWithImages: typeof import('./src/@core/components/cards/CardStatisticsWithImages.vue')['default']
     CashBoxSwitcher: typeof import('./src/components/cashboxs/CashBoxSwitcher.vue')['default']
     Categorys: typeof import('./src/components/Category/categorys.vue')['default']
+    ChildDialog: typeof import('./src/components/attributes/ChildDialog.vue')['default']
     ColorPicker: typeof import('./src/components/ColorPicker.vue')['default']
     ContextMenu: typeof import('./src/components/ContextMenu.vue')['default']
     copy: typeof import('./src/components/ContextMenu copy.vue')['default']

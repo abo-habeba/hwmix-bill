@@ -1,12 +1,12 @@
 <template>
-  <v-dialog v-model="dialog" max-width="500px">
+  <v-dialog v-model="localAddDialog" max-width="500px">
     <v-card>
       <v-card-title>اضافة خاصية جديدة</v-card-title>
       <v-card-text>
         <v-combobox
           class="my-2"
           v-model="selectedAttribute"
-          :items="attributes"
+          :items="props.attributes"
           item-title="name"
           item-value="id"
           label="الخاصية"
@@ -18,7 +18,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="grey darken-1" text @click="closeDialog">الغاء</v-btn>
+        <v-btn color="grey darken-1" text @click="closeDialog(null)">الغاء</v-btn>
         <v-btn color="blue darken-1" text @click="saveAttribute">حفظ</v-btn>
       </v-card-actions>
     </v-card>
@@ -26,48 +26,59 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, defineProps } from 'vue';
+import { defineProps, defineEmits, ref, watch } from 'vue';
 
+// تعريف الـ props
 const props = defineProps({
-  attributes: Array,
-  modelValue: Boolean,
+  addDialog: Boolean,
+  attributes: Array, // تغير النوع إلى Array ليتناسب مع البيانات
 });
 
-const emits = defineEmits(['update:modelValue', 'attribute-saved']);
+const emit = defineEmits(['update:addDialog']);
+const localAddDialog = ref(props.addDialog);
 
 const selectedAttribute = ref(null);
 const nameValue = ref('');
+const valueValue = ref('');
 
+// متابعة التغييرات في الـ props.addDialog
+watch(
+  () => props.addDialog,
+  newValue => {
+    localAddDialog.value = newValue;
+  }
+);
+
+// إغلاق الديالوج
+const closeDialog = payload => {
+  localAddDialog.value = false;
+  emit('update:addDialog', { dialog: localAddDialog.value, data: payload });
+};
+
+// اختيار الخاصية
 function handleAttributeSelection(value) {
   if (!value || typeof value === 'string') {
     selectedAttribute.value = { name: value, id: null };
   }
 }
 
+// حفظ الخاصية
 function saveAttribute() {
-  if (!nameValue.value) {
-    alert('يجب إدخال قيمة للخاصية');
-    return;
-  }
-
   const payload = selectedAttribute.value.id
     ? {
         attribute_id: selectedAttribute.value.id,
         name_value: nameValue.value,
+        value: valueValue.value,
       }
     : {
         name: selectedAttribute.value.name,
         name_value: nameValue.value,
+        value: valueValue.value,
       };
 
-  emits('attribute-saved', payload);
-  closeDialog();
-}
+  // أضف الكود لحفظ البيانات في الـ API أو إجراء آخر حسب الحاجة
 
-function closeDialog() {
-  emits('update:modelValue', false);
-  selectedAttribute.value = null;
-  nameValue.value = '';
+  closeDialog(payload);
 }
 </script>
 
