@@ -248,6 +248,7 @@ async function fetchUsers() {
     });
     users.value = response.data;
     total.value = response.total;
+    console.log('users', users.value);
   } catch (error) {
     console.error('Error fetching users:', error);
   } finally {

@@ -15,6 +15,7 @@ const apiClient = axios.create({
 const options = {
   // nullsAsUndefineds: true,
   allowEmptyArrays: true,
+  indices: true,
 };
 
 // Set Authorization dynamically

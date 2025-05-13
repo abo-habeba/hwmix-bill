@@ -49,13 +49,18 @@ onMounted(() => {
   mergedCompanies();
   if (route.params.id) {
     loading.value = true;
+    getAll('roles')
+      .then(data => {
+        roles.value = data.data;
+        console.log('roles', roles.value);
+      })
+      .catch(e => {
+        roles.value = [];
+      });
     getOne('user', userId.value, true)
       .then(res => {
         user.value = res;
         selectedCompanies.value = res.companies;
-        getAll('roles').then(data => {
-          roles.value = data.data;
-        });
       })
       .finally(e => {
         loading.value = false;
@@ -187,7 +192,7 @@ function openRoleDetails(role) {
       </v-tabs-window-item>
       <v-tabs-window-item value="role">
         <v-card elevation="0" class="ma-4">
-          <editUserRolse v-model:user="user" :user="user" :roles="roles" />
+          <editUserRolse v-if="roles && user" v-model:user="user" :user="user" :roles="roles" />
           <v-card-title class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4"> ادوار المستخدم </v-card-title>
           <v-card-text v-if="user?.roles.length > 0">
             <span v-for="(rol, index) in user.roles" :key="index">

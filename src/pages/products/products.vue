@@ -1,5 +1,5 @@
 <script setup>
-import { getAll, saveItem } from '@/services/api';
+import { deleteOne, getAll, saveItem } from '@/services/api';
 import { ref, nextTick, watch, onMounted, computed } from 'vue';
 import { useDisplay } from 'vuetify';
 
@@ -15,6 +15,7 @@ const categories = ref([]);
 const searchCategory = ref('');
 const searchBrand = ref('');
 const attributeValues = ref('');
+const productVariants = ref('');
 
 const newProduct = ref({
   name: '',
@@ -55,15 +56,28 @@ onMounted(() => {
   if (storedProducts) {
     products.value = JSON.parse(storedProducts);
   }
+  getProducts();
   getAttributes();
   getWarehouse();
   getBrands();
   getCategories();
+  getProductVariants();
 });
 
+function getProducts() {
+  getAll('products').then(res => {
+    attributes.value = res.data;
+  });
+}
 function getAttributes() {
   getAll('attributes').then(res => {
     attributes.value = res.data;
+  });
+}
+function getProductVariants() {
+  getAll('product-variants').then(res => {
+    productVariants.value = res.data;
+    console.log(productVariants.value);
   });
 }
 function getWarehouse() {
@@ -90,7 +104,6 @@ watch(
   newProducts => {
     localStorage.setItem('products', JSON.stringify(newProducts));
     console.log(newProducts);
-    console.log('products', JSON.stringify(newProducts));
   },
   { deep: true }
 );
@@ -160,23 +173,50 @@ const openAddDialog = () => {
   editIndex.value = null;
   dialog.value = true;
 };
-
+const ProductEditDialog = ref(false);
+const ProductVariantEdit = ref(null);
 // فتح الديالوج للتعديل: نسخ بيانات المنتج إلى النموذج ووضع index المنتج في editIndex
-const openEditDialog = index => {
-  editIndex.value = index;
-  Object.assign(newProduct.value, JSON.parse(JSON.stringify(products.value[index])));
+const openEditDialog = Product => {
+  ProductVariantEdit.value = Product;
+  newProduct.value = ProductVariantEdit.value.product;
+  newProduct.value.variants = ProductVariantEdit.value;
+  newProduct.value.variants.attributes = ProductVariantEdit.value.attributes;
+
+  // Object.assign(newProduct.value, JSON.parse(JSON.stringify(products.value[index])));
+  // ProductEditDialog.value = true;
   dialog.value = true;
+};
+
+const prepareProduct = product => {
+  // Create a deep copy to avoid mutating the original object
+  const prepared = JSON.parse(JSON.stringify(product));
+  // Loop through each variant if exists
+  if (prepared.variants && Array.isArray(prepared.variants)) {
+    prepared.variants = prepared.variants.map(variant => {
+      // Remove the 'values' property from each attribute
+      if (variant.attributes && Array.isArray(variant.attributes)) {
+        variant.attributes = variant.attributes.map(attr => {
+          const { values, ...rest } = attr;
+          return rest;
+        });
+      }
+      return variant;
+    });
+  }
+  return prepared;
 };
 
 // حفظ المنتج سواء للإضافة أو التعديل
 const saveProduct = () => {
+  const productToSend = prepareProduct(newProduct.value);
+
   if (editIndex.value !== null) {
     // تعديل المنتج
-    saveItem('product', newProduct.value, false, true, true);
+    saveItem('product', productToSend, false, true, true);
     products.value[editIndex.value] = JSON.parse(JSON.stringify(newProduct.value));
   } else {
     // إضافة منتج جديد
-    saveItem('product', newProduct.value, false, true, true);
+    saveItem('product', productToSend, false, true, true);
     products.value.push(JSON.parse(JSON.stringify(newProduct.value)));
   }
   resetForm();
@@ -184,8 +224,9 @@ const saveProduct = () => {
   editIndex.value = null;
 };
 
-const removeProduct = index => {
-  products.value.splice(index, 1);
+const removeProduct = id => {
+  deleteOne('product-variant', id);
+  // products.value.splice(index, 1);
 };
 
 // دالة تحويل الاسم إلى سلوج
@@ -208,9 +249,7 @@ watch(
   { immediate: true }
 );
 
-const submitProducts = () => {
-  console.log('🚀 إرسال المنتجات:', JSON.stringify(products.value, null, 2));
-};
+const submitProducts = () => {};
 function fetchBrands(query) {
   if (!query) return;
   getAll('brands', { search: query }).then(res => {
@@ -244,8 +283,6 @@ const formattedCategories = computed(() => {
 // تطبيق البحث في `name` و `description`
 const filteredCategories = computed(() => {
   if (!searchCategory.value) return formattedCategories.value;
-  console.log(formattedCategories.value.filter(cat => cat.name.includes(searchCategory.value)));
-
   return formattedCategories.value.filter(cat => cat.name.includes(searchCategory.value));
 });
 const setAttributeValues = item => {
@@ -453,6 +490,62 @@ function closeDialog() {
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="ProductEditDialog" max-width="600px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">تعديل المنتج</span>
+        </v-card-title>
+
+        <v-card-text>
+          <v-form ref="form">
+            <v-row>
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="ProductVariantEdit.name" label="اسم المنتج" required />
+              </v-col>
+
+              <v-col cols="12" sm="6">
+                <v-textarea v-model="ProductVariantEdit.description" label="الوصف" required />
+              </v-col>
+
+              <v-col cols="12" sm="6">
+                <v-select v-model="ProductVariantEdit.category" :items="categories" label="الفئة" required />
+              </v-col>
+
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="ProductVariantEdit.purchase_price" label="سعر الشراء" type="number" required />
+              </v-col>
+
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="ProductVariantEdit.retail_price" label="السعر التجزئة" type="number" required />
+              </v-col>
+
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="ProductVariantEdit.discount" label="الخصم" type="number" required />
+              </v-col>
+
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="ProductVariantEdit.sku" label="SKU" required />
+              </v-col>
+            </v-row>
+
+            <!-- عرض الـ Attributes -->
+            <v-divider></v-divider>
+            <v-chip>الخصائص</v-chip>
+            <v-row v-for="(attribute, index) in ProductVariantEdit.attributes" :key="index">
+              <v-col cols="12" sm="6">
+                <v-text-field v-model="attribute.value" :label="attribute.name" />
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn text @click="dialog = false">إلغاء</v-btn>
+          <v-btn color="primary">حفظ التغييرات</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-card class="pa-4">
       <!-- زر فتح الديالوج للإضافة -->
       <v-btn color="primary" @click="openAddDialog">+ إضافة منتج</v-btn>
@@ -463,25 +556,36 @@ function closeDialog() {
         <thead>
           <tr>
             <th>الاسم</th>
-            <th>رابط المنتج</th>
+            <th>الخصائص</th>
+            <th>الكمية</th>
             <th>الفئة</th>
             <th>الإجراء</th>
           </tr>
         </thead>
         <tbody v-if="products.length">
-          <tr v-for="(product, index) in products" :key="index">
+          <tr v-for="(product, index) in productVariants" :key="index">
             <td>{{ product.name }}</td>
-            <td>{{ product.slug }}</td>
-            <td>{{ product.category_id }}</td>
             <td>
-              <v-btn variant="text" color="blue" icon="ri-edit-line" @click="openEditDialog(index)"></v-btn>
-              <v-btn variant="text" icon="ri-delete-bin-line" color="red" @click="removeProduct(index)"></v-btn>
+              <v-chip
+                v-for="(attribute, idx) in product.attributes"
+                :key="idx"
+                :style="{ color: attribute.value.value }"
+                class="ma-1"
+                text-color="white"
+              >
+                {{ attribute.value.name || 'غير محدد' }}
+              </v-chip>
+            </td>
+            <td>{{ product.stock_quantity }}</td>
+            <td>{{ product.category }}</td>
+            <td>
+              <v-btn variant="text" color="blue" icon="ri-edit-line" @click="openEditDialog(product)"></v-btn>
+              <v-btn variant="text" icon="ri-delete-bin-line" color="red" @click="removeProduct(product.id)"></v-btn>
             </td>
           </tr>
         </tbody>
       </v-table>
     </v-card>
     <!-- زر إرسال المنتجات -->
-    <v-btn v-if="products.length" color="green" block class="mt-4" @click="submitProducts"> حفظ المنتجات </v-btn>
   </v-container>
 </template>
