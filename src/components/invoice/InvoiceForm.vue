@@ -76,7 +76,7 @@
         </v-row>
         <v-dialog v-model="showScanner" max-width="400">
           <v-card class="pa-2">
-            <QrcodeStream @decode="onBarcodeScanned" @init="onScannerInit" @error="onScannerError" />
+            <video ref="barcodeVideo" style="width: 100%; height: 240px; object-fit: cover" autoplay muted playsinline></video>
             <v-alert v-if="scannerError" type="error" class="mt-2" dense border="start" border-color="error">
               {{ scannerError }}
             </v-alert>
@@ -157,9 +157,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { getAll, saveItem, getOne } from '@/services/api';
-import { QrcodeStream } from 'vue-qrcode-reader';
+import { BrowserMultiFormatReader } from '@zxing/browser';
 
 const emit = defineEmits(['saved', 'close']);
 const props = defineProps({
@@ -197,6 +197,8 @@ const productSearch = ref(null);
 const userSearchText = ref('');
 const showScanner = ref(false);
 const scannerError = ref('');
+const barcodeVideo = ref(null);
+let codeReader = null;
 
 // Computed
 const totalAmount = computed(() => form.value.items.reduce((sum, item) => sum + (item.unit_price * item.quantity - item.discount), 0));
@@ -336,18 +338,34 @@ const updateTotal = () => {
 };
 
 // Barcode Scanner
-function onScannerInit() {
+function startBarcodeScanner() {
   scannerError.value = '';
+  codeReader = new BrowserMultiFormatReader();
+  codeReader.decodeFromVideoDevice(null, barcodeVideo.value, (result, err) => {
+    if (result) {
+      stopBarcodeScanner();
+      showScanner.value = false;
+      searchProductBySerial(result.getText());
+    } else if (err && err.name !== 'NotFoundException') {
+      scannerError.value = 'خطأ في قراءة الباركود: ' + err.message;
+    }
+  });
 }
 
-function onScannerError(error) {
-  scannerError.value =
-    error === 'NotAllowedError'
-      ? 'تم رفض إذن الكاميرا. يرجى السماح بالوصول للكاميرا.'
-      : error === 'NotFoundError'
-      ? 'لم يتم العثور على كاميرا.'
-      : 'حدث خطأ أثناء تشغيل الكاميرا.';
+function stopBarcodeScanner() {
+  if (codeReader) {
+    codeReader.reset();
+    codeReader = null;
+  }
 }
+
+watch(showScanner, val => {
+  if (val) {
+    setTimeout(startBarcodeScanner, 300); // انتظر حتى يظهر الفيديو
+  } else {
+    stopBarcodeScanner();
+  }
+});
 
 function onBarcodeScanned(serial) {
   showScanner.value = false;
