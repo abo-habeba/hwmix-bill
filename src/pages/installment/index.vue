@@ -1,1 +1,3 @@
-// ...existing code from Installment.vue...
+<template>
+  <div>صفحة التقسيط قيد الإنشاء</div>
+</template>

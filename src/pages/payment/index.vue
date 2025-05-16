@@ -1,1 +1,3 @@
-// ...existing code from Payment.vue...
+<template>
+  <div>صفحة الدفع قيد الإنشاء</div>
+</template>

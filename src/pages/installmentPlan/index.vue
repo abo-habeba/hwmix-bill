@@ -1,1 +1,3 @@
-// ...existing code from InstallmentPlan.vue...
+<template>
+  <div>صفحة خطة التقسيط قيد الإنشاء</div>
+</template>
