@@ -17,7 +17,9 @@ onMounted(() => {
   </div> -->
   <v-locale-provider rtl>
     <VApp>
-      <RouterView />
+      <VCol style="position: relative" cols="12">
+        <RouterView />
+      </VCol>
     </VApp>
   </v-locale-provider>
 </template>
@@ -87,6 +89,9 @@ onMounted(() => {
 <style lang="scss">
 .v-checkbox-btn.v-selection-control .v-label {
   white-space: nowrap;
+}
+.v-table {
+  white-space: nowrap !important;
 }
 .layout-page-content {
   padding-inline: 0 !important;

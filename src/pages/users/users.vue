@@ -6,10 +6,8 @@ const userStore = useUserStore();
 console.log(userStore.can(['users_create', 'super_admin', 'company_owner']));
 </script>
 <template>
-  <VCol style="position: relative" cols="12">
-    <VCard class="pa-0" title="المستخدمين">
-      <DataTable />
-    </VCard>
-    <AddUser v-if="userStore.can(['users_create', 'super_admin', 'company_owner'])" />
-  </VCol>
+  <AddUser class="ma-3" v-if="userStore.can(['users_create', 'super_admin', 'company_owner'])" />
+  <VCard class="pa-0" title="المستخدمين">
+    <DataTable />
+  </VCard>
 </template>

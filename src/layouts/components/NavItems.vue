@@ -84,16 +84,76 @@ const navItems = [
       ],
     },
   },
+  // group invoices
   {
-    type: 'link',
-    permission: ['warehouses', 'super_admin', 'company_owner'],
-    item: { title: 'المخازن', to: { name: 'warehouses' }, icon: 'ri-building-line' },
+    type: 'group',
+    permission: ['super_admin', 'company_owner'],
+    item: {
+      title: 'الفواتير',
+      // to: { path: '/invoice' },
+      icon: 'ri-file-list-3-line',
+      children: [
+        { title: 'الفواتير', to: { name: 'invoice' }, icon: 'ri-file-list-3-line', permission: ['super_admin', 'company_owner'] },
+        { title: 'أنواع الفواتير', to: { name: 'invoiceType' }, icon: 'ri-file-settings-line', permission: ['super_admin', 'company_owner'] },
+      ],
+    },
   },
-  {
-    type: 'link',
-    permission: ['stock', 'super_admin', 'company_owner'],
-    item: { title: 'المخزون', to: { name: 'stock' }, icon: 'ri-archive-line' },
-  },
+  // {
+  //   type: 'link',
+  //   permission: ['warehouses', 'super_admin', 'company_owner'],
+  //   item: { title: 'المخازن', to: { name: 'warehouses' }, icon: 'ri-building-line' },
+  // },
+  // {
+  //   type: 'link',
+  //   permission: ['stock', 'super_admin', 'company_owner'],
+  //   item: { title: 'المخزون', to: { name: 'stock' }, icon: 'ri-archive-line' },
+  // },
+  // // روابط الفواتير والتقسيط
+  // {
+  //   type: 'link',
+  //   permission: ['super_admin', 'company_owner'],
+  //   item: {
+  //     title: 'الفواتير',
+  //     to: { path: '/invoice' },
+  //     icon: 'ri-file-list-3-line',
+  //   },
+  // },
+  // {
+  //   type: 'link',
+  //   permission: ['super_admin', 'company_owner'],
+  //   item: {
+  //     title: 'أنواع الفواتير',
+  //     to: { path: '/invoiceType' },
+  //     icon: 'ri-file-settings-line',
+  //   },
+  // },
+  // {
+  //   type: 'link',
+  //   permission: ['super_admin', 'company_owner'],
+  //   item: {
+  //     title: 'المدفوعات',
+  //     to: { path: '/payment' },
+  //     icon: 'ri-bank-card-line',
+  //   },
+  // },
+  // {
+  //   type: 'link',
+  //   permission: ['super_admin', 'company_owner'],
+  //   item: {
+  //     title: 'خطط التقسيط',
+  //     to: { path: '/installmentPlan' },
+  //     icon: 'ri-calendar-schedule-line',
+  //   },
+  // },
+  // {
+  //   type: 'link',
+  //   permission: ['super_admin', 'company_owner'],
+  //   item: {
+  //     title: 'الأقساط',
+  //     to: { path: '/installment' },
+  //     icon: 'ri-money-dollar-circle-line',
+  //   },
+  // },
 ];
 </script>
 

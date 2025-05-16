@@ -23,6 +23,11 @@ export default function (app) {
       defaultTheme: 'light',
       themes,
     },
+    defaults: {
+      global: {
+        density: 'compact',
+      },
+    },
   });
 
   app.use(vuetify);

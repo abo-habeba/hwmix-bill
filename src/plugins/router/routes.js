@@ -197,7 +197,57 @@ export const routes = [
           // roles: 'stock',
         },
       },
-
+      // Invoice & Installment & Payment
+      {
+        path: 'invoice',
+        component: () => import('@/pages/invoice/index.vue'),
+        name: 'invoice',
+        meta: {
+          title: 'الفواتير',
+          description: 'إدارة الفواتير',
+          roles: ['super_admin', 'company_owner'],
+        },
+      },
+      {
+        path: 'invoiceType',
+        component: () => import('@/pages/invoiceType/index.vue'),
+        name: 'invoiceType',
+        meta: {
+          title: 'أنواع الفواتير',
+          description: 'إدارة أنواع الفواتير',
+          roles: ['super_admin', 'company_owner'],
+        },
+      },
+      {
+        path: 'payment',
+        component: () => import('@/pages/payment/index.vue'),
+        name: 'payment',
+        meta: {
+          title: 'المدفوعات',
+          description: 'إدارة المدفوعات',
+          roles: ['super_admin', 'company_owner'],
+        },
+      },
+      {
+        path: 'installmentPlan',
+        component: () => import('@/pages/installmentPlan/index.vue'),
+        name: 'installmentPlan',
+        meta: {
+          title: 'خطط التقسيط',
+          description: 'إدارة خطط التقسيط',
+          roles: ['super_admin', 'company_owner'],
+        },
+      },
+      {
+        path: 'installment',
+        component: () => import('@/pages/installment/index.vue'),
+        name: 'installment',
+        meta: {
+          title: 'الأقساط',
+          description: 'إدارة الأقساط',
+          roles: ['super_admin', 'company_owner'],
+        },
+      },
       {
         path: 'account-settings1',
         component: () => import('@/pages/account-settings.vue'),

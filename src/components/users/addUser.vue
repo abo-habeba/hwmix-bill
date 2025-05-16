@@ -1,6 +1,6 @@
 <template>
   <v-btn
-    class="text-center btn-add"
+    class="text-center"
     density="compact"
     variant="flat"
     style="background-color: #28a745 !important; color: white; z-index: 10"
