@@ -358,6 +358,9 @@ function onBarcodeScanned(serial) {
 async function searchProductBySerial(serial) {
   isLoadingProducts.value = true;
   try {
+    alert(`تم العثور علي السيريال: ${serial}`);
+    showScanner.value = false;
+    return;
     const { data } = await getAll('products', { serial });
     if (data && data.length) {
       addOrIncrement(data[0].id);
