@@ -83,10 +83,6 @@ function openCompaniesDialog() {
           </span>
         </IconBtn>
         <VSpacer />
-        <IconBtn href="https://github.com/themeselection/materio-vuetify-vuejs-admin-template-free" target="_blank" rel="noopener noreferrer">
-          <VIcon icon="ri-github-fill" />
-        </IconBtn>
-
         <IconBtn>
           <VIcon icon="ri-notification-line" />
         </IconBtn>

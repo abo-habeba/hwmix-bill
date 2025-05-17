@@ -340,20 +340,24 @@ const updateTotal = () => {
 
 // Barcode Scanner
 function startBarcodeScanner() {
+  alert('startBarcodeScanner');
   scannerError.value = null;
   codeReader.value = new BrowserMultiFormatReader();
   codeReader.value.decodeFromVideoDevice(null, barcodeVideo.value, (result, err) => {
     if (result) {
+      alert('if', result);
       console.log('if', result);
       showScanner.value = false;
       searchProductBySerial(result.getText());
       stopBarcodeScanner();
     } else if (err && err.name !== 'NotFoundException') {
+      alert('else if', result);
+      console.log('else if', result);
       scannerError.value = 'خطأ في قراءة الباركود: ' + err.message;
       stopBarcodeScanner();
-      console.log('else if', result);
     }
   });
+  alert('end if', result);
 }
 
 function stopBarcodeScanner() {
