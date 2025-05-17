@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, defineProps, defineEmits } from 'vue';
-import { getItems, deleteItem } from '@/services/api';
+import { deleteOne } from '@/services/api';
 import InvoiceItemForm from './InvoiceItemForm.vue';
 
 const props = defineProps({
@@ -24,7 +24,7 @@ function addItem() {
 
 function removeItem(item) {
   if (confirm('هل أنت متأكد من حذف العنصر؟')) {
-    deleteItem('invoice-item', item.id).then(() => emit('updated'));
+    deleteOne('invoice-item', item.id).then(() => emit('updated'));
   }
 }
 

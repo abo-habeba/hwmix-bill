@@ -159,7 +159,8 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { getAll, saveItem, getOne } from '@/services/api';
-import { BrowserMultiFormatReader } from '@zxing/browser';
+// import { BrowserMultiFormatReader } from '@zxing/browser';
+import { BrowserMultiFormatReader } from '@zxing/library';
 
 const emit = defineEmits(['saved', 'close']);
 const props = defineProps({
@@ -196,9 +197,9 @@ const productSearchText = ref('');
 const productSearch = ref(null);
 const userSearchText = ref('');
 const showScanner = ref(false);
-const scannerError = ref('');
+const scannerError = ref(null);
 const barcodeVideo = ref(null);
-let codeReader = null;
+const codeReader = ref(null);
 
 // Computed
 const totalAmount = computed(() => form.value.items.reduce((sum, item) => sum + (item.unit_price * item.quantity - item.discount), 0));
@@ -339,23 +340,27 @@ const updateTotal = () => {
 
 // Barcode Scanner
 function startBarcodeScanner() {
-  scannerError.value = '';
-  codeReader = new BrowserMultiFormatReader();
-  codeReader.decodeFromVideoDevice(null, barcodeVideo.value, (result, err) => {
+  scannerError.value = null;
+  codeReader.value = new BrowserMultiFormatReader();
+  codeReader.value.decodeFromVideoDevice(null, barcodeVideo.value, (result, err) => {
     if (result) {
-      stopBarcodeScanner();
+      console.log('if', result);
       showScanner.value = false;
       searchProductBySerial(result.getText());
+      stopBarcodeScanner();
     } else if (err && err.name !== 'NotFoundException') {
       scannerError.value = 'خطأ في قراءة الباركود: ' + err.message;
+      stopBarcodeScanner();
+      console.log('else if', result);
     }
   });
 }
 
 function stopBarcodeScanner() {
-  if (codeReader) {
-    codeReader.reset();
-    codeReader = null;
+  // showScanner.value = false;
+  if (codeReader.value) {
+    codeReader.value.reset();
+    codeReader.value = null;
   }
 }
 
@@ -366,12 +371,6 @@ watch(showScanner, val => {
     stopBarcodeScanner();
   }
 });
-
-function onBarcodeScanned(serial) {
-  showScanner.value = false;
-  scannerError.value = '';
-  if (serial) searchProductBySerial(serial);
-}
 
 async function searchProductBySerial(serial) {
   isLoadingProducts.value = true;
