@@ -74,11 +74,12 @@
             <span class="ms-2">بحث بالباركود</span>
           </v-col>
         </v-row>
+        <!-- show Scanner barcode Video -->
         <v-dialog v-model="showScanner" max-width="400">
           <v-card class="pa-2">
-            <video ref="barcodeVideo" style="width: 100%; height: 240px; object-fit: cover" autoplay muted playsinline></video>
+            <video ref="barcodeVideo" id="barcodeVideo" style="width: 100%; height: 240px; object-fit: cover" autoplay muted playsinline></video>
             <v-alert v-if="scannerError" type="error" class="mt-2" dense border="start" border-color="error">
-              {{ scannerError }}
+              {{ scannerError }}. يرجى التأكد من أن الباركود واضح وأن الكاميرا تعمل بشكل صحيح.
             </v-alert>
           </v-card>
         </v-dialog>
@@ -199,6 +200,11 @@ const userSearchText = ref('');
 const showScanner = ref(false);
 const scannerError = ref(null);
 const barcodeVideo = ref(null);
+
+// Ensure the video element is accessible
+onMounted(() => {
+  barcodeVideo.value = document.getElementById('barcodeVideo');
+});
 const codeReader = ref(null);
 
 // Computed
@@ -340,28 +346,25 @@ const updateTotal = () => {
 
 // Barcode Scanner
 function startBarcodeScanner() {
-  alert('startBarcodeScanner');
   scannerError.value = null;
-  codeReader.value = new BrowserMultiFormatReader();
+  if (!codeReader.value) {
+    codeReader.value = new BrowserMultiFormatReader();
+  }
   codeReader.value.decodeFromVideoDevice(null, barcodeVideo.value, (result, err) => {
     if (result) {
-      alert('if', result);
-      console.log('if', result);
-      showScanner.value = false;
-      searchProductBySerial(result.getText());
-      stopBarcodeScanner();
+      alert('تم قراءة الكود: ' + result.getText());
+      // لا توقف القارئ هنا حتى تخرج يدويًا أو تغلق الديالوج
+      // showScanner.value = false;
+      // stopBarcodeScanner();
     } else if (err && err.name !== 'NotFoundException') {
-      alert('else if', result);
-      console.log('else if', result);
       scannerError.value = 'خطأ في قراءة الباركود: ' + err.message;
-      stopBarcodeScanner();
+      // لا توقف القارئ هنا ليستمر في المحاولة
     }
+    // إذا لم يوجد نتيجة أو كان الخطأ NotFoundException، استمر في المحاولة تلقائياً
   });
-  alert('end if', result);
 }
 
 function stopBarcodeScanner() {
-  // showScanner.value = false;
   if (codeReader.value) {
     codeReader.value.reset();
     codeReader.value = null;
@@ -377,20 +380,8 @@ watch(showScanner, val => {
 });
 
 async function searchProductBySerial(serial) {
-  isLoadingProducts.value = true;
-  try {
-    alert(`تم العثور علي السيريال: ${serial}`);
-    showScanner.value = false;
-    return;
-    const { data } = await getAll('products', { serial });
-    if (data && data.length) {
-      addOrIncrement(data[0].id);
-    } else {
-      scannerError.value = 'لم يتم العثور على منتج بهذا الباركود.';
-    }
-  } finally {
-    isLoadingProducts.value = false;
-  }
+  // فقط أظهر alert ولا تبحث فعلياً
+  alert('تم العثور على السيريال: ' + serial);
 }
 
 // Save Form
