@@ -35,6 +35,7 @@
 import { ref, onMounted } from 'vue';
 import { getAll, saveItem, deleteOne } from '@/services/api';
 import AddAttribute from '@/components/attributes/AddAttribute.vue';
+import { toast } from 'vue3-toastify';
 
 const addDialog = ref(false);
 const deleteDialog = ref(false);
@@ -48,10 +49,17 @@ const savedAttribute = data => {
 
 // دالة حفظ الخاصية
 function saveAttribute(payload) {
-  saveItem('attribute', payload, false, true, true).then(() => {
-    getAttributes();
-    dialog.value = false; // إغلاق الحوار بعد الحفظ
-  });
+  if (!payload.name) {
+    toast.error('اسم الخاصية مطلوب');
+    return;
+  }
+  saveItem('attribute', payload, false, true, true)
+    .then(() => {
+      getAttributes();
+      addDialog.value = false;
+      toast.success('تم حفظ الخاصية بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حفظ الخاصية'));
 }
 
 // دالة تأكيد الحذف
@@ -62,10 +70,13 @@ function confirmDelete(id) {
 
 // دالة حذف الخاصية
 function deleteAttribute(id) {
-  deleteOne('attribute', id).then(() => {
-    getAttributes();
-    deleteDialog.value = false;
-  });
+  deleteOne('attribute', id)
+    .then(() => {
+      getAttributes();
+      deleteDialog.value = false;
+      toast.success('تم حذف الخاصية بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حذف الخاصية'));
 }
 
 // دالة جلب الخصائص

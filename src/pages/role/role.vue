@@ -138,6 +138,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
+import { toast } from 'vue3-toastify';
 const router = useRouter();
 const { xs } = useDisplay();
 const loading = ref(false);
@@ -221,28 +222,39 @@ const confirmDelete = item => {
 
 const saveRole = () => {
   saving.value = true;
-  if (!form.value.validate()) return;
+  if (!form.value.validate()) {
+    toast.error('يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح');
+    saving.value = false;
+    return;
+  }
   try {
-    saveItem('role', editedItem.value, editedItem.value.id).then(data => {
-      if (editedItem.value.id) {
-        let role = roles.value.find(role => role.id === data.id);
-        Object.assign(role, editedItem.value);
-      } else {
-        roles.value.push(data);
-      }
-    });
+    saveItem('role', editedItem.value, editedItem.value.id)
+      .then(data => {
+        if (editedItem.value.id) {
+          let role = roles.value.find(role => role.id === data.id);
+          Object.assign(role, editedItem.value);
+          toast.success('تم تعديل الدور بنجاح');
+        } else {
+          roles.value.push(data);
+          toast.success('تم إضافة الدور بنجاح');
+        }
+        dialog.value = false;
+      })
+      .catch(() => toast.error('حدث خطأ أثناء حفظ الدور'));
   } finally {
     saving.value = false;
-    dialog.value = false;
   }
 };
 
 const deleteRole = async () => {
   deleting.value = true;
   try {
-    deleteOne('role', editedItem.value.id).then(() => {
-      roles.value = roles.value.filter(role => role.id !== editedItem.value.id);
-    });
+    deleteOne('role', editedItem.value.id)
+      .then(() => {
+        roles.value = roles.value.filter(role => role.id !== editedItem.value.id);
+        toast.success('تم حذف الدور بنجاح');
+      })
+      .catch(() => toast.error('حدث خطأ أثناء حذف الدور'));
   } finally {
     deleteDialog.value = false;
     deleting.value = false;

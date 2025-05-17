@@ -91,6 +91,7 @@ import { getAll, saveItem, deleteOne } from '@/services/api';
 // function handleColorSelected(color) {
 //   selectedColor.value = color;
 // }
+import { toast } from 'vue3-toastify';
 const dialog = ref(false);
 const colorPickerDialog = ref(false); // Dialog for color picker
 const deleteDialog = ref(false);
@@ -101,12 +102,23 @@ const attribute = ref(null);
 const valueToDelete = ref(null);
 
 function saveValue() {
+  if (!attributeValue.value.name) {
+    toast.error('اسم القيمة مطلوب');
+    return;
+  }
+  if (!attribute.value) {
+    toast.error('يجب اختيار الخاصية');
+    return;
+  }
   attributeValue.value.attribute_id = attribute.value;
-  saveItem('attribute-value', attributeValue.value, false, true, true).then(() => {
-    getValues();
-    dialog.value = false;
-    attributeValue.value = { name: '', color: '', attribute_id: null };
-  });
+  saveItem('attribute-value', attributeValue.value, false, true, true)
+    .then(() => {
+      getValues();
+      dialog.value = false;
+      toast.success('تم حفظ القيمة بنجاح');
+      attributeValue.value = { name: '', color: '', attribute_id: null };
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حفظ القيمة'));
 }
 
 function confirmDelete(id) {
@@ -115,10 +127,13 @@ function confirmDelete(id) {
 }
 
 function deleteConfirmed() {
-  deleteOne(`attribute-value`, valueToDelete.value).then(() => {
-    getValues();
-    deleteDialog.value = false;
-  });
+  deleteOne(`attribute-value`, valueToDelete.value)
+    .then(() => {
+      getValues();
+      deleteDialog.value = false;
+      toast.success('تم حذف القيمة بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حذف القيمة'));
 }
 
 function getValues() {

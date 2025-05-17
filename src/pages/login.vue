@@ -2,6 +2,7 @@
 import { login } from '@/services/api';
 import logo from '@images/logo.svg?raw';
 import { ref } from 'vue';
+import { toast } from 'vue3-toastify';
 
 import { useRouter } from 'vue-router';
 
@@ -15,14 +16,19 @@ const form = ref({
 const errMessages = ref(false);
 function logind() {
   errMessages.value = false;
-
+  if (!form.value.login || !form.value.password) {
+    toast.error('جميع الحقول مطلوبة');
+    return;
+  }
   login('login', form.value, true, true)
     .then(() => {
+      toast.success('تم تسجيل الدخول بنجاح');
       router.push('/dashboard');
     })
     .catch(e => {
       console.log('catch log in', e);
       errMessages.value = e.message;
+      toast.error(e.message || 'فشل تسجيل الدخول، تحقق من البيانات');
     });
 }
 
@@ -68,6 +74,7 @@ const isPasswordVisible = ref(false);
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                @keyup.enter="logind"
               />
 
               <!-- remember me checkbox -->

@@ -2,6 +2,7 @@
 import { deleteOne, getAll, saveItem } from '@/services/api';
 import { ref, nextTick, watch, onMounted, computed } from 'vue';
 import { useDisplay } from 'vuetify';
+import { toast } from 'vue3-toastify';
 
 const { xs } = useDisplay();
 // الحالة الرئيسية
@@ -209,24 +210,42 @@ const prepareProduct = product => {
 // حفظ المنتج سواء للإضافة أو التعديل
 const saveProduct = () => {
   const productToSend = prepareProduct(newProduct.value);
-
+  if (!newProduct.value.name) {
+    toast.error('اسم المنتج مطلوب');
+    return;
+  }
   if (editIndex.value !== null) {
     // تعديل المنتج
-    saveItem('product', productToSend, false, true, true);
-    products.value[editIndex.value] = JSON.parse(JSON.stringify(newProduct.value));
+    saveItem('product', productToSend, false, true, true)
+      .then(() => {
+        products.value[editIndex.value] = JSON.parse(JSON.stringify(newProduct.value));
+        toast.success('تم تعديل المنتج بنجاح');
+        resetForm();
+        dialog.value = false;
+        editIndex.value = null;
+      })
+      .catch(() => toast.error('حدث خطأ أثناء تعديل المنتج'));
   } else {
     // إضافة منتج جديد
-    saveItem('product', productToSend, false, true, true);
-    products.value.push(JSON.parse(JSON.stringify(newProduct.value)));
+    saveItem('product', productToSend, false, true, true)
+      .then(() => {
+        products.value.push(JSON.parse(JSON.stringify(newProduct.value)));
+        toast.success('تم إضافة المنتج بنجاح');
+        resetForm();
+        dialog.value = false;
+        editIndex.value = null;
+      })
+      .catch(() => toast.error('حدث خطأ أثناء إضافة المنتج'));
   }
-  resetForm();
-  dialog.value = false;
-  editIndex.value = null;
 };
 
 const removeProduct = id => {
-  deleteOne('product-variant', id);
-  // products.value.splice(index, 1);
+  deleteOne('product-variant', id)
+    .then(() => {
+      toast.success('تم حذف المنتج بنجاح');
+      // products.value.splice(index, 1);
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حذف المنتج'));
 };
 
 // دالة تحويل الاسم إلى سلوج

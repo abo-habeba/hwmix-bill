@@ -3,6 +3,7 @@ import CashBoxSwitcher from '@/components/cashboxs/CashBoxSwitcher.vue';
 import DataTable from '@/components/cashboxs/transfer/DataTable.vue';
 import TransactionDialog from '@/components/cashboxs/transfer/TransactionDialog.vue';
 import { getAll, saveItem, updateItem } from '@/services/api';
+import { toast } from 'vue3-toastify';
 
 import { useUserStore } from '@/stores/user';
 import { ref } from 'vue';
@@ -108,6 +109,24 @@ const isDisabled = computed(() => {
     to_cashBox.value !== 'اختر خزنة'
   );
 });
+function saveCashbox() {
+  if (!cashbox.value.name) {
+    toast.error('اسم الخزنة مطلوب');
+    return;
+  }
+  saveItem('cashBox/transfer', data, false, true, true)
+    .then(() => {
+      toast.success('تم حفظ الخزنة بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حفظ الخزنة'));
+}
+function deleteCashbox(id) {
+  deleteOne('cashbox', id)
+    .then(() => {
+      toast.success('تم حذف الخزنة بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حذف الخزنة'));
+}
 </script>
 <template>
   <VCol cols="12">

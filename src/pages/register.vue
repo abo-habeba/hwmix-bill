@@ -1,6 +1,7 @@
 <script setup>
 import { register } from '@/services/api';
 import logo from '@images/logo.svg?raw';
+import { toast } from 'vue3-toastify';
 
 import { useRouter } from 'vue-router';
 
@@ -15,11 +16,20 @@ const form = ref({
 });
 
 function registerd() {
-  register('register', form.value).then(data => {
-    localStorage.setItem('authToken', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    router.push('/dashboard');
-  });
+  if (!form.value.full_name || !form.value.phone || !form.value.nickname || !form.value.email || !form.value.password) {
+    toast.error('جميع الحقول مطلوبة');
+    return;
+  }
+  register('register', form.value)
+    .then(res => {
+      localStorage.setItem('authToken', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      toast.success('تم إنشاء الحساب بنجاح');
+      router.push('/dashboard');
+    })
+    .catch(e => {
+      toast.error(e?.message || 'فشل إنشاء الحساب، تحقق من البيانات');
+    });
 }
 
 const isPasswordVisible = ref(false);

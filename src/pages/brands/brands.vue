@@ -14,7 +14,6 @@
         <v-chip v-if="brands.length === 0">لا توجد علامات تجارية حتى الآن</v-chip>
       </div>
     </v-card>
-
     <!-- Add Brand Dialog -->
     <v-dialog v-model="dialog" max-width="500px">
       <v-card>
@@ -48,6 +47,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getAll, saveItem, deleteOne } from '@/services/api';
+import { toast } from 'vue3-toastify';
 
 const dialog = ref(false);
 const deleteDialog = ref(false);
@@ -56,11 +56,18 @@ const brand = ref({ name: '' });
 const brands = ref([]);
 
 function saveBrand() {
-  saveItem('brand', brand.value, false, true, true).then(() => {
-    getBrands();
-    dialog.value = false;
-    brand.value = { name: '' };
-  });
+  if (!brand.value.name) {
+    toast.error('اسم العلامة التجارية مطلوب');
+    return;
+  }
+  saveItem('brand', brand.value, false, true, true)
+    .then(() => {
+      getBrands();
+      dialog.value = false;
+      toast.success('تم حفظ العلامة التجارية بنجاح');
+      brand.value = { name: '' };
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حفظ العلامة التجارية'));
 }
 
 function confirmDelete(id) {
@@ -69,10 +76,13 @@ function confirmDelete(id) {
 }
 
 function deleteBrand(id) {
-  deleteOne('brand', id).then(() => {
-    getBrands();
-    deleteDialog.value = false;
-  });
+  deleteOne('brand', id)
+    .then(() => {
+      getBrands();
+      deleteDialog.value = false;
+      toast.success('تم حذف العلامة التجارية بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حذف العلامة التجارية'));
 }
 
 function getBrands() {

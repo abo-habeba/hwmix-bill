@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/user';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
+import { toast } from 'vue3-toastify';
 const { xs } = useDisplay();
 const route = useRoute();
 const router = useRouter();
@@ -52,6 +53,24 @@ function sendData() {
     userStore.fetchUser();
     router.go(-1);
   });
+}
+function saveCompany() {
+  if (!company.value.name) {
+    toast.error('اسم الشركة مطلوب');
+    return;
+  }
+  saveItem('company', company.value, route.params.id)
+    .then(() => {
+      toast.success('تم حفظ الشركة بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حفظ الشركة'));
+}
+function deleteCompany(id) {
+  deleteOne('company', id)
+    .then(() => {
+      toast.success('تم حذف الشركة بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حذف الشركة'));
 }
 </script>
 

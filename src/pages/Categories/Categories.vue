@@ -47,6 +47,7 @@
 import { VTreeview } from 'vuetify/labs/VTreeview';
 import { ref, onMounted } from 'vue';
 import { getAll, saveItem, deleteOne } from '@/services/api';
+import { toast } from 'vue3-toastify';
 
 // قائمة الفئات المسترجعة من الـ API
 const categories = ref([]);
@@ -114,17 +115,27 @@ function closeAddDialog() {
 }
 // حفظ الفئة الجديدة
 function saveCategory() {
-  saveItem('category', newCategory.value, false, true, true).then(() => {
-    getCategories();
-    closeAddDialog();
-  });
+  if (!newCategory.value.name) {
+    toast.error('اسم الفئة مطلوب');
+    return;
+  }
+  saveItem('category', newCategory.value, false, true, true)
+    .then(() => {
+      getCategories();
+      closeAddDialog();
+      toast.success('تم حفظ الفئة بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حفظ الفئة'));
 }
-// حذف الفئة
+
 function deleteCategory(id) {
   if (confirm('هل أنت متأكد من حذف هذه الفئة؟')) {
-    deleteOne('category', id).then(() => {
-      getCategories();
-    });
+    deleteOne('category', id)
+      .then(() => {
+        getCategories();
+        toast.success('تم حذف الفئة بنجاح');
+      })
+      .catch(() => toast.error('حدث خطأ أثناء حذف الفئة'));
   }
 }
 </script>

@@ -99,20 +99,22 @@ function saveWarehouse() {
     toast.error('اسم المخزن مطلوب');
     return;
   }
-  saveItem('warehouse', warehouse.value, false, true, true).then(() => {
-    getWarehouses();
-    dialog.value = false;
-    toast.success('تم حفظ المخزن بنجاح');
-    warehouse.value = {
-      name: '',
-      location: '',
-      manager_name: '',
-      capacity: null,
-      status: 'active',
-      company_id: '',
-      created_by: '',
-    };
-  });
+  saveItem('warehouse', warehouse.value, false, true, true)
+    .then(() => {
+      getWarehouses();
+      dialog.value = false;
+      toast.success('تم حفظ المخزن بنجاح');
+      warehouse.value = {
+        name: '',
+        location: '',
+        manager_name: '',
+        capacity: null,
+        status: 'active',
+        company_id: '',
+        created_by: '',
+      };
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حفظ المخزن'));
 }
 
 function confirmDelete(id) {
@@ -121,11 +123,13 @@ function confirmDelete(id) {
 }
 
 function deleteWarehouse(id) {
-  deleteOne('warehouse', id).then(() => {
-    getWarehouses();
-    deleteDialog.value = false;
-    toast.success('تم حذف المخزن بنجاح');
-  });
+  deleteOne('warehouse', id)
+    .then(() => {
+      getWarehouses();
+      deleteDialog.value = false;
+      toast.success('تم حذف المخزن بنجاح');
+    })
+    .catch(() => toast.error('حدث خطأ أثناء حذف المخزن'));
 }
 
 function getWarehouses() {
