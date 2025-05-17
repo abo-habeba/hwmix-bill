@@ -26,36 +26,7 @@ const navItems = [
       icon: 'ri-group-line',
     },
   },
-  //roles
-  {
-    type: 'link',
-    permission: ['roles', 'super_admin', 'company_owner'],
-    item: {
-      title: 'الصلاحيات والادوار',
-      to: { name: 'roles' },
-      icon: 'ri-lock-unlock-line',
-    },
-  },
-  //logs
-  {
-    type: 'link',
-    permission: ['logs', 'super_admin', 'company_owner'],
-    item: {
-      title: 'سجل النظام',
-      to: { name: 'logs' },
-      icon: 'ri-file-list-2-line',
-    },
-  },
-  //companys
-  {
-    type: 'link',
-    permission: ['companys', 'super_admin', 'company_owner'],
-    item: {
-      title: 'الشركات',
-      to: { name: 'companys' },
-      icon: 'ri-community-line',
-    },
-  },
+
   // cashboxs
   {
     type: 'link',
@@ -64,6 +35,20 @@ const navItems = [
       title: 'الخزن',
       to: { name: 'cashboxs' },
       icon: 'ri-currency-line',
+    },
+  },
+  // group invoices
+  {
+    type: 'group',
+    permission: ['super_admin', 'company_owner'],
+    item: {
+      title: 'الفواتير',
+      // to: { path: '/invoice' },
+      icon: 'ri-file-list-3-line',
+      children: [
+        { title: 'الفواتير', to: { name: 'invoice' }, icon: 'ri-file-list-3-line', permission: ['super_admin', 'company_owner'] },
+        { title: 'أنواع الفواتير', to: { name: 'invoiceType' }, icon: 'ri-file-settings-line', permission: ['super_admin', 'company_owner'] },
+      ],
     },
   },
   // group products
@@ -84,30 +69,47 @@ const navItems = [
       ],
     },
   },
-  // group invoices
+
   {
-    type: 'group',
-    permission: ['super_admin', 'company_owner'],
+    type: 'link',
+    permission: ['warehouses', 'super_admin', 'company_owner'],
+    item: { title: 'المخازن', to: { name: 'warehouses' }, icon: 'ri-building-line' },
+  },
+  {
+    type: 'link',
+    permission: ['stock', 'super_admin', 'company_owner'],
+    item: { title: 'المخزون', to: { name: 'stock' }, icon: 'ri-archive-line' },
+  },
+  //roles
+  {
+    type: 'link',
+    permission: ['roles', 'super_admin', 'company_owner'],
     item: {
-      title: 'الفواتير',
-      // to: { path: '/invoice' },
-      icon: 'ri-file-list-3-line',
-      children: [
-        { title: 'الفواتير', to: { name: 'invoice' }, icon: 'ri-file-list-3-line', permission: ['super_admin', 'company_owner'] },
-        { title: 'أنواع الفواتير', to: { name: 'invoiceType' }, icon: 'ri-file-settings-line', permission: ['super_admin', 'company_owner'] },
-      ],
+      title: 'الصلاحيات والادوار',
+      to: { name: 'roles' },
+      icon: 'ri-lock-unlock-line',
     },
   },
-  // {
-  //   type: 'link',
-  //   permission: ['warehouses', 'super_admin', 'company_owner'],
-  //   item: { title: 'المخازن', to: { name: 'warehouses' }, icon: 'ri-building-line' },
-  // },
-  // {
-  //   type: 'link',
-  //   permission: ['stock', 'super_admin', 'company_owner'],
-  //   item: { title: 'المخزون', to: { name: 'stock' }, icon: 'ri-archive-line' },
-  // },
+  //companys
+  {
+    type: 'link',
+    permission: ['companys', 'super_admin', 'company_owner'],
+    item: {
+      title: 'الشركات',
+      to: { name: 'companys' },
+      icon: 'ri-community-line',
+    },
+  },
+  //logs
+  {
+    type: 'link',
+    permission: ['logs', 'super_admin', 'company_owner'],
+    item: {
+      title: 'سجل النظام',
+      to: { name: 'logs' },
+      icon: 'ri-file-list-2-line',
+    },
+  },
   // // روابط الفواتير والتقسيط
   // {
   //   type: 'link',

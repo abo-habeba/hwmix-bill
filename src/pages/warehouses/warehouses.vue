@@ -20,29 +20,29 @@
       <v-card>
         <v-card-title>اضافة مخزن جديد</v-card-title>
         <v-card-text>
-          <v-row>
+          <v-row dense>
             <v-col cols="12">
-              <v-text-field v-model="warehouse.name" label="اسم المخزن" required></v-text-field>
+              <v-text-field v-model="warehouse.name" label="اسم المخزن" :rules="[v => !!v || 'اسم المخزن مطلوب']" required dense></v-text-field>
             </v-col>
-          </v-row>
-          <v-row>
             <v-col cols="12">
-              <v-text-field v-model="warehouse.location" label="الموقع"></v-text-field>
+              <v-text-field v-model="warehouse.location" label="الموقع" dense></v-text-field>
             </v-col>
-          </v-row>
-          <v-row>
             <v-col cols="12">
-              <v-text-field v-model="warehouse.manager_name" label="اسم المدير"></v-text-field>
+              <v-text-field v-model="warehouse.manager_name" label="اسم المدير" dense></v-text-field>
             </v-col>
-          </v-row>
-          <v-row>
             <v-col cols="12">
-              <v-text-field v-model="warehouse.capacity" label="السعة" type="number"></v-text-field>
+              <v-text-field v-model="warehouse.capacity" label="السعة" type="number" dense></v-text-field>
             </v-col>
-          </v-row>
-          <v-row>
             <v-col cols="12">
-              <v-select v-model="warehouse.status" item-value="value" item-title="name" :items="statusOptions" label="الحالة" required></v-select>
+              <v-select
+                v-model="warehouse.status"
+                item-value="value"
+                item-title="name"
+                :items="statusOptions"
+                label="الحالة"
+                required
+                dense
+              ></v-select>
             </v-col>
           </v-row>
           <!-- يمكن إضافة company_id و created_by عند الحاجة -->
@@ -73,6 +73,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getAll, saveItem, deleteOne } from '@/services/api';
+import { toast } from 'vue3-toastify';
 
 const dialog = ref(false);
 const deleteDialog = ref(false);
@@ -94,9 +95,14 @@ const statusOptions = ref([
 ]);
 
 function saveWarehouse() {
+  if (!warehouse.value.name) {
+    toast.error('اسم المخزن مطلوب');
+    return;
+  }
   saveItem('warehouse', warehouse.value, false, true, true).then(() => {
     getWarehouses();
     dialog.value = false;
+    toast.success('تم حفظ المخزن بنجاح');
     warehouse.value = {
       name: '',
       location: '',
@@ -118,6 +124,7 @@ function deleteWarehouse(id) {
   deleteOne('warehouse', id).then(() => {
     getWarehouses();
     deleteDialog.value = false;
+    toast.success('تم حذف المخزن بنجاح');
   });
 }
 

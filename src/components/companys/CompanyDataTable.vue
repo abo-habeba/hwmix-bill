@@ -11,41 +11,30 @@
         {{ form.status }}
       </v-chip>
     </v-card-title>
-    <v-chip v-for="item in users" :key="item">{{ item.full_name }}</v-chip>
+
     <v-divider />
-    <!-- invoice form  -->
+
     <v-card-text class="overflow-y-auto" style="max-height: calc(100vh - 200px)">
       <v-form @submit.prevent="save" id="invoice-form">
         <!-- Customer & Type -->
         <v-row dense class="my-4">
           <v-col cols="12" sm="6">
             <v-autocomplete
-              v-model="selectedUser"
-              v-model:search="userSearchText"
-              @update:search="onUserSearch"
+              v-model="form.user_id"
               :items="users"
-              return-object
-              :item-title="
-                item => {
-                  const name = item.full_name || 'بدون اسم';
-                  const nickname = item.nickname ? `(${item.nickname})` : '';
-                  const phone = item.phone ? `📞 ${item.phone} ` : 'بدون هاتف';
-                  const id = item.id ? `كود ${item.id}` : '';
-                  return `${name} ${nickname} ${phone} ${id}`;
-                }
-              "
+              item-title="full_name"
               item-value="id"
-              :filter="() => true"
               label="ابحث عن عميل"
               prepend-inner-icon="ri-user-line"
               :rules="[v => !!v || 'حقل العميل مطلوب']"
               clearable
               :loading="isLoadingUsers"
               :no-data-text="userSearchText.length < 3 ? 'أدخل 3 أحرف على الأقل' : 'لا يوجد عميل'"
+              @update:search-input="onUserSearch"
               required
             />
           </v-col>
-          <v-col coالls="12" sm="6">
+          <v-col cols="12" sm="6">
             <v-autocomplete
               v-model="form.invoice_type_id"
               :items="invoiceTypes"
@@ -74,22 +63,26 @@
               :loading="isLoadingProducts"
               :no-data-text="productSearchText && productSearchText.length < 3 ? 'أدخل 3 أحرف على الأقل' : 'لا يوجد منتج'"
               @update:search-input="onProductSearch"
-              @update:model-value="onProductSelect"
+              @update:model-value="addOrIncrement"
               @scroll.passive="handleScroll"
             />
           </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field v-model="serialInput" label="أدخل السيريال أو امسح الباركود" clearable hide-details ref="serialInputField">
-              <template #prepend>
-                <v-tooltip text="فتح الكاميرا" location="top">
-                  <template #activator="{ props }">
-                    <v-icon v-bind="props" class="cursor-pointer" @click="showScanner = true" size="40" color="#10B981"> ri-qr-scan-2-line </v-icon>
-                  </template>
-                </v-tooltip>
-              </template>
-            </v-text-field>
+          <v-col cols="12" sm="6" class="d-flex align-center">
+            <v-btn icon @click="showScanner = true">
+              <v-icon>ri-qr-scan-2-line</v-icon>
+            </v-btn>
+            <span class="ms-2">بحث بالباركود</span>
           </v-col>
         </v-row>
+        <!-- show Scanner barcode Video -->
+        <v-dialog v-model="showScanner" max-width="400">
+          <v-card class="pa-2">
+            <video ref="barcodeVideo" id="barcodeVideo" style="width: 100%; height: 240px; object-fit: cover" autoplay muted playsinline></video>
+            <v-alert v-if="scannerError" type="error" class="mt-2" dense border="start" border-color="error">
+              {{ scannerError }}. يرجى التأكد من أن الباركود واضح وأن الكاميرا تعمل بشكل صحيح.
+            </v-alert>
+          </v-card>
+        </v-dialog>
 
         <!-- Items Table -->
         <v-data-table :headers="headers" :items="form.items" item-key="id" class="elevation-1" hide-default-footer density="compact">
@@ -153,24 +146,6 @@
       </v-form>
     </v-card-text>
 
-    <!-- show Scanner barcode Video -->
-    <v-dialog v-model="showScanner" max-width="400">
-      <v-card>
-        <v-alert v-if="scannerError" type="warning" dense border="start" border-color="error">
-          {{ scannerError }}
-        </v-alert>
-        <video
-          class="ma-2"
-          ref="barcodeVideo"
-          id="barcodeVideo"
-          style="width: 100%; height: 240px; object-fit: cover"
-          autoplay
-          muted
-          playsinline
-        ></video>
-        <p class="ma-auto">تاكد ان السريال واضح وان الكاميرا نظيفة</p>
-      </v-card>
-    </v-dialog>
     <!-- Actions -->
     <v-card-actions class="actions-sticky justify-start">
       <v-spacer></v-spacer>
@@ -193,24 +168,6 @@ const props = defineProps({
   invoiceId: { type: Number, default: null },
 });
 
-const users = ref([]);
-const products = ref([]);
-const invoiceTypes = ref([]);
-const isSaving = ref(false);
-const isLoadingUsers = ref(false);
-const isLoadingProducts = ref(false);
-const productPage = ref(1);
-const productHasMore = ref(true);
-const productSearchText = ref('');
-const productSearch = ref(null);
-const userSearchText = ref('');
-const showScanner = ref(false);
-const scannerError = ref(null);
-const barcodeVideo = ref(null);
-const serialInput = ref('');
-const serialInputField = ref(null);
-const selectedUser = ref(null);
-
 // Reactive state
 const form = ref({
   id: null,
@@ -228,6 +185,21 @@ const headers = ref([
   { title: 'الإجمالي', key: 'total', align: 'center' },
   { title: 'حذف', key: 'actions', align: 'center', sortable: false },
 ]);
+
+const users = ref([]);
+const products = ref([]);
+const invoiceTypes = ref([]);
+const isSaving = ref(false);
+const isLoadingUsers = ref(false);
+const isLoadingProducts = ref(false);
+const productPage = ref(1);
+const productHasMore = ref(true);
+const productSearchText = ref('');
+const productSearch = ref(null);
+const userSearchText = ref('');
+const showScanner = ref(false);
+const scannerError = ref(null);
+const barcodeVideo = ref(null);
 
 // Ensure the video element is accessible
 onMounted(() => {
@@ -268,6 +240,7 @@ onMounted(async () => {
 
 // Search Handlers
 async function searchUsers(query) {
+  // عدل حسب مسار الـ API لديك
   const { data } = await getAll('users', { search: query });
   return data;
 }
@@ -278,33 +251,21 @@ async function searchProducts(query, page = 1) {
   return data;
 }
 
-function debounceRequest(endpoint, value, delay = 500) {
-  return new Promise(resolve => {
-    if (!debounceRequest.timer) debounceRequest.timer = null;
-
-    clearTimeout(debounceRequest.timer);
-
-    debounceRequest.timer = setTimeout(async () => {
-      try {
-        const { data } = await getAll(endpoint, { search: value });
-        resolve(data);
-      } catch (error) {
-        console.error('Debounced request error:', error);
-        resolve(null);
-      }
-    }, delay);
-  });
-}
-
 const onUserSearch = async val => {
+  userSearchText.value = val || '';
   if (!val || val.length < 3) {
     users.value = [];
     return;
   }
-  isLoadingUsers.value = true;
-  const data = await debounceRequest('users', val, 1000);
-  if (data) users.value = data;
-  isLoadingUsers.value = false;
+  try {
+    isLoadingUsers.value = true;
+    users.value = await searchUsers(val);
+  } catch (error) {
+    users.value = [];
+    console.error('Error searching users:', error);
+  } finally {
+    isLoadingUsers.value = false;
+  }
 };
 
 const onProductSearch = async val => {
@@ -346,13 +307,13 @@ const handleScroll = async e => {
 };
 
 // Items Management
-// أضف دالة لإضافة أو زيادة المنتج بناءً على كائن المنتج
-const addOrIncrement = product => {
+const addOrIncrement = productId => {
+  const product = products.value.find(p => p.id === productId);
   if (!product) return;
-  const existingItem = form.value.items.find(i => i.id === product.id);
+
+  const existingItem = form.value.items.find(i => i.id === productId);
   if (existingItem) {
     existingItem.quantity++;
-    existingItem.total = existingItem.unit_price * existingItem.quantity - existingItem.discount;
   } else {
     form.value.items.push({
       id: product.id,
@@ -365,37 +326,6 @@ const addOrIncrement = product => {
   }
   updateTotal();
 };
-
-// عند اختيار منتج من البحث اليدوي
-const onProductSelect = productId => {
-  const product = products.value.find(p => p.id === productId);
-  if (product) {
-    addOrIncrement(product);
-  }
-};
-
-// عند البحث بالسيريال
-async function searchProductBySerial(serial) {
-  try {
-    // عدل حسب مسار الـ API لديك
-    const { data } = await getAll('products', { serial });
-    const product = Array.isArray(data) ? data[0] : data;
-    if (product) {
-      addOrIncrement(product);
-      playBeep('success'); // صوت عند النجاح
-      scannerError.value = null;
-    } else {
-      // scannerError.value = 'لم يتم العثور على منتج بهذا السيريال';
-      console.log('لم يتم العثور على منتج بهذا السيريال');
-
-      playBeep('error');
-    }
-  } catch (error) {
-    scannerError.value = 'خطأ في البحث عن المنتج';
-    playBeep('error');
-    console.error('خطأ في البحث عن المنتج', error);
-  }
-}
 
 const updateItemQuantity = item => {
   if (!item) return;
@@ -416,27 +346,25 @@ const updateTotal = () => {
 
 // Barcode Scanner
 function startBarcodeScanner() {
-  console.log('تشغيل الماسح الضوئي');
   scannerError.value = null;
   if (!codeReader.value) {
     codeReader.value = new BrowserMultiFormatReader();
   }
   codeReader.value.decodeFromVideoDevice(null, barcodeVideo.value, (result, err) => {
     if (result) {
-      const serial = result.getText();
-      console.log('تم قراءة السيريال:', serial);
-      searchProductBySerial(serial);
+      alert('تم قراءة الكود: ' + result.getText());
+      // لا توقف القارئ هنا حتى تخرج يدويًا أو تغلق الديالوج
       // showScanner.value = false;
       // stopBarcodeScanner();
     } else if (err && err.name !== 'NotFoundException') {
-      scannerError.value = '';
-      // playBeep('error'); // صوت عند الخطأ
+      scannerError.value = 'خطأ في قراءة الباركود: ' + err.message;
+      // لا توقف القارئ هنا ليستمر في المحاولة
     }
+    // إذا لم يوجد نتيجة أو كان الخطأ NotFoundException، استمر في المحاولة تلقائياً
   });
 }
 
 function stopBarcodeScanner() {
-  console.log('إيقاف الماسح الضوئي');
   if (codeReader.value) {
     codeReader.value.reset();
     codeReader.value = null;
@@ -444,13 +372,17 @@ function stopBarcodeScanner() {
 }
 
 watch(showScanner, val => {
-  console.log('تغيير حالة الماسح:', val);
   if (val) {
     setTimeout(startBarcodeScanner, 300); // انتظر حتى يظهر الفيديو
   } else {
     stopBarcodeScanner();
   }
 });
+
+async function searchProductBySerial(serial) {
+  // فقط أظهر alert ولا تبحث فعلياً
+  alert('تم العثور على السيريال: ' + serial);
+}
 
 // Save Form
 const save = async () => {
@@ -459,7 +391,6 @@ const save = async () => {
     const payload = {
       ...form.value,
       total_amount: totalAmount.value,
-      user_id: selectedUser.value?.id,
     };
 
     await saveItem('invoices', payload, form.value.id);
@@ -471,39 +402,4 @@ const save = async () => {
     isSaving.value = false;
   }
 };
-
-// عند الضغط على Enter في حقل السيريال
-const onSerialInputEnter = async () => {
-  if (!serialInput.value) return;
-  await searchProductBySerial(serialInput.value);
-  serialInput.value = '';
-  focusSerialInput();
-};
-
-const focusSerialInput = () => {
-  setTimeout(() => {
-    if (serialInputField.value && serialInputField.value.focus) {
-      serialInputField.value.focus();
-    }
-  }, 100);
-};
-
-function playBeep(type) {
-  let freq = type === 'success' ? 880 : 220;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.type = 'sine';
-    o.frequency.value = freq;
-    g.gain.value = 0.1;
-    o.connect(g);
-    g.connect(ctx.destination);
-    o.start();
-    o.stop(ctx.currentTime + 0.15);
-    o.onended = () => ctx.close();
-  } catch (e) {
-    // ignore if browser blocks audio
-  }
-}
 </script>

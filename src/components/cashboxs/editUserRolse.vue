@@ -37,6 +37,72 @@ function assignRole() {
     dialogRolesEdit.value = false;
   });
 }
+
+// دالة لإضافة أو زيادة كمية المنتج في form.items
+const addOrIncrement = product => {
+  if (!product) return;
+  // تحقق إذا كان المنتج موجود بالفعل في form.items
+  const existingItem = form.value.items.find(i => i.id === product.id);
+  if (existingItem) {
+    existingItem.quantity++;
+  } else {
+    form.value.items.push({
+      id: product.id,
+      name: product.name,
+      quantity: 1,
+      unit_price: product.price,
+      discount: 0,
+      total: product.price,
+    });
+  }
+  updateTotal();
+};
+
+// عند البحث اليدوي: عند اختيار منتج من الـ autocomplete
+const onProductSearch = async val => {
+  productSearchText.value = val || '';
+  if (!val || val.length < 3) {
+    products.value = [];
+    return;
+  }
+  try {
+    isLoadingProducts.value = true;
+    const data = await searchProducts(val, 1);
+    products.value = data.items || data;
+    productHasMore.value = data.meta ? data.meta.current_page < data.meta.last_page : false;
+  } catch (error) {
+    products.value = [];
+    console.error('Error searching products:', error);
+  } finally {
+    isLoadingProducts.value = false;
+  }
+};
+
+// عند اختيار منتج من البحث اليدوي
+const onProductSelect = productId => {
+  const product = products.value.find(p => p.id === productId);
+  addOrIncrement(product);
+};
+
+// عند البحث بالسيريال
+async function searchProductBySerial(serial) {
+  try {
+    const { data } = await getAll('products', { serial });
+    let product = null;
+    if (data && (Array.isArray(data) ? data.length : data.items?.length)) {
+      product = Array.isArray(data) ? data[0] : data.items[0];
+    }
+    if (product) {
+      addOrIncrement(product);
+      scannerError.value = null;
+      return;
+    }
+    scannerError.value = 'لم يتم العثور على منتج بهذا السيريال';
+  } catch (error) {
+    scannerError.value = 'حدث خطأ أثناء البحث عن المنتج';
+    console.error('searchProductBySerial error:', error);
+  }
+}
 </script>
 <template>
   <v-btn
