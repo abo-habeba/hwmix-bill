@@ -7,7 +7,9 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AAttributeValues: typeof import('./src/components/attributeValues/AAttributeValues.vue')['default']
     AddAttribute: typeof import('./src/components/attributes/AddAttribute.vue')['default']
+    AddAttributeValues: typeof import('./src/components/attributes/addAttributeValues.vue')['default']
     AddCompany: typeof import('./src/components/companys/addCompany.vue')['default']
     AddUser: typeof import('./src/components/cashboxs/addUser.vue')['default']
     AdvancedSearch: typeof import('./src/components/AdvancedSearch.vue')['default']

@@ -1,3 +1,3 @@
 <template>
-  <h1>productVariants</h1>
+  <h1>خيارات المنتج</h1>
 </template>

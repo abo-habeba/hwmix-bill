@@ -18,6 +18,7 @@ function logind() {
   errMessages.value = false;
   if (!form.value.login || !form.value.password) {
     toast.error('جميع الحقول مطلوبة');
+    errMessages.value = 'جميع الحقول مطلوبة';
     return;
   }
   login('login', form.value, true, true)
@@ -26,9 +27,16 @@ function logind() {
       router.push('/dashboard');
     })
     .catch(e => {
-      console.log('catch log in', e);
-      errMessages.value = e.message;
-      toast.error(e.message || 'فشل تسجيل الدخول، تحقق من البيانات');
+      let msg = e?.message || 'فشل تسجيل الدخول، تحقق من البيانات';
+      if (e?.response?.status === 401) {
+        msg = 'بيانات الدخول غير صحيحة';
+      } else if (e?.response?.status === 429) {
+        msg = 'عدد محاولات الدخول كبير، يرجى المحاولة لاحقاً';
+      } else if (e?.response?.status === 500) {
+        msg = 'خطأ في الخادم، حاول لاحقاً';
+      }
+      errMessages.value = msg;
+      toast.error(msg);
     });
 }
 

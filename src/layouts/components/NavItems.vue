@@ -59,13 +59,12 @@ const navItems = [
       title: 'المنتجات',
       icon: 'ri-shopping-bag-3-line',
       children: [
-        { title: 'كل المنتجات', to: { name: 'products' }, icon: 'ri-box-3-line' },
-        { title: 'نسخ المنتجات', to: { name: 'product-variants' }, icon: 'ri-file-copy-line' },
-        { title: 'خصائص نسخ المنتجات', to: { name: 'product-variant-attributes' }, icon: 'ri-equalizer-line' },
-        { title: 'الخصائص', to: { name: 'attributes' }, icon: 'ri-settings-3-line' },
-        { title: 'قيم الخصائص', to: { name: 'attribute-values' }, icon: 'ri-list-settings-line' },
+        { title: 'المنتجات', to: { name: 'products' }, icon: 'ri-box-3-line', permission: ['products', 'super_admin', 'company_owner'] },
+        { title: 'خيارات المنتج', to: { name: 'product-variants' }, icon: 'ri-settings-3-line' },
+        { title: ' الخصائص', to: { name: 'attributes' }, icon: 'ri-list-settings-line' },
+        // { title: 'قيم الخصائص', to: { name: 'attribute-values' }, icon: 'ri-list-settings-line' },
         { title: 'العلامات التجارية', to: { name: 'brands' }, icon: 'ri-brand-line' },
-        { title: 'الاقسام', to: { name: 'categories' }, icon: 'ri-brand-line' },
+        { title: 'الاقسام', to: { name: 'categories' }, icon: 'ri-folder-line' },
       ],
     },
   },
@@ -74,11 +73,6 @@ const navItems = [
     type: 'link',
     permission: ['warehouses', 'super_admin', 'company_owner'],
     item: { title: 'المخازن', to: { name: 'warehouses' }, icon: 'ri-building-line' },
-  },
-  {
-    type: 'link',
-    permission: ['stock', 'super_admin', 'company_owner'],
-    item: { title: 'المخزون', to: { name: 'stock' }, icon: 'ri-archive-line' },
   },
   //roles
   {

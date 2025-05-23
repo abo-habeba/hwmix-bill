@@ -207,13 +207,18 @@ const prepareProduct = product => {
   return prepared;
 };
 
+// قواعد الفاليديشن باستخدام vuetify
+const productRules = {
+  name: [v => !!v || 'اسم المنتج مطلوب', v => (typeof v === 'string' && v.length <= 255) || 'اسم المنتج يجب ألا يزيد عن 255 حرفًا'],
+  slug: [v => v === null || v === undefined || (!!v && typeof v === 'string') || 'السلوج يجب أن يكون نصًا'],
+  warehouse_id: [v => !!v || 'المخزن مطلوب'],
+  description: [v => !v || typeof v === 'string' || 'الوصف يجب أن يكون نصًا'],
+  description_long: [v => !v || typeof v === 'string' || 'الوصف المفصل يجب أن يكون نصًا'],
+};
 // حفظ المنتج سواء للإضافة أو التعديل
 const saveProduct = () => {
+  // لا داعي للتحقق اليدوي أو إشعارات التوست، نعتمد فقط على vuetify rules
   const productToSend = prepareProduct(newProduct.value);
-  if (!newProduct.value.name) {
-    toast.error('اسم المنتج مطلوب');
-    return;
-  }
   if (editIndex.value !== null) {
     // تعديل المنتج
     saveItem('product', productToSend, false, true, true)
@@ -327,7 +332,7 @@ function closeDialog() {
           <!-- بيانات المنتج الأساسية -->
           <v-row class="elevation-10 my-3">
             <v-col cols="12" md="6">
-              <v-text-field v-model="newProduct.name" label="اسم المنتج" required />
+              <v-text-field v-model="newProduct.name" label="اسم المنتج" :rules="productRules.name" required />
             </v-col>
             <!--is_active && featured && is_returnable -->
             <v-col cols="12">
@@ -370,6 +375,7 @@ function closeDialog() {
                     v-model:search="searchBrand"
                     hide-no-data
                     hide-selected
+                    :rules="productRules.brand_id"
                   />
                 </v-col>
                 <v-col>
@@ -380,15 +386,25 @@ function closeDialog() {
                     item-title="name"
                     :items="warehouses || []"
                     label="المخزن"
+                    :rules="productRules.warehouse_id"
+                    required
+                  />
+                  <v-select
+                    v-else
+                    :items="[{ id: null, name: 'لا يوجد مخازن، يرجى إضافة مخزن أولاً', disabled: true }]"
+                    label="المخزن"
+                    item-title="name"
+                    :value="null"
+                    required
                   />
                 </v-col>
               </v-row>
             </v-col>
             <v-col cols="12">
-              <v-textarea rows="1" auto-grow v-model="newProduct.description" label="الوصف القصير" />
+              <v-textarea rows="1" auto-grow v-model="newProduct.description" label="الوصف القصير" :rules="productRules.description" />
             </v-col>
             <v-col cols="12">
-              <v-textarea rows="2" auto-grow v-model="newProduct.description_long" label="الوصف المفصل" />
+              <v-textarea rows="2" auto-grow v-model="newProduct.description_long" label="الوصف المفصل" :rules="productRules.description_long" />
             </v-col>
           </v-row>
           <!-- بيانات المتغيرات -->

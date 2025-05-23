@@ -138,8 +138,9 @@ export const routes = [
         },
       },
       {
+        //src\pages\attributes\attributes.vue
         path: 'attributes',
-        component: () => import('@/pages/attributes/attributes2.vue'),
+        component: () => import('@/pages/attributes/attributes.vue'),
         name: 'attributes',
         meta: {
           title: 'الخصائص',
