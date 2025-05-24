@@ -8,23 +8,25 @@
       <v-card>
         <v-card-title>{{ isEditMode ? 'تعديل قيمة' : 'اضافة قيمة جديدة' }}</v-card-title>
         <v-card-text>
-          <!-- لا داعي لاختيار الخاصية هنا -->
-          <v-text-field
-            class="pa-3"
-            v-model="attributeValue.name"
-            label="اسم القيمة"
-            :rules="[v => !!v || 'اسم القيمة مطلوب']"
-            :error-messages="nameError"
-          ></v-text-field>
+          <v-form ref="formRef" v-model="formValid">
+            <!-- لا داعي لاختيار الخاصية هنا -->
+            <v-text-field
+              class="pa-3"
+              v-model="attributeValue.name"
+              label="اسم القيمة"
+              :rules="[v => !!v || 'اسم القيمة مطلوب']"
+              required
+            ></v-text-field>
 
-          <!-- Color Picker Button -->
-          <v-btn class="ma-3" :style="{ backgroundColor: attributeValue.color || '' }" @click="colorPickerDialog = true"> اختر اللون </v-btn>
+            <!-- Color Picker Button -->
+            <v-btn class="ma-3" :style="{ backgroundColor: attributeValue.color || '' }" @click="colorPickerDialog = true"> اختر اللون </v-btn>
+          </v-form>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeDialog">الغاء</v-btn>
-          <v-btn color="blue darken-1" text @click="saveValue">{{ isEditMode ? 'تحديث' : 'حفظ' }}</v-btn>
+          <v-btn color="blue darken-1" :class="{ 'forbidden-cursor': !formValid }" text @click="saveValue">{{ isEditMode ? 'تحديث' : 'حفظ' }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -65,6 +67,8 @@ const colorPickerDialog = ref(false);
 const attributeValue = ref({ name: '', color: '', attribute_id: null, id: null });
 const nameError = ref('');
 const isEditMode = ref(false);
+const formRef = ref(null);
+const formValid = ref(false);
 
 function openAddDialog() {
   isEditMode.value = false;
@@ -90,16 +94,14 @@ function closeDialog() {
 
 async function saveValue() {
   nameError.value = '';
-  if (!attributeValue.value.name) {
-    nameError.value = 'اسم القيمة مطلوب';
-    return;
-  }
+  const { valid } = await formRef.value.validate();
+  if (!valid) return;
   // استخدم الخاصية الحالية مباشرة
   if (props.attributes && props.attributes[0] && props.attributes[0].id) {
     attributeValue.value.attribute_id = props.attributes[0].id;
   }
   try {
-    const response = await saveItem('attribute-value', attributeValue.value, attributeValue.value.id, false, true);
+    const response = await saveItem('attribute-value', attributeValue.value, attributeValue.value.id ? attributeValue.value.id : false, false, true);
     if (isEditMode.value && attributeValue.value.id) {
       toast.success('تم تعديل القيمة بنجاح');
       emit('value-edited', response.data);

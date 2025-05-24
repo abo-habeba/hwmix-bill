@@ -96,4 +96,7 @@ onMounted(() => {
 .layout-page-content {
   padding-inline: 0 !important;
 }
+.forbidden-cursor {
+  cursor: not-allowed !important;
+}
 </style>

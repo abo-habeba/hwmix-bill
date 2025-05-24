@@ -63,7 +63,7 @@ function sendData() {
           <VDivider />
           <VCardText>
             <!-- 👉 Form -->
-            <VForm class="mt-6">
+            <VForm class="mt-6" ref="companyForm" v-model="companyFormValid">
               <VRow>
                 <!-- 👉  Name -->
                 <VCol sm="6" md="4" cols="12">
@@ -113,7 +113,7 @@ function sendData() {
                 </VCol>
                 <!-- 👉 Form Actions -->
                 <VCol cols="12" class="d-flex flex-wrap gap-4">
-                  <VBtn @click="sendData"> حفظ </VBtn>
+                  <VBtn :disabled="!companyFormValid" :class="{ 'forbidden-cursor': !companyFormValid }" @click="sendData"> حفظ </VBtn>
                   <!-- reset Form -->
                   <!-- <VBtn color="secondary" variant="outlined" type="reset" @click.prevent="resetForm"> Reset </VBtn> -->
                 </VCol>
@@ -132,5 +132,9 @@ function sendData() {
   margin-top: 15px;
   border: 1px solid #ccc;
   border-radius: 8px;
+}
+
+.forbidden-cursor {
+  cursor: not-allowed !important;
 }
 </style>

@@ -6,20 +6,34 @@
         <v-icon class="me-2" size="28">ri-file-list-3-line</v-icon>
         <span class="text-h5">{{ form.id ? 'تعديل فاتورة' : 'فاتورة جديدة' }}</span>
       </div>
+      <!-- invoice  status-->
       <v-chip v-if="form.status" color="success" class="px-3">
         <v-icon left small>ri-checkbox-circle-line</v-icon>
         {{ form.status }}
       </v-chip>
+      <!-- selected User balance -->
+      <v-chip
+        v-if="selectedUser && typeof selectedUser.balance !== 'undefined'"
+        class="ms-2 px-4 py-2 text-h6 font-weight-bold"
+        color="info"
+        prepend-icon="ri-wallet-3-line"
+        style="font-size: 1.1rem; min-width: 160px; direction: ltr"
+      >
+        <span class="me-1">رصيد العميل:</span>
+        <span :class="{ 'text-error': selectedUser.balance < 0, 'text-success': selectedUser.balance >= 0 }">
+          {{ formatCurrency(selectedUser.balance) }}
+        </span>
+      </v-chip>
     </v-card-title>
-    <v-chip v-for="item in users" :key="item">{{ item.full_name }}</v-chip>
-    <v-divider />
+    <v-divider class="mb-3" />
     <!-- invoice form  -->
     <v-card-text class="overflow-y-auto" style="max-height: calc(100vh - 200px)">
-      <v-form @submit.prevent="save" id="invoice-form">
-        <!-- Customer & Type -->
-        <v-row dense class="my-4">
-          <v-col cols="12" sm="6">
+      <v-form ref="formRef" v-model="formValid" @submit.prevent="save" id="invoice-form">
+        <v-row class="ma-0">
+          <!-- selected User -->
+          <v-col class="py-0" cols="12" sm="6">
             <v-autocomplete
+              class="ma-0"
               v-model="selectedUser"
               v-model:search="userSearchText"
               @update:search="onUserSearch"
@@ -45,7 +59,8 @@
               required
             />
           </v-col>
-          <v-col coالls="12" sm="6">
+          <!-- invoice type -->
+          <v-col class="py-0" cols="12" sm="6">
             <v-autocomplete
               v-model="form.invoice_type_id"
               :items="invoiceTypes"
@@ -58,13 +73,12 @@
               required
             />
           </v-col>
-        </v-row>
-
-        <!-- Product Search -->
-        <v-row dense class="mb-4">
-          <v-col cols="12" sm="6">
+          <!-- product Search -->
+          <v-col class="py-0" cols="12" sm="6">
             <v-autocomplete
+              class="ma-0"
               v-model="productSearch"
+              v-model:search="productSearchText"
               :items="products"
               item-title="name"
               item-value="id"
@@ -73,13 +87,13 @@
               clearable
               :loading="isLoadingProducts"
               :no-data-text="productSearchText && productSearchText.length < 3 ? 'أدخل 3 أحرف على الأقل' : 'لا يوجد منتج'"
-              @update:search-input="onProductSearch"
+              @update:search="onProductSearch"
               @update:model-value="onProductSelect"
-              @scroll.passive="handleScroll"
             />
           </v-col>
-          <v-col cols="12" sm="6">
-            <v-text-field v-model="serialInput" label="أدخل السيريال أو امسح الباركود" clearable hide-details ref="serialInputField">
+          <!-- product Search Scanner -->
+          <v-col class="py-0" cols="12" sm="6">
+            <v-text-field class="ma-0" v-model="serialInput" label="أدخل السيريال أو امسح الباركود" clearable hide-details ref="serialInputField">
               <template #prepend>
                 <v-tooltip text="فتح الكاميرا" location="top">
                   <template #activator="{ props }">
@@ -90,11 +104,11 @@
             </v-text-field>
           </v-col>
         </v-row>
-
         <!-- Items Table -->
+        <div v-if="itemsError" class="text-error text-center text-caption mt-1">{{ itemsError }}</div>
         <v-data-table :headers="headers" :items="form.items" item-key="id" class="elevation-1" hide-default-footer density="compact">
           <template #no-data>
-            <v-row class="pa-4">
+            <v-row class="pa-1">
               <v-col class="text-center text-grey"> لا توجد منتجات مضافة </v-col>
             </v-row>
           </template>
@@ -143,8 +157,8 @@
           </template>
         </v-data-table>
 
-        <!-- Total -->
-        <v-row justify="end" class="mt-4">
+        <!-- Total  amount -->
+        <v-row justify="end" class="ma-3">
           <v-chip color="primary" class="pa-3 text-h6">
             <v-icon left>ri-calculator-line</v-icon>
             المجموع الكلي: {{ formatCurrency(form.total_amount) }}
@@ -174,7 +188,17 @@
     <!-- Actions -->
     <v-card-actions class="actions-sticky justify-start">
       <v-spacer></v-spacer>
-      <v-btn class="elevation-4 px-4" color="primary" append-icon="ri-save-3-line" type="submit" form="invoice-form" :loading="isSaving"> حفظ </v-btn>
+      <v-btn
+        class="elevation-4 px-4"
+        color="primary"
+        append-icon="ri-save-3-line"
+        type="submit"
+        form="invoice-form"
+        :class="{ 'forbidden-cursor': !formValid }"
+        :loading="isSaving"
+      >
+        حفظ
+      </v-btn>
       <v-spacer></v-spacer>
       <v-btn class="elevation-4 px-4" color="error" append-icon="ri-close-line" @click="$emit('close')"> إلغاء </v-btn>
       <v-spacer></v-spacer>
@@ -210,6 +234,9 @@ const barcodeVideo = ref(null);
 const serialInput = ref('');
 const serialInputField = ref(null);
 const selectedUser = ref(null);
+const formRef = ref(null);
+const formValid = ref(false);
+const itemsError = ref('');
 
 // Reactive state
 const form = ref({
@@ -273,8 +300,7 @@ async function searchUsers(query) {
 }
 
 async function searchProducts(query, page = 1) {
-  // عدل حسب مسار الـ API لديك
-  const { data } = await getAll('products', { search: query, page });
+  const { data } = await getAll('product-variants/search-by-product', { search: query, page });
   return data;
 }
 
@@ -309,12 +335,10 @@ const onUserSearch = async val => {
 
 const onProductSearch = async val => {
   productSearchText.value = val || '';
-
   if (!val || val.length < 3) {
     products.value = [];
     return;
   }
-
   try {
     isLoadingProducts.value = true;
     const data = await searchProducts(val, 1);
@@ -322,9 +346,16 @@ const onProductSearch = async val => {
     productHasMore.value = data.meta ? data.meta.current_page < data.meta.last_page : false;
   } catch (error) {
     products.value = [];
-    console.error('Error searching products:', error);
   } finally {
     isLoadingProducts.value = false;
+  }
+};
+
+// عند اختيار منتج من البحث اليدوي
+const onProductSelect = productId => {
+  const product = products.value.find(p => p.id === productId);
+  if (product) {
+    addOrIncrement(product);
   }
 };
 
@@ -346,13 +377,14 @@ const handleScroll = async e => {
 };
 
 // Items Management
-// أضف دالة لإضافة أو زيادة المنتج بناءً على كائن المنتج
 const addOrIncrement = product => {
   if (!product) return;
-  const existingItem = form.value.items.find(i => i.id === product.id);
+  // البحث عن المنتج في الفاتورة حسب id أو حسب id وvariant_id إذا كان لديك متغيرات
+  const existingItem = form.value.items.find(i => i.id === product.id && (!product.variant_id || i.variant_id === product.variant_id));
   if (existingItem) {
-    existingItem.quantity++;
+    existingItem.quantity = Number(existingItem.quantity || 1) + 1;
     existingItem.total = existingItem.unit_price * existingItem.quantity - existingItem.discount;
+    playBeep('success');
   } else {
     form.value.items.push({
       id: product.id,
@@ -361,17 +393,19 @@ const addOrIncrement = product => {
       unit_price: product.price,
       discount: 0,
       total: product.price,
+      ...(product.variant_id ? { variant_id: product.variant_id } : {}),
     });
+    playBeep('success');
   }
+  itemsError.value = '';
   updateTotal();
-};
-
-// عند اختيار منتج من البحث اليدوي
-const onProductSelect = productId => {
-  const product = products.value.find(p => p.id === productId);
-  if (product) {
-    addOrIncrement(product);
-  }
+  setTimeout(() => {
+    const searchInput = document.querySelector('input[aria-label="ابحث عن منتج"]');
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.select();
+    }
+  }, 100);
 };
 
 // عند البحث بالسيريال
@@ -452,8 +486,20 @@ watch(showScanner, val => {
   }
 });
 
+watch(formValid, (newVal, oldVal) => {
+  itemsError.value = '';
+});
+
 // Save Form
 const save = async () => {
+  itemsError.value = '';
+  if (!formRef.value) return;
+  if (!form.value.items || form.value.items.length < 1) {
+    itemsError.value = 'أضف منتج واحد على الأقل';
+    return;
+  }
+  const { valid } = await formRef.value.validate();
+  if (!valid) return;
   try {
     isSaving.value = true;
     const payload = {
@@ -507,3 +553,9 @@ function playBeep(type) {
   }
 }
 </script>
+
+<style scoped>
+.forbidden-cursor {
+  cursor: not-allowed !important;
+}
+</style>

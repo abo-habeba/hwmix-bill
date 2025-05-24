@@ -132,7 +132,7 @@ function openRoleDetails(role) {
               <VDivider />
               <VCardText>
                 <!-- 👉 Form -->
-                <VForm class="mt-6">
+                <VForm class="mt-6" ref="userForm" v-model="userFormValid">
                   <VRow>
                     <!-- 👉 First Name -->
                     <VCol sm="6" md="4" cols="12">
@@ -179,7 +179,7 @@ function openRoleDetails(role) {
                     </VCol>
                     <!-- 👉 Form Actions -->
                     <VCol cols="12" class="d-flex flex-wrap gap-4">
-                      <VBtn @click="sendData"> حفظ </VBtn>
+                      <VBtn :disabled="!userFormValid" :class="{ 'forbidden-cursor': !userFormValid }" @click="sendData"> حفظ </VBtn>
                       <!-- reset Form -->
                       <!-- <VBtn color="secondary" variant="outlined" type="reset" @click.prevent="resetForm"> Reset </VBtn> -->
                     </VCol>
@@ -208,3 +208,9 @@ function openRoleDetails(role) {
     </v-tabs-window>
   </v-card>
 </template>
+
+<style scoped>
+.forbidden-cursor {
+  cursor: not-allowed !important;
+}
+</style>

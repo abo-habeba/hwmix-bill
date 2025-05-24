@@ -70,17 +70,20 @@ function getProducts() {
     attributes.value = res.data;
   });
 }
+
 function getAttributes() {
   getAll('attributes').then(res => {
     attributes.value = res.data;
   });
 }
+
 function getProductVariants() {
   getAll('product-variants').then(res => {
     productVariants.value = res.data;
     console.log(productVariants.value);
   });
 }
+
 function getWarehouse() {
   getAll('warehouses').then(async res => {
     warehouses.value = res.data;
@@ -174,6 +177,7 @@ const openAddDialog = () => {
   editIndex.value = null;
   dialog.value = true;
 };
+
 const ProductEditDialog = ref(false);
 const ProductVariantEdit = ref(null);
 // فتح الديالوج للتعديل: نسخ بيانات المنتج إلى النموذج ووضع index المنتج في editIndex
@@ -216,8 +220,13 @@ const productRules = {
   description_long: [v => !v || typeof v === 'string' || 'الوصف المفصل يجب أن يكون نصًا'],
 };
 // حفظ المنتج سواء للإضافة أو التعديل
-const saveProduct = () => {
-  // لا داعي للتحقق اليدوي أو إشعارات التوست، نعتمد فقط على vuetify rules
+const productForm = ref(null); // إضافة المرجع الصحيح للنموذج
+const productFormValid = ref(false);
+const saveProduct = async () => {
+  if (!productForm.value) return;
+  const { valid } = await productForm.value.validate();
+  if (!valid) return;
+
   const productToSend = prepareProduct(newProduct.value);
   if (editIndex.value !== null) {
     // تعديل المنتج
@@ -329,198 +338,202 @@ function closeDialog() {
           <h2>{{ isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد' }}</h2>
         </v-card-title>
         <v-card-text :class="xs ? 'px-2' : 'px-5'">
-          <!-- بيانات المنتج الأساسية -->
-          <v-row class="elevation-10 my-3">
-            <v-col cols="12" md="6">
-              <v-text-field v-model="newProduct.name" label="اسم المنتج" :rules="productRules.name" required />
-            </v-col>
-            <!--is_active && featured && is_returnable -->
-            <v-col cols="12">
-              <v-row>
-                <v-col>
-                  <v-switch v-model="newProduct.is_active" label="نشط" />
-                </v-col>
-                <v-col>
-                  <v-switch v-model="newProduct.featured" label="مميز" />
-                </v-col>
-                <v-col>
-                  <v-switch v-model="newProduct.is_returnable" label="قابل للإرجاع" />
-                </v-col>
-              </v-row>
-            </v-col>
-            <!-- Categories && brands && warehouses  -->
-            <v-col cols="12">
-              <v-row>
-                <v-col>
-                  <v-combobox
-                    v-model="newProduct.category_id"
-                    item-value="id"
-                    item-title="name"
-                    :items="filteredCategories || []"
-                    label="الفئة"
-                    @update:modelValue="newProduct.category_id = $event ? $event.id : null"
-                    v-model:search="searchCategory"
-                    hide-no-data
-                    hide-selected
-                  />
-                </v-col>
-                <v-col class="px-0">
-                  <v-combobox
-                    v-model="newProduct.brand_id"
-                    item-value="id"
-                    item-title="name"
-                    :items="brands || []"
-                    label="العلامة التجارية"
-                    @update:modelValue="newProduct.brand_id = $event ? $event.id : null"
-                    v-model:search="searchBrand"
-                    hide-no-data
-                    hide-selected
-                    :rules="productRules.brand_id"
-                  />
-                </v-col>
-                <v-col>
-                  <v-select
-                    v-if="warehouses.length"
-                    v-model="newProduct.warehouse_id"
-                    item-value="id"
-                    item-title="name"
-                    :items="warehouses || []"
-                    label="المخزن"
-                    :rules="productRules.warehouse_id"
-                    required
-                  />
-                  <v-select
-                    v-else
-                    :items="[{ id: null, name: 'لا يوجد مخازن، يرجى إضافة مخزن أولاً', disabled: true }]"
-                    label="المخزن"
-                    item-title="name"
-                    :value="null"
-                    required
-                  />
-                </v-col>
-              </v-row>
-            </v-col>
-            <v-col cols="12">
-              <v-textarea rows="1" auto-grow v-model="newProduct.description" label="الوصف القصير" :rules="productRules.description" />
-            </v-col>
-            <v-col cols="12">
-              <v-textarea rows="2" auto-grow v-model="newProduct.description_long" label="الوصف المفصل" :rules="productRules.description_long" />
-            </v-col>
-          </v-row>
-          <!-- بيانات المتغيرات -->
-          <v-card-title> تفاصيل المنتج الإضافية </v-card-title>
-          <v-card-subtitle class="pb-2"> مثل السعر والصور والخصومات </v-card-subtitle>
-          <v-row class="elevation-10 my-5" v-for="(variant, vIndex) in newProduct.variants" :key="vIndex">
-            <v-col cols="12">
-              <!--purchase_price && retail_price && wholesale_price -->
-              <v-row>
-                <v-col cols="4">
-                  <v-text-field v-model="variant.purchase_price" label="سعر الشراء" type="number" />
-                </v-col>
-                <v-col cols="4">
-                  <v-text-field v-model="variant.retail_price" label="سعر التجزئة" type="number" />
-                </v-col>
-                <v-col cols="4">
-                  <v-text-field v-model="variant.wholesale_price" label="سعر الجملة" type="number" />
-                </v-col>
-              </v-row>
-            </v-col>
-            <!-- tax rate && discount -->
-            <v-col cols="12">
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field v-model="variant.tax_rate" label="نسبة الضريبة" type="number" />
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field v-model="variant.discount" label="الخصم" type="number" />
-                </v-col>
-              </v-row>
-            </v-col>
-            <v-col class="py-0" cols="12">
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field v-model="variant.expiry_date" label="تاريخ الانتهاء" type="date" />
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field v-model="variant.image_url" label="رابط الصورة" />
-                </v-col>
-              </v-row>
-            </v-col>
-            <!-- قسم اختيار الخصائص المتعددة -->
-            <v-col cols="12">
-              <!-- زر إضافة خاصية -->
-              <v-btn variant="text" color="primary" @click="variant.attributes.push({ attribute_id: null, attribute_value_id: null, values: [] })">
-                + إضافة خصائص
-              </v-btn>
-              <v-card-subtitle>اختيار خصائص مثل اللون والحجم</v-card-subtitle>
-
-              <div v-for="(attr, aIndex) in variant.attributes" :key="aIndex" class="d-flex align-center mb-2">
-                <v-col cols="5">
-                  <v-combobox
-                    v-model="attr.attribute_id"
-                    :items="attributes || []"
-                    item-title="name"
-                    item-value="id"
-                    label="الخاصية"
-                    class="mr-2"
-                    @update:modelValue="attr.attribute_id = $event ? $event.id : null"
-                  >
-                    <template v-slot:item="{ props, item }">
-                      <v-list-item
-                        v-bind="props"
-                        @click="
-                          () => {
-                            attr.attribute_value_id = null;
-                            attr.values = item.raw.values;
-                          }
-                        "
-                      >
-                      </v-list-item>
-                    </template>
-                  </v-combobox>
-                </v-col>
-
-                <v-col cols="5">
-                  <v-combobox
-                    v-model="attr.attribute_value_id"
-                    :items="attr.values || []"
-                    item-title="name"
-                    item-value="id"
-                    label="اختر قيمة"
-                    class="mr-2"
-                    :return-object="false"
-                  >
-                    <template v-slot:item="{ props, item }">
-                      <v-list-item append-icon="ri-pantone-fill" :style="{ color: item.raw.value || '' }" v-bind="props"> </v-list-item>
-                    </template>
-                  </v-combobox>
-                </v-col>
-
-                <v-col cols="2">
-                  <v-btn variant="text" class="ms-2" color="red" icon @click="variant.attributes.splice(aIndex, 1)">
-                    <v-icon>ri-delete-bin-line</v-icon>
-                  </v-btn>
-                </v-col>
-              </div>
-            </v-col>
-            <v-col cols="12" md="12">
-              <v-btn prepend-icon="ri-delete-bin-line" color="error" @click="removeVariant(vIndex)">حذف التفاصيل</v-btn>
-            </v-col>
-          </v-row>
-          <v-btn variant="text" @click="addVariant" class="mb-3">+ إضافة تفاصيل جديدة</v-btn>
-          <v-divider class="my-4"></v-divider>
-          <div style="display: flex; position: sticky; bottom: 4px; left: 0; right: 0; width: 100%">
-            <v-row>
-              <v-col cols="4">
-                <v-btn prepend-icon="ri-close-line" color="error" @click="closeDialog"> إلغاء </v-btn>
+          <v-form ref="productForm" v-model="productFormValid">
+            <!-- بيانات المنتج الأساسية -->
+            <v-row class="elevation-10 my-3">
+              <v-col cols="12" md="6">
+                <v-text-field v-model="newProduct.name" label="اسم المنتج" :rules="productRules.name" required />
               </v-col>
-              <v-col cols="4" class="text-center">
-                <v-btn prepend-icon="ri-save-line" color="success" @click="saveProduct">
-                  {{ isEditMode ? 'حفظ التعديلات' : 'إضافة المنتج' }}
-                </v-btn>
+              <!--is_active && featured && is_returnable -->
+              <v-col cols="12">
+                <v-row>
+                  <v-col>
+                    <v-switch v-model="newProduct.is_active" label="نشط" :color="newProduct.is_active ? 'primary' : 'grey'" />
+                  </v-col>
+                  <v-col>
+                    <v-switch v-model="newProduct.featured" label="مميز" :color="newProduct.featured ? 'primary' : 'grey'" />
+                  </v-col>
+                  <v-col>
+                    <v-switch v-model="newProduct.is_returnable" label="قابل للإرجاع" :color="newProduct.is_returnable ? 'primary' : 'grey'" />
+                  </v-col>
+                </v-row>
+              </v-col>
+              <!-- Categories && brands && warehouses  -->
+              <v-col cols="12">
+                <v-row>
+                  <v-col>
+                    <v-combobox
+                      v-model="newProduct.category_id"
+                      item-value="id"
+                      item-title="name"
+                      :items="filteredCategories || []"
+                      label="الفئة"
+                      @update:modelValue="newProduct.category_id = $event ? $event.id : null"
+                      v-model:search="searchCategory"
+                      hide-no-data
+                      hide-selected
+                      :rules="[v => !!v || 'الفئة مطلوبة']"
+                      required
+                    />
+                  </v-col>
+                  <v-col class="px-0">
+                    <v-combobox
+                      v-model="newProduct.brand_id"
+                      item-value="id"
+                      item-title="name"
+                      :items="brands || []"
+                      label="العلامة التجارية"
+                      @update:modelValue="newProduct.brand_id = $event ? $event.id : null"
+                      v-model:search="searchBrand"
+                      hide-no-data
+                      hide-selected
+                      :rules="productRules.brand_id"
+                    />
+                  </v-col>
+                  <v-col>
+                    <v-select
+                      v-if="warehouses.length"
+                      v-model="newProduct.warehouse_id"
+                      item-value="id"
+                      item-title="name"
+                      :items="warehouses || []"
+                      label="المخزن"
+                      :rules="productRules.warehouse_id"
+                      required
+                    />
+                    <v-select
+                      v-else
+                      :items="[{ id: null, name: 'لا يوجد مخازن، يرجى إضافة مخزن أولاً', disabled: true }]"
+                      label="المخزن"
+                      item-title="name"
+                      :value="null"
+                      required
+                    />
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12">
+                <v-textarea rows="1" auto-grow v-model="newProduct.description" label="الوصف القصير" :rules="productRules.description" />
+              </v-col>
+              <v-col cols="12">
+                <v-textarea rows="2" auto-grow v-model="newProduct.description_long" label="الوصف المفصل" :rules="productRules.description_long" />
               </v-col>
             </v-row>
-          </div>
+            <!-- بيانات المتغيرات -->
+            <v-card-title> تفاصيل المنتج الإضافية </v-card-title>
+            <v-card-subtitle class="pb-2"> مثل السعر والصور والخصومات </v-card-subtitle>
+            <v-row class="elevation-10 my-5" v-for="(variant, vIndex) in newProduct.variants" :key="vIndex">
+              <v-col cols="12">
+                <!--purchase_price && retail_price && wholesale_price -->
+                <v-row>
+                  <v-col cols="4">
+                    <v-text-field v-model="variant.purchase_price" label="سعر الشراء" type="number" />
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field v-model="variant.retail_price" label="سعر التجزئة" type="number" />
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field v-model="variant.wholesale_price" label="سعر الجملة" type="number" />
+                  </v-col>
+                </v-row>
+              </v-col>
+              <!-- tax rate && discount -->
+              <v-col cols="12">
+                <v-row>
+                  <v-col cols="6">
+                    <v-text-field v-model="variant.tax_rate" label="نسبة الضريبة" type="number" />
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field v-model="variant.discount" label="الخصم" type="number" />
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col class="py-0" cols="12">
+                <v-row>
+                  <v-col cols="6">
+                    <v-text-field v-model="variant.expiry_date" label="تاريخ الانتهاء" type="date" />
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field v-model="variant.image_url" label="رابط الصورة" />
+                  </v-col>
+                </v-row>
+              </v-col>
+              <!-- قسم اختيار الخصائص المتعددة -->
+              <v-col cols="12">
+                <!-- زر إضافة خاصية -->
+                <v-btn variant="text" color="primary" @click="variant.attributes.push({ attribute_id: null, attribute_value_id: null, values: [] })">
+                  + إضافة خصائص
+                </v-btn>
+                <v-card-subtitle>اختيار خصائص مثل اللون والحجم</v-card-subtitle>
+
+                <div v-for="(attr, aIndex) in variant.attributes" :key="aIndex" class="d-flex align-center mb-2">
+                  <v-col cols="5">
+                    <v-combobox
+                      v-model="attr.attribute_id"
+                      :items="attributes || []"
+                      item-title="name"
+                      item-value="id"
+                      label="الخاصية"
+                      class="mr-2"
+                      @update:modelValue="attr.attribute_id = $event ? $event.id : null"
+                    >
+                      <template v-slot:item="{ props, item }">
+                        <v-list-item
+                          v-bind="props"
+                          @click="
+                            () => {
+                              attr.attribute_value_id = null;
+                              attr.values = item.raw.values;
+                            }
+                          "
+                        >
+                        </v-list-item>
+                      </template>
+                    </v-combobox>
+                  </v-col>
+
+                  <v-col cols="5">
+                    <v-combobox
+                      v-model="attr.attribute_value_id"
+                      :items="attr.values || []"
+                      item-title="name"
+                      item-value="id"
+                      label="اختر قيمة"
+                      class="mr-2"
+                      :return-object="false"
+                    >
+                      <template v-slot:item="{ props, item }">
+                        <v-list-item append-icon="ri-pantone-fill" :style="{ color: item.raw.value || '' }" v-bind="props"> </v-list-item>
+                      </template>
+                    </v-combobox>
+                  </v-col>
+
+                  <v-col cols="2">
+                    <v-btn variant="text" class="ms-2" color="red" icon @click="variant.attributes.splice(aIndex, 1)">
+                      <v-icon>ri-delete-bin-line</v-icon>
+                    </v-btn>
+                  </v-col>
+                </div>
+              </v-col>
+              <v-col cols="12" md="12">
+                <v-btn prepend-icon="ri-delete-bin-line" color="error" @click="removeVariant(vIndex)">حذف التفاصيل</v-btn>
+              </v-col>
+            </v-row>
+            <v-btn variant="text" @click="addVariant" class="mb-3">+ إضافة تفاصيل جديدة</v-btn>
+            <v-divider class="my-4"></v-divider>
+            <div style="display: flex; position: sticky; bottom: 4px; left: 0; right: 0; width: 100%">
+              <v-row>
+                <v-col cols="4">
+                  <v-btn prepend-icon="ri-close-line" color="error" @click="closeDialog"> إلغاء </v-btn>
+                </v-col>
+                <v-col cols="4" class="text-center">
+                  <v-btn prepend-icon="ri-save-line" color="success" :class="{ 'forbidden-cursor': !productFormValid }" @click="saveProduct">
+                    {{ isEditMode ? 'حفظ التعديلات' : 'إضافة المنتج' }}
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </div>
+          </v-form>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -624,3 +637,9 @@ function closeDialog() {
     <!-- زر إرسال المنتجات -->
   </v-container>
 </template>
+
+<style scoped>
+.forbidden-cursor {
+  cursor: not-allowed !important;
+}
+</style>

@@ -3,12 +3,16 @@
     <v-card>
       <v-card-title>{{ isEditMode ? 'تعديل خاصية' : 'اضافة خاصية جديدة' }}</v-card-title>
       <v-card-text>
-        <v-text-field v-model="nameValue" label="اسم الخاصية" :rules="nameRules" :error-messages="errorMessage" required />
+        <v-form ref="formRef" v-model="formValid">
+          <v-text-field v-model="nameValue" label="اسم الخاصية" :rules="nameRules" required />
+        </v-form>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="grey darken-1" text @click="closeDialog(null)">الغاء</v-btn>
-        <v-btn color="blue darken-1" text @click="handleSubmit">{{ isEditMode ? 'تعديل' : 'حفظ' }}</v-btn>
+        <v-btn color="blue darken-1" text :class="{ 'forbidden-cursor': !formValid }" @click="handleSubmit">
+          {{ isEditMode ? 'تعديل' : 'حفظ' }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -29,6 +33,8 @@ const localAddDialog = ref(props.addDialog);
 const nameValue = ref('');
 const errorMessage = ref('');
 const isEditMode = computed(() => !!props.editAttribute);
+const formRef = ref(null);
+const formValid = ref(false);
 
 watch(
   () => props.addDialog,
@@ -58,13 +64,10 @@ const closeDialog = payload => {
 
 async function handleSubmit() {
   errorMessage.value = '';
-  // تحقق من الفاليديشن عبر v-form
-  const form = document.querySelector('.v-form');
-  if (form && form.__vue__) {
-    // إذا كان v-form موجودًا في الصفحة
-    if (!form.__vue__.validate()) return;
-  }
-  // تجهيز البيانات
+  if (!formRef.value) return;
+
+  const { valid } = await formRef.value.validate();
+  if (!valid) return;
   const payload = { name: nameValue.value };
   let response;
   try {
@@ -85,7 +88,7 @@ async function handleSubmit() {
 }
 </script>
 
-<style scoped>
+<style>
 .gap-2 {
   gap: 8px;
 }
