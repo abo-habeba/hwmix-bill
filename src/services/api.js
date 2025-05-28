@@ -3,7 +3,8 @@ import { serialize } from 'object-to-formdata';
 import { useUserStore } from '@/stores/user';
 // http://10.0.0.64:8008/   bill-api.hwnix.com  http://127.0.0.1:8000/
 const apiClient = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' ? 'https://bill-api.hwnix.com/api/' : 'http://10.0.0.64:8008/api/',
+  // baseURL: process.env.NODE_ENV === 'production' ? 'https://bill-api.hwnix.com/api/' : 'http://10.0.0.64:8008/api/',
+  baseURL: process.env.NODE_ENV === 'production' ? 'https://bill-api.hwnix.com/api/' : 'http://127.0.0.1:8000/api/',
   headers: {
     'Cache-Control': 'no-cache',
     Pragma: 'no-cache',

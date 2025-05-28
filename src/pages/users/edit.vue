@@ -4,7 +4,7 @@ import { getOne, saveItem, getAll } from '@/services/api';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
-import editUserRolse from '../../components/users/editUserRolse.vue';
+import UsersEditUserRolse from '../../components/users/UsersEditUserRolse.vue';
 import RoleDetails from '@/components/roles/RoleDetails.vue';
 import { useUserStore } from '@/stores/user';
 const { xs } = useDisplay();
@@ -192,7 +192,7 @@ function openRoleDetails(role) {
       </v-tabs-window-item>
       <v-tabs-window-item value="role">
         <v-card elevation="0" class="ma-4">
-          <editUserRolse v-if="roles && user" v-model:user="user" :user="user" :roles="roles" />
+          <UsersEditUserRolse v-if="roles && user" v-model:user="user" :user="user" :roles="roles" />
           <v-card-title class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4"> ادوار المستخدم </v-card-title>
           <v-card-text v-if="user?.roles.length > 0">
             <span v-for="(rol, index) in user.roles" :key="index">
