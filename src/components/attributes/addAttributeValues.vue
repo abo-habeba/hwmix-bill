@@ -101,7 +101,7 @@ async function saveValue() {
     attributeValue.value.attribute_id = props.attributes[0].id;
   }
   try {
-    const response = await saveItem('attribute-value', attributeValue.value, attributeValue.value.id ? attributeValue.value.id : false, false, true);
+    const response = await saveItem('attribute-value', attributeValue.value, attributeValue.value.id, true);
     if (isEditMode.value && attributeValue.value.id) {
       toast.success('تم تعديل القيمة بنجاح');
       emit('value-edited', response.data);

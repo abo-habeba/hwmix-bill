@@ -3,7 +3,7 @@
     ref="productAutocomplete"
     v-model="selectedProduct"
     :items="products"
-    item-title="name"
+    :item-title="productTitle"
     item-value="id"
     :label="label"
     prepend-inner-icon="ri-search-line"
@@ -14,12 +14,22 @@
     @update:search="onProductSearch"
     @update:model-value="onProductSelect"
     hide-details
-  />
+  >
+    <template v-slot:item="{ props, item }">
+      <v-list-item class="px-2 py-0" v-bind="props" :prepend-avatar="item.raw?.imag" :title="item.raw.name">
+        <template #subtitle>
+          <AttributesDisplay v-if="item.raw.attributes.length" :attributes="item.raw.attributes" />
+        </template>
+      </v-list-item>
+    </template>
+  </v-autocomplete>
+  <!-- stop -->
 </template>
 
 <script setup>
 import { ref, watch, defineProps, defineEmits, computed, nextTick } from 'vue';
 import { getAll } from '@/services/api';
+import AttributesDisplay from '@/components/products/AttributesDisplay.vue';
 
 const props = defineProps({
   modelValue: [Number, String, Object, null],
@@ -46,6 +56,25 @@ const noProductText = computed(() => {
   return isLoading.value ? 'جاري البحث...' : 'لا يوجد منتج';
 });
 
+function productTitle(item) {
+  if (!item) return '';
+  const _name = item.full_name || item.name || 'بدون اسم';
+  // const _description = item.description ? `${item.description}` : ''; // ${_description}
+  let _attributes = 'بدون خصائص';
+  if (Array.isArray(item.attributes) && item.attributes.length) {
+    // الحصول علي الخصائص والقيم الخاصه بها
+    _attributes = item.attributes
+      .map(attr => {
+        // const attrName = attr.attribute?.name || '';
+        const attrValue = attr.attribute_value?.name || ''; // attrName &&  // ${attrName}:
+        return attrValue ? ` ${attrValue}` : ''; // | ${_attributes}
+      })
+      .filter(Boolean)
+      .join(' | ');
+  }
+  // عرض التنسيق المناسب
+  return `${_name}`.replace(/\s+/g, ' ').trim();
+}
 let searchTimeout = null;
 function onProductSearch(val) {
   searchText.value = val;
@@ -54,7 +83,6 @@ function onProductSearch(val) {
     loadProducts(true);
   }, 400);
 }
-
 async function loadProducts(reset = false) {
   if (searchText.value.length < 3) return;
 
@@ -88,6 +116,5 @@ function onProductSelect(val) {
       input.select();
     }
   });
-  emit('update:modelValue', val);
 }
 </script>

@@ -42,11 +42,11 @@
             <InvoiceTypeSelect v-model="form.invoice_type_id" />
           </v-col>
           <!-- بحث المنتج -->
-          <v-col class="py-0" cols="12" sm="6">
+          <v-col class="py-0" cols="6" sm="6">
             <ProductSearchInput v-model="productSearch" :label="'ابحث عن منتج'" @update:model-value="onProductSelect" />
           </v-col>
           <!-- إدخال السيريال أو مسح الباركود -->
-          <v-col class="py-0" cols="12" sm="6">
+          <v-col class="py-0" cols="6" sm="6">
             <SerialOrBarcodeInput v-model="serialInput" @update:model-value="onSerialInputEnter" />
           </v-col>
         </v-row>
@@ -54,51 +54,8 @@
         <!-- عرض رسالة خطأ في حال وجودها -->
         <div v-if="itemsError" class="text-error text-center text-caption mt-1">{{ itemsError }}</div>
 
-        <!-- جدول العناصر -->
-        <v-data-table :headers="headers" :items="form.items" item-key="id" class="elevation-1 ma-3" hide-default-footer density="compact">
-          <template #no-data>
-            <v-row class="pa-1">
-              <v-col class="text-center text-grey"> لا توجد منتجات مضافة </v-col>
-            </v-row>
-          </template>
-
-          <template #item.name="{ item }">{{ item.name }}</template>
-
-          <template #item.quantity="{ item }">
-            <v-text-field
-              v-model.number="item.quantity"
-              type="number"
-              min="1"
-              dense
-              hide-details
-              style="max-width: 60px"
-              @input="updateItemQuantity(item)"
-            />
-          </template>
-
-          <template #item.unit_price="{ item }">{{ formatCurrency(item.unit_price) }}</template>
-
-          <template #item.discount="{ item }">
-            <v-text-field
-              v-model.number="item.discount"
-              type="number"
-              min="0"
-              :max="item.unit_price"
-              dense
-              hide-details
-              style="max-width: 60px"
-              @input="updateItemQuantity(item)"
-            />
-          </template>
-
-          <template #item.total="{ item }">{{ formatCurrency(item.total) }}</template>
-
-          <template #item.actions="{ item }">
-            <v-btn icon color="error" @click="removeInvoiceItem(item.id)">
-              <v-icon>ri-delete-bin-line</v-icon>
-            </v-btn>
-          </template>
-        </v-data-table>
+        <!-- جدول العناصر (جدول Vuetify v-data-table) -->
+        <InvoiceItemsTable :items="form.items" @update-item="updateItemQuantity" @remove-item="removeInvoiceItem" />
 
         <!-- المجموع الكلي -->
         <v-row justify="end" class="ma-3">
@@ -188,18 +145,6 @@ const form = ref({
   customer_id: null,
 });
 
-// --- التعريفات الثابتة ---
-const headers = [
-  { title: 'المنتج', key: 'name' },
-  { title: 'الكمية', key: 'quantity', width: 70 },
-  { title: 'سعر الوحدة', key: 'unit_price', width: 100 },
-  { title: 'الخصم', key: 'discount', width: 80 },
-  { title: 'الإجمالي', key: 'total', width: 120 },
-  { title: 'إجراءات', key: 'actions', width: 80, sortable: false },
-];
-
-//  * تحميل بيانات الفاتورة عند وجود ID (تعديل)
-
 async function loadInvoice(id) {
   try {
     const res = await getOne('invoices', id);
@@ -241,20 +186,63 @@ async function searchProductBySerial(serial) {
 
 // --- إضافة أو زيادة كمية المنتج في الفاتورة ---
 function addOrIncrement(product) {
-  if (!product) return;
+  if (!product) {
+    console.warn('addOrIncrement: المنتج غير موجود', product);
+    return;
+  }
+  // تحديد نوع المستخدم
+  let userType = selectedUser.value?.customer_type || 'retail';
+  // استخراج سعر الوحدة حسب نوع المستخدم
+  let price = 0;
+  if (userType === 'wholesale') {
+    price =
+      Number(product.wholesale_price) ||
+      Number(product.retail_price) ||
+      Number(product.price) ||
+      Number(product.unit_price) ||
+      Number(product.purchase_price) ||
+      0;
+  } else {
+    price =
+      Number(product.retail_price) ||
+      Number(product.wholesale_price) ||
+      Number(product.price) ||
+      Number(product.unit_price) ||
+      Number(product.purchase_price) ||
+      0;
+  }
   const existingItem = form.value.items.find(i => i.id === product.id);
   if (existingItem) {
-    existingItem.quantity++;
+    existingItem.quantity += 1;
+    existingItem.unit_price = price; // تحديث السعر في حال تغير
+    updateItemQuantity(existingItem);
   } else {
-    form.value.items.push({
+    const newItem = {
       id: product.id,
       name: product.name,
       quantity: 1,
-      unit_price: product.price,
+      unit_price: price,
       discount: 0,
-      total: product.price,
-    });
+      total: price,
+    };
+    form.value.items.push(newItem);
+    updateTotal();
   }
+}
+
+// --- تحديث كمية أو خصم عنصر في الفاتورة ---
+function updateItemQuantity(item) {
+  if (!item) return;
+  const prevQuantity = item.quantity;
+  item.quantity = Math.max(1, Number(item.quantity) || 1);
+  item.discount = Math.max(0, Number(item.discount) || 0);
+  item.total = item.unit_price * item.quantity - item.discount;
+  updateTotal();
+}
+
+// --- حذف عنصر من الفاتورة ---
+function removeInvoiceItem(id) {
+  form.value.items = form.value.items.filter(i => i.id !== id);
   updateTotal();
 }
 
@@ -268,9 +256,7 @@ function onSerialInputEnter(serial) {
 function formatCurrency(value) {
   const number = Number(value);
   if (isNaN(number)) return '';
-  return number.toLocaleString('en-EG', {
-    style: 'currency',
-    currency: 'EGP',
+  return number.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -299,15 +285,6 @@ function updateTotal() {
   form.value.total_amount = total;
 }
 
-// --- مراقبة تغييرات السيريال ---
-watch(serialInput, newVal => {
-  if (!newVal) return;
-  const timer = setTimeout(() => {
-    searchProductBySerial(newVal);
-  }, 300);
-  return () => clearTimeout(timer);
-});
-
 // --- تحميل بيانات الفاتورة وأنواع الفواتير عند التMount ---
 onMounted(() => {
   if (props.invoiceId) {
@@ -317,6 +294,7 @@ onMounted(() => {
 
 // --- معالجة اختيار المنتج من ProductSearchInput ---
 function onProductSelect(product) {
+  console.log('🎯 onProductSelect called with:', product?.id, product?.name);
   if (product) {
     addOrIncrement(product);
   }
@@ -326,5 +304,13 @@ function onProductSelect(product) {
 <style scoped>
 .forbidden-cursor {
   cursor: not-allowed !important;
+}
+.very-small-input {
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 45px !important;
+  padding: 2px 3px !important;
+  font-size: 13px !important;
+  height: 28px !important;
 }
 </style>

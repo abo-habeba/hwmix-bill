@@ -1,30 +1,53 @@
 <template>
   <v-container>
     <!-- Button to open the dialog -->
-    <v-btn color="primary" @click="dialog = true">اضافة علامة تجارية جديدة</v-btn>
+    <v-btn prepend-icon="ri-add-line" color="primary" @click="openBrandDialog">اضافة علامة تجارية جديدة</v-btn>
 
     <!-- Brands List -->
     <v-card class="mt-4 pa-3">
       <v-card-title> العلامات التجارية</v-card-title>
-      <v-divider></v-divider>
-      <div class="d-flex flex-wrap gap-2 pa-3">
-        <v-chip class="pa-1" v-for="brand in brands" :key="brand.id" closable @click:close="confirmDelete(brand.id)">
-          {{ brand.name }}
-        </v-chip>
-        <v-chip v-if="brands.length === 0">لا توجد علامات تجارية حتى الآن</v-chip>
-      </div>
+      <v-divider class="ma-1"></v-divider>
+      <v-row class="flex-wrap ma-2" style="gap: 16px">
+        <v-col
+          v-for="brand in brands"
+          :key="brand.id"
+          cols="12"
+          sm="auto"
+          class="d-flex align-center elevation-2 pa-1 rounded"
+          style="background: white; min-width: 280px"
+        >
+          <v-avatar variant="text" icon="ri-price-tag-3-line" color="primary" size="32" class="me-3" />
+          <div class="text-lg fw-medium">
+            {{ brand.name }}
+          </div>
+          <v-spacer />
+          <v-btn icon="ri-edit-line" variant="text" color="success" @click.stop="editBrand(brand)" title="تعديل العلامة التجارية" class="mx-1" />
+          <v-btn
+            icon="ri-delete-bin-line"
+            variant="text"
+            color="error"
+            @click.stop="confirmDelete(brand.id)"
+            title="حذف العلامة التجارية"
+            class="mx-1"
+          />
+        </v-col>
+
+        <v-col v-if="brands.length === 0" cols="12">
+          <v-alert type="info" border="start" class="text-center"> لا توجد علامات تجارية حتى الآن </v-alert>
+        </v-col>
+      </v-row>
     </v-card>
-    <!-- Add Brand Dialog -->
+    <!-- Add/Edit Brand Dialog -->
     <v-dialog v-model="dialog" max-width="500px">
       <v-card>
-        <v-card-title>اضافة علامة تجارية جديدة</v-card-title>
+        <v-card-title>{{ brand?.id ? 'تعديل العلامة التجارية' : 'اضافة علامة تجارية جديدة' }}</v-card-title>
         <v-card-text>
           <v-text-field v-model="brand.name" label="اسم العلامة التجارية"></v-text-field>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="dialog = false">الغاء</v-btn>
-          <v-btn color="blue darken-1" text @click="saveBrand">حفظ</v-btn>
+          <v-btn color="blue darken-1" text @click="closeBrandDialog">الغاء</v-btn>
+          <v-btn color="blue darken-1" text @click="saveBrand">{{ brand.id ? 'تعديل' : 'حفظ' }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -55,19 +78,33 @@ const confirmDeleteId = ref(null);
 const brand = ref({ name: '' });
 const brands = ref([]);
 
+function openBrandDialog() {
+  brand.value = { name: '' };
+  dialog.value = true;
+}
+
+function closeBrandDialog() {
+  dialog.value = false;
+  brand.value = { name: '' };
+}
+
 function saveBrand() {
   if (!brand.value.name) {
     toast.error('اسم العلامة التجارية مطلوب');
     return;
   }
-  saveItem('brand', brand.value, false, true, true)
+  const isEdit = !!brand.value.id;
+  saveItem('brand', brand.value, isEdit ? brand.value.id : false, true, true)
     .then(() => {
       getBrands();
       dialog.value = false;
-      toast.success('تم حفظ العلامة التجارية بنجاح');
+      toast.success(isEdit ? 'تم تعديل العلامة التجارية بنجاح' : 'تم حفظ العلامة التجارية بنجاح');
       brand.value = { name: '' };
     })
-    .catch(() => toast.error('حدث خطأ أثناء حفظ العلامة التجارية'));
+    .catch(e => {
+      const msg = e || (isEdit ? 'حدث خطأ أثناء تعديل العلامة التجارية' : 'حدث خطأ أثناء حفظ العلامة التجارية');
+      toast.error(msg);
+    });
 }
 
 function confirmDelete(id) {
@@ -76,19 +113,31 @@ function confirmDelete(id) {
 }
 
 function deleteBrand(id) {
-  deleteOne('brand', id)
+  deleteOne('brand/delete', id, true, true)
     .then(() => {
       getBrands();
       deleteDialog.value = false;
       toast.success('تم حذف العلامة التجارية بنجاح');
     })
-    .catch(() => toast.error('حدث خطأ أثناء حذف العلامة التجارية'));
+    .catch(msg => {
+      toast.error(msg);
+    });
 }
 
 function getBrands() {
   getAll('brands').then(res => {
     brands.value = res.data;
   });
+}
+
+// إضافة دالة editBrand
+function editBrand(b) {
+  brand.value = { ...b };
+  console.log(b);
+  dialog.value = true;
+  return;
+
+  if (!brand.value.name) brand.value.name = '';
 }
 
 onMounted(() => {

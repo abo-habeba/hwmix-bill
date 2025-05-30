@@ -37,6 +37,19 @@ apiClient.interceptors.request.use(config => {
 
   return config;
 });
+apiClient.interceptors.response.use(
+  response => response,
+  error => {
+    // إذا كان الخطأ 401 أو رسالة Unauthenticated
+    if (error?.response?.status === 401 || error?.response?.data?.message === 'Unauthenticated.') {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+      return Promise.reject(error);
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default apiClient;
 
@@ -47,15 +60,15 @@ export const getAll = (apiEndpoint, params = null, loading = false, log = false)
     apiClient
       .get(apiEndpoint, { params: params })
       .then(response => {
-        log ? console.log(` ${log}:  => `, response.data) : '';
+        log ? console.log(`getAll:  => `, response.data) : '';
         resolve(response.data);
-        return response.data;
         loading ? (userStore.loadingApi = false) : '';
       })
       .catch(error => {
+        log ? console.log(`getAll:  => `, error) : '';
         loading ? (userStore.loadingApi = false) : '';
-        log ? console.log(` ${log}:  => `, error) : '';
-        reject(error.response);
+        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء جلب البيانات';
+        reject(msg);
       });
   });
 };
@@ -67,14 +80,15 @@ export const getOne = (apiEndpoint, id, loading = false, log = false) => {
     apiClient
       .get(`${apiEndpoint}/${id}`)
       .then(response => {
+        log ? console.log(`getOne:  => `, response.data) : '';
         loading ? (userStore.loadingApi = false) : '';
-        log ? console.log(` ${log}:  => `, response.data) : '';
         resolve(response.data.data);
       })
       .catch(error => {
+        log ? console.log(`getOne:  => `, error) : '';
         loading ? (userStore.loadingApi = false) : '';
-        log ? console.log(` ${log}:  => `, error) : '';
-        reject(error.response);
+        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء جلب البيانات';
+        reject(msg);
       });
   });
 };
@@ -90,86 +104,110 @@ export const saveItem = (apiEndpoint, data, id = false, loading = false, log = f
       apiClient
         .post(apiEndpointIfId, formData)
         .then(response => {
+          log ? console.log(`saveItem:  => `, response.data) : '';
           loading ? (userStore.loadingApi = false) : '';
-          log ? console.log(` ${log}:  => `, response.data) : '';
           resolve(response.data);
         })
         .catch(error => {
+          log ? console.log(`saveItem:  => `, error) : '';
           loading ? (userStore.loadingApi = false) : '';
-          log ? console.log(` ${log}:  => `, error) : '';
-          reject(error);
+          const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الحفظ';
+          reject(msg);
         });
     } else {
       apiClient
         .post(apiEndpoint, formData)
         .then(response => {
+          log ? console.log(`saveItem:  => `, response.data) : '';
           loading ? (userStore.loadingApi = false) : '';
-          log ? console.log(` ${log}:  => `, response.data) : '';
           resolve(response.data);
         })
         .catch(error => {
-          log ? console.log(` ${log}:  => `, error) : '';
+          log ? console.log(`saveItem:  => `, error) : '';
           loading ? (userStore.loadingApi = false) : '';
-          reject(error);
+          const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الحفظ';
+          reject(msg);
         });
     }
   });
 };
 
 export const deleteOne = (apiEndpoint, id, loading = false, log = false) => {
+  const userStore = useUserStore();
+  loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
     apiClient
       .delete(`${apiEndpoint}/${id}`)
       .then(response => {
-        log ? console.log(` ${log}:  => `, response.data) : '';
+        log ? console.log(`deleteOne:  => `, response.data) : '';
+        loading ? (userStore.loadingApi = false) : '';
         resolve(response.data.data);
       })
       .catch(error => {
-        log ? console.log(` ${log}:  => `, error) : '';
-        reject(error);
+        log ? console.log(`deleteOne:  => `, error) : '';
+        loading ? (userStore.loadingApi = false) : '';
+        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الحذف  ';
+        reject(msg);
       });
   });
 };
+
 export const updateItem = (apiEndpoint, loading = false, log = false) => {
+  const userStore = useUserStore();
+  loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
     apiClient
       .put(`${apiEndpoint}`)
       .then(response => {
-        log ? console.log(` ${log}:  => `, response.data) : '';
+        log ? console.log(`updateItem:  => `, response.data) : '';
+        loading ? (userStore.loadingApi = false) : '';
         resolve(response.data.data);
       })
       .catch(error => {
-        log ? console.log(` ${log}:  => `, error) : '';
-        reject(error);
+        log ? console.log(`updateItem:  => `, error) : '';
+        loading ? (userStore.loadingApi = false) : '';
+        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء التحديث  ';
+        reject(msg);
       });
   });
 };
 
 export const deleteAll = (apiEndpoint, ids, loading = false, log = false) => {
+  const userStore = useUserStore();
+  loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
     apiClient
       .post(apiEndpoint, { item_ids: ids })
       .then(response => {
+        log ? console.log(`deleteAll:  => `, response.data) : '';
+        loading ? (userStore.loadingApi = false) : '';
         resolve(response.data.data);
       })
       .catch(error => {
-        log ? console.log(` ${log}:  => `, error) : '';
-        reject(error);
+        log ? console.log(`deleteAll:  => `, error) : '';
+        loading ? (userStore.loadingApi = false) : '';
+        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الحذف  ';
+        reject(msg);
       });
   });
 };
 
 export const register = (apiEndpoint, id, loading = false, log = false) => {
+  const userStore = useUserStore();
+  loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
     apiClient
       .delete(`${apiEndpoint}/${id}`)
       .then(response => {
-        log ? console.log(` ${log}:  => `, error) : '';
-        resolve(response.data);
+        log ? console.log(`register:  => `, response.data) : '';
+        loading ? (userStore.loadingApi = false) : '';
+        resolve(response.data.data);
       })
       .catch(error => {
-        log ? console.log(` ${log}:  => `, error) : '';
-        reject(error);
+        log ? console.log(`register:  => `, error) : '';
+        loading ? (userStore.loadingApi = false) : '';
+        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الخروج  ';
+        reject(msg);
       });
   });
 };
@@ -180,17 +218,18 @@ export const login = (apiEndpoint, data, loading = false, log = false) => {
     apiClient
       .post(apiEndpoint, data)
       .then(response => {
+        log ? console.log(`login:  => `, response.data) : '';
         localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         loading ? (userStore.loadingApi = false) : '';
-        log ? console.log(` ${log}:  => `, response.data) : '';
         location.reload();
         resolve(response.data);
       })
       .catch(error => {
+        log ? console.log(`login:  => `, error) : '';
         loading ? (userStore.loadingApi = false) : '';
-        log ? console.log(` ${log}:  => `, error) : '';
-        reject(error.response.data);
+        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء تسجيل الدخول';
+        reject(msg);
       });
   });
 };
@@ -202,19 +241,20 @@ export const logOut = (apiEndpoint, loading = false, log = false) => {
     apiClient
       .post(apiEndpoint)
       .then(response => {
+        log ? console.log(`logOut:  => `, response.data) : '';
         delete axios.defaults.headers.common['Authorization'];
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
         localStorage.removeItem('products');
         loading ? (userStore.loadingApi = false) : '';
-        log ? console.log(` ${log}:  => `, response.data) : '';
         resolve(response.data);
         location.reload();
       })
       .catch(error => {
+        log ? console.log(`logOut:  => `, error) : '';
         loading ? (userStore.loadingApi = false) : '';
-        log ? console.log(` ${log}:  => `, error) : '';
-        reject(error);
+        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء تسجيل الخروج';
+        reject(msg);
       });
   });
 };

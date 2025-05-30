@@ -72,7 +72,7 @@ async function handleSubmit() {
   let response;
   try {
     if (isEditMode.value && props.editAttribute) {
-      response = await saveItem('attribute', { ...payload, id: props.editAttribute.id }, false, true, true);
+      response = await saveItem('attribute', { ...payload, id: props.editAttribute.id }, props.editAttribute.id, true, true);
       // تحديث الخاصية في المصفوفة
       const updated = props.attributes.map(attr => (attr.id === props.editAttribute.id ? { ...attr, ...response.data } : attr));
       emit('update:attributes', updated);

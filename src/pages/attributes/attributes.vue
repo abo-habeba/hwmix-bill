@@ -256,7 +256,8 @@ const openAddDialog = () => {
 
 // دالة فتح حوار التعديل
 const openEditDialog = attribute => {
-  editAttribute.value = attribute;
+  // إصلاح: يجب عمل نسخة جديدة حتى تعمل reactivity بشكل صحيح
+  editAttribute.value = { ...attribute };
   addDialog.value = true;
 };
 

@@ -2,26 +2,21 @@
 import { ref, watch, onMounted } from 'vue';
 import { useDisplay } from 'vuetify';
 import { getAll, saveItem } from '@/services/api';
-const props = defineProps({
-  dialog: Boolean,
-  product: Object,
-  isEditMode: Boolean,
-});
 
-const emit = defineEmits(['update:dialog', 'saved', 'close']);
-const { xs } = useDisplay();
+function deepMerge(target, source) {
+  for (const key in source) {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) && target[key] && typeof target[key] === 'object') {
+      deepMerge(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
 
-const dialog = ref(props.dialog);
-const productForm = ref(null);
-const productFormValid = ref(false);
-const brands = ref([]);
-const warehouses = ref([]);
-const categories = ref([]);
-const attributes = ref([]);
-
-const localProduct = ref({
-  id: null,
+const defaultProduct = {
   name: '',
+  slug: '',
   is_active: true,
   featured: false,
   is_returnable: true,
@@ -29,53 +24,40 @@ const localProduct = ref({
   description_long: '',
   category_id: null,
   brand_id: null,
+  warehouse_id: null,
   variants: [
     {
-      retail_price: 0,
-      purchase_price: 0,
-      wholesale_price: 0,
-      dimensions: 0,
-      discount: 0,
-      expiry_date: '',
-      image_url: '',
       attributes: [
         {
           attribute_id: null,
           attribute_value_id: null,
         },
       ],
+      dimensions: '',
+      discount: null,
+      expiry_date: '',
+      image_url: '',
+      status: 'active',
+      tax_rate: null,
     },
   ],
-});
+};
 
-// 1. إصلاح mapProductData لتعيد نسخة جديدة من المنتج وتعيد القيم الافتراضية بشكل صحيح
-function mapProductData(apiProduct) {
-  return {
-    id: apiProduct.id,
-    name: apiProduct.name,
-    is_active: apiProduct.is_active ?? true,
-    featured: !!apiProduct.featured,
-    is_returnable: apiProduct.is_returnable ?? true,
-    description: apiProduct.description || '',
-    description_long: apiProduct.description_long || '',
-    category_id: apiProduct.category_id?.id || apiProduct.category?.id || null,
-    brand_id: apiProduct.brand_id?.id || apiProduct.brand?.id || null,
-    warehouse_id: apiProduct.warehouse_id || null,
-    variants: (apiProduct?.variants || []).map(variant => ({
-      retail_price: variant.retail_price ?? 0,
-      purchase_price: variant.purchase_price ?? 0,
-      wholesale_price: variant.wholesale_price ?? 0,
-      dimensions: variant.dimensions ?? '',
-      discount: variant.discount ?? 0,
-      expiry_date: variant.expiry_date || '',
-      image_url: variant.image_url || '',
-      attributes: (variant?.attributes || []).map(attr => ({
-        attribute_id: attr.attribute_id,
-        attribute_value_id: attr.attribute_value_id,
-      })),
-    })),
-  };
-}
+const props = defineProps({
+  dialog: Boolean,
+  product: Object,
+  isEditMode: Boolean,
+});
+const emit = defineEmits(['update:dialog', 'saved', 'close']);
+const { xs } = useDisplay();
+const dialog = ref(props.dialog);
+const productForm = ref(null);
+const productFormValid = ref(false);
+const localProduct = ref({ ...defaultProduct });
+const brands = ref([]);
+const warehouses = ref([]);
+const categories = ref([]);
+const attributes = ref([]); // هنا هنخزن الخصائص
 
 const productRules = {
   name: [v => !!v || 'اسم المنتج مطلوب', v => (typeof v === 'string' && v.length <= 255) || 'اسم المنتج يجب ألا يزيد عن 255 حرفًا'],
@@ -88,46 +70,9 @@ watch(
   val => {
     dialog.value = val;
     if (val) {
-      if (props.isEditMode && props.product) {
-        localProduct.value = mapProductData(props.product);
-        console.log('Edit onMounted localProduct', localProduct.value);
-
-        if (props.isEditMode && props.product) {
-          mapProductData(props.product);
-        }
-      } else {
-        // وضع الإضافة: تعيين القيم الافتراضية
-        localProduct.value = {
-          id: null,
-          name: '',
-          is_active: true,
-          featured: false,
-          is_returnable: true,
-          description: '',
-          description_long: '',
-          category_id: null,
-          brand_id: null,
-          warehouse_id: warehouses.value.length > 0 ? warehouses.value[0].id : null,
-          variants: [
-            {
-              attributes: [
-                {
-                  attribute_id: null,
-                  attribute_value_id: null,
-                },
-              ],
-              retail_price: 0,
-              purchase_price: 0,
-              wholesale_price: 0,
-              dimensions: '',
-              discount: 0,
-              expiry_date: '',
-              image_url: '',
-            },
-          ],
-        };
-
-        console.log('new onMounted localProduct', localProduct.value);
+      // عند فتح الدايالوج، إذا كنا في وضع إضافة منتج جديد
+      if (!props.isEditMode) {
+        localProduct.value = JSON.parse(JSON.stringify(defaultProduct));
       }
     }
   }
@@ -137,46 +82,41 @@ watch(dialog, val => emit('update:dialog', val));
 
 watch(
   () => props.product,
-  newVal => {
-    if (props.isEditMode && newVal) {
-      localProduct.value = mapProductData(newVal);
+  val => {
+    if (val && Object.keys(val).length) {
+      // دمج عميق بين الافتراضي والقادم
+      localProduct.value = deepMerge(JSON.parse(JSON.stringify(defaultProduct)), JSON.parse(JSON.stringify(val)));
+    } else if (props.dialog && !props.isEditMode) {
+      // منتج جديد: استخدم القيم الافتراضية عند فتح الدايالوج
+      localProduct.value = JSON.parse(JSON.stringify(defaultProduct));
     }
   }
 );
 
-watch(
-  () => [warehouses.value, props.product],
-  ([warehousesVal, productVal]) => {
-    if (!localProduct.value.warehouse_id && warehousesVal.length > 0) {
-      localProduct.value.warehouse_id = warehousesVal[0].id;
-    }
-  },
-  { immediate: true }
-);
-onMounted(async () => {
-  await Promise.all([getBrands(), getAttributes(), getWarehouses(), getCategories()]);
+onMounted(() => {
+  getBrands();
+  getAttributes();
+  getWarehouses();
+  getCategories();
 });
 
 function getBrands() {
-  getAll('brands', null, true, false).then(res => {
+  getAll('brands').then(res => {
     brands.value = res.data;
   });
 }
 function getAttributes() {
-  getAll('attributes', null, true, false).then(res => {
+  getAll('attributes').then(res => {
     attributes.value = res.data; // صححت هنا
   });
 }
 function getWarehouses() {
-  getAll('warehouses', null, true, false).then(res => {
+  getAll('warehouses').then(res => {
     warehouses.value = res.data;
-    if (!localProduct.value.warehouse_id && warehouses.value.length > 0) {
-      localProduct.value.warehouse_id = warehouses.value[0].id;
-    }
   });
 }
 function getCategories() {
-  getAll('categories', null, true, false).then(res => {
+  getAll('categories').then(res => {
     categories.value = res.data;
   });
 }
@@ -189,12 +129,16 @@ function getAttributeValues(attributeId) {
 
 function getContrastColor(hexcolor) {
   if (!hexcolor) return '#000';
+  // إزالة # إذا موجودة
   const c = hexcolor.substring(1);
   const rgb = parseInt(c, 16);
   const r = (rgb >> 16) & 0xff;
   const g = (rgb >> 8) & 0xff;
   const b = (rgb >> 0) & 0xff;
+
+  // حساب اللمعان
   const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+
   return luma > 186 ? '#000' : '#fff'; // إذا فاتح اعمل النص اسود، غير كده ابيض
 }
 
@@ -225,7 +169,6 @@ function addVariant() {
     tax_rate: null,
   });
 }
-
 function removeVariant(index) {
   localProduct.value.variants.splice(index, 1);
 }
@@ -235,10 +178,12 @@ function saveProduct() {
   productForm.value.validate().then(async ({ valid }) => {
     if (!valid) return;
     try {
-      const res = await saveItem('product', localProduct.value, localProduct.value.id);
+      const res = await saveItem('product', localProduct.value, localProduct.value.id || false);
       emit('saved', res.data);
       closeDialog();
-    } catch (e) {}
+    } catch (e) {
+      // يمكن إضافة إشعار خطأ هنا
+    }
   });
 }
 </script>
@@ -286,7 +231,6 @@ function saveProduct() {
                     :rules="[v => !!v || 'الفئة مطلوبة']"
                     required
                     hide-details="auto"
-                    :return-object="false"
                   />
                 </v-col>
                 <v-col class="px-0">
@@ -297,7 +241,6 @@ function saveProduct() {
                     :items="brands || []"
                     label="العلامة التجارية"
                     hide-details="auto"
-                    :return-object="false"
                   />
                 </v-col>
                 <v-col>
@@ -310,7 +253,6 @@ function saveProduct() {
                     label="المخزن"
                     required
                     hide-details="auto"
-                    :return-object="false"
                   />
                   <v-select
                     v-else
@@ -346,11 +288,11 @@ function saveProduct() {
             </v-col>
           </v-row>
           <!-- خيارات المنتج الإضافية -->
-          <v-card class="bg-grey-lighten-4 pa-2">
+          <v-card>
             <v-card-title> خيارات المنتج </v-card-title>
-            <v-row class="bg-grey-lighten-4 pa-2" v-for="(variant, vIndex) in localProduct.variants" :key="vIndex">
+            <v-row v-for="(variant, vIndex) in localProduct.variants" :key="vIndex">
               <!-- بيانات variant الأساسية -->
-              <v-col class="bg-grey-lighten-4 pa-2" cols="12">
+              <v-col cols="12">
                 <v-row>
                   <v-col cols="4">
                     <v-text-field v-model="variant.purchase_price" label="سعر الشراء" type="number" hide-details="auto" />
@@ -411,7 +353,7 @@ function saveProduct() {
                       dense
                       outlined
                       :disabled="!attr.attribute_id"
-                      ::return-object="false"
+                      :return-object="false"
                       hide-details="auto"
                       :style="
                         (() => {
@@ -452,15 +394,13 @@ function saveProduct() {
               </v-col>
 
               <v-col cols="12">
-                <v-btn variant="text" color="error" append-icon="ri-delete-bin-line" @click="removeVariant(vIndex)">حذف</v-btn>
+                <v-btn variant="text" color="error" @click="removeVariant(vIndex)">حذف</v-btn>
+              </v-col>
+              <v-col cols="12">
+                <v-btn variant="text" color="primary" @click="addVariant">+ اضافة خيار جديد </v-btn>
               </v-col>
             </v-row>
           </v-card>
-          <v-row>
-            <v-col cols="12">
-              <v-btn class="my-3" color="primary" @click="addVariant">+ اضافة خيار جديد </v-btn>
-            </v-col>
-          </v-row>
 
           <v-divider class="my-4"></v-divider>
           <v-row>

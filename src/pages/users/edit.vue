@@ -157,6 +157,21 @@ function openRoleDetails(role) {
                     <VCol cols="12" sm="6" md="4">
                       <VTextField v-model="user.username" label="اسم المستخدم" placeholder="اسم المستخدم" />
                     </VCol>
+                    <!-- 👉 نوع المستخدم -->
+                    <VCol cols="12" sm="6" md="4">
+                      <v-select
+                        v-model="user.customer_type"
+                        :items="[
+                          { value: 'retail', title: 'عميل قطاعي' },
+                          { value: 'wholesale', title: 'عميل جملة ' },
+                        ]"
+                        label="نوع العميل"
+                        item-title="title"
+                        item-value="value"
+                        required
+                        clearable
+                      />
+                    </VCol>
 
                     <VCol cols="12">
                       <v-select
@@ -172,6 +187,7 @@ function openRoleDetails(role) {
                         :item-props="itemProps"
                       ></v-select>
                     </VCol>
+
                     <v-divider style="width: 50%" :thickness="2" class="border-opacity-100" color="warning"></v-divider>
                     <!-- 👉 password -->
                     <VCol cols="12" sm="6" md="4">

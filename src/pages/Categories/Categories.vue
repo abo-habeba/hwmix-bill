@@ -3,32 +3,34 @@
     <!-- زر لإضافة فئة رئيسية جديدة -->
     <v-btn color="primary" class="mb-4" @click="openAddDialog(null)">اضافة فئة رئيسية جديدة</v-btn>
 
-    <v-card class="mt-4 pa-3" outlined>
+    <v-card class="mt-4 pa-3" outlined style="overflow-x: auto">
       <v-card-title>الفئات الهرمية</v-card-title>
       <v-divider></v-divider>
-      <!-- v-treeview لعرض الشجرة -->
-      <v-treeview
-        v-if="treeCategories.length"
-        :items="treeCategories"
-        item-title="name"
-        item-value="id"
-        open-on-click
-        :item-props="getItemProps"
-        class="treeview-border ma-auto"
-        max-width="500px"
-      >
-        <!-- إضافة أزرار لكل فئة -->
-        <template #append="{ item }">
-          <v-icon small class="ma-3" @click.stop="openAddDialog(item)">{{ 'ri-add-line' }}</v-icon>
-          <v-icon class="ma-3" small color="red" @click.stop="deleteCategory(item.id)">{{ 'ri-delete-bin-6-line' }}</v-icon>
-        </template>
-      </v-treeview>
+      <div style="width: max-content">
+        <!-- v-treeview لعرض الشجرة -->
+        <v-treeview
+          v-if="treeCategories.length"
+          :items="treeCategories"
+          item-title="name"
+          item-value="id"
+          open-on-click
+          :item-props="getItemProps"
+          class="treeview-border ma-auto"
+          max-width="unset"
+        >
+          <template #append="{ item }">
+            <v-btn icon="ri-add-line" variant="text" color="primary" @click.stop="openAddDialog(item)" title="إضافة فرعية" class="mx-1" />
+            <v-btn icon="ri-edit-line" variant="text" color="primary" @click.stop="openEditDialog(item)" title="تعديل الفئة" class="mx-1" />
+            <v-btn icon="ri-delete-bin-line" variant="text" color="error" @click.stop="deleteCategory(item.id)" title="حذف الفئة" class="mx-1" />
+          </template>
+        </v-treeview>
+      </div>
     </v-card>
 
     <!-- حوار إضافة فئة جديدة -->
     <v-dialog v-model="addDialog" max-width="500px">
       <v-card>
-        <v-card-title>اضافة فئة جديدة</v-card-title>
+        <v-card-title>{{ isEditMode ? 'تعديل فئة' : 'اضافة فئة جديدة' }}</v-card-title>
         <v-card-text>
           <v-text-field class="pa-2" v-model="newCategory.name" label="اسم الفئة" required></v-text-field>
           <v-textarea class="pa-2" v-model="newCategory.description" label="الوصف"></v-textarea>
@@ -36,7 +38,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn text @click="closeAddDialog">الغاء</v-btn>
-          <v-btn text color="blue darken-1" @click="saveCategory">حفظ</v-btn>
+          <v-btn text color="blue darken-1" @click="saveCategory">{{ isEditMode ? 'تعديل' : 'حفظ' }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -61,8 +63,33 @@ const newCategory = ref({
   description: '',
   parent_id: null,
 });
+// متغير لوضعية التعديل
+const isEditMode = ref(false);
 
-// دالة لبناء الشجرة الهرمية من القائمة المسطحة
+function openAddDialog(parentCategory) {
+  isEditMode.value = false;
+  if (parentCategory) {
+    newCategory.value.parent_id = parentCategory.id;
+  } else {
+    newCategory.value.parent_id = null;
+  }
+  newCategory.value.name = '';
+  newCategory.value.description = '';
+  addDialog.value = true;
+}
+
+function openEditDialog(category) {
+  isEditMode.value = true;
+  newCategory.value = { ...category };
+  addDialog.value = true;
+}
+
+function closeAddDialog() {
+  addDialog.value = false;
+  isEditMode.value = false;
+  newCategory.value = { name: '', description: '', parent_id: null };
+}
+
 function buildTree(categoriesList) {
   const map = {};
   categoriesList.forEach(category => {
@@ -92,40 +119,27 @@ function getCategories() {
 }
 
 const getItemProps = item => ({
-  expandIcon: item.children && item.children.length ? 'ri-add-line' : 'ri-checkbox-blank-circle-line',
-  collapseIcon: item.children && item.children.length ? 'ri-subtract-line' : 'ri-checkbox-blank-circle-line',
+  expandIcon: item.children && item.children.length ? 'ri-folder-line' : 'ri-checkbox-blank-circle-line',
+  collapseIcon: item.children && item.children.length ? 'ri-folder-open-line' : 'ri-checkbox-blank-circle-line',
 });
 onMounted(() => {
   getCategories();
 });
 
-// فتح حوار إضافة فئة جديدة وتعيين الفئة الأب إن وجدت
-function openAddDialog(parentCategory) {
-  if (parentCategory) {
-    newCategory.value.parent_id = parentCategory.id;
-  } else {
-    newCategory.value.parent_id = null;
-  }
-  addDialog.value = true;
-}
-// إغلاق حوار الإضافة وإعادة تعيين بيانات الفئة الجديدة
-function closeAddDialog() {
-  addDialog.value = false;
-  newCategory.value = { name: '', description: '', parent_id: null };
-}
-// حفظ الفئة الجديدة
+// حفظ الفئة الجديدة أو تعديلها
 function saveCategory() {
   if (!newCategory.value.name) {
     toast.error('اسم الفئة مطلوب');
     return;
   }
-  saveItem('category', newCategory.value, false, true, true)
+  const isEdit = isEditMode.value && newCategory.value.id;
+  saveItem('category', newCategory.value, isEdit ? newCategory.value.id : false, true, true)
     .then(() => {
       getCategories();
       closeAddDialog();
-      toast.success('تم حفظ الفئة بنجاح');
+      toast.success(isEdit ? 'تم تعديل الفئة بنجاح' : 'تم حفظ الفئة بنجاح');
     })
-    .catch(() => toast.error('حدث خطأ أثناء حفظ الفئة'));
+    .catch(() => toast.error(isEdit ? 'حدث خطأ أثناء تعديل الفئة' : 'حدث خطأ أثناء حفظ الفئة'));
 }
 
 function deleteCategory(id) {
