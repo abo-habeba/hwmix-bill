@@ -87,9 +87,12 @@ function openCompaniesDialog() {
           <VIcon icon="ri-notification-line" />
         </IconBtn>
 
-        <NavbarThemeSwitcher class="me-2" />
+        <!-- <NavbarThemeSwitcher class="me-2" /> -->
 
         <UserProfile />
+        <IconBtn to="/dashboard">
+          <VIcon icon="ri-home-4-line" />
+        </IconBtn>
       </div>
     </template>
 

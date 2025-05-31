@@ -8,7 +8,7 @@ const themes = [
     name: 'dark',
     icon: 'ri-moon-clear-line',
   },
-]
+];
 </script>
 
 <template>

@@ -17,7 +17,7 @@ onMounted(() => {
   </div> -->
   <v-locale-provider rtl>
     <VApp>
-      <VCol style="position: relative" cols="12">
+      <VCol class="pa-0" style="position: relative" cols="12">
         <RouterView />
       </VCol>
     </VApp>
