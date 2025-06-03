@@ -44,6 +44,7 @@ const user = ref({
 });
 
 const tab = ref(route.params.tab || tabs[0].tab);
+const userFormValid = ref(false);
 
 onMounted(() => {
   mergedCompanies();

@@ -154,6 +154,7 @@ function saveVariant(editedVariant) {
     <v-card class="pa-2" style="overflow-x: auto; overflow-y: unset">
       <div class="d-flex align-center justify-space-between mb-2">
         <h3 class="text-h6 font-weight-bold mb-0">قائمة المنتجات</h3>
+        <v-btn color="primary" @click="openAddDialog" size="small">+ إضافة منتج</v-btn>
         <div class="d-flex align-center gap-2">
           <v-text-field
             v-model="search"
@@ -173,7 +174,6 @@ function saveVariant(editedVariant) {
             prepend-inner-icon="ri-search-line"
             @click:prepend-inner="fetchProducts"
           />
-          <v-btn color="primary" @click="openAddDialog" size="small">+ إضافة منتج</v-btn>
         </div>
       </div>
 

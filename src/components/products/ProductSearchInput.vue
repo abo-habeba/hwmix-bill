@@ -117,4 +117,12 @@ function onProductSelect(val) {
     }
   });
 }
+
+const showInput = ref(false);
+
+function handleBlur() {
+  setTimeout(() => {
+    showInput.value = false;
+  }, 200); // بنأخر الإخفاء شوية علشان اختيار العنصر ما يتلغيهوش
+}
 </script>

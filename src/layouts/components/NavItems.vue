@@ -24,7 +24,13 @@ const navItems = [
       icon: 'ri-file-list-3-line',
       tooltip: 'كل أنواع الفواتير المرتبطة بالبيع والشراء',
       children: [
-        { title: 'فواتير البيع والشراء', to: { name: 'invoice' }, icon: 'ri-file-copy-line', tooltip: 'عرض وإنشاء فواتير بيع أو شراء' },
+        {
+          title: 'فواتير البيع والشراء',
+          to: { name: 'invoices' },
+          createRoute: 'invoice-create',
+          icon: 'ri-file-copy-line',
+          tooltip: 'عرض وإنشاء فواتير بيع أو شراء',
+        },
         { title: 'فواتير الخدمة', to: { name: 'service-invoices' }, icon: 'ri-service-line', tooltip: 'فواتير للخدمات غير المرتبطة بمنتجات' },
         { title: 'عروض الأسعار', to: { name: 'invoices-quotation' }, icon: 'ri-price-tag-3-line', tooltip: 'إصدار أو مراجعة عروض الأسعار' },
         {

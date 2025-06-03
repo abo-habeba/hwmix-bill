@@ -1,9 +1,19 @@
 // مسارات الفواتير وكل ما يتعلق بها
 export default [
   {
-    path: 'invoice',
-    component: () => import('@/pages/invoice/index.vue'),
-    name: 'invoice',
+    path: 'invoices',
+    component: () => import('@/pages/invoices/index.vue'),
+    name: 'invoices',
+    meta: {
+      title: 'الفواتير',
+      description: 'إدارة الفواتير',
+      roles: ['super_admin', 'company_owner'],
+    },
+  },
+  {
+    path: 'invoices/invoice-create',
+    component: () => import('@/pages/invoices/index.vue'),
+    name: 'invoice-create',
     meta: {
       title: 'الفواتير',
       description: 'إدارة الفواتير',

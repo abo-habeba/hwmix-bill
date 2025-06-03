@@ -9,13 +9,14 @@
     label="ابحث عن عميل"
     prepend-inner-icon="ri-user-line"
     :rules="[v => !!v || 'حقل العميل مطلوب']"
-    clearable
-    :loading="isLoadingUsers"
-    :no-data-text="userNoDataText"
-    required
-    return-object
     @update:search="onUserSearch"
     @update:model-value="emitUser"
+    :loading="isLoadingUsers"
+    :no-data-text="userNoDataText"
+    clearable
+    required
+    return-object
+    hide-details="auto"
   />
 </template>
 
