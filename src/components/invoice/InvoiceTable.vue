@@ -1,11 +1,37 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { getAll, deleteOne } from '@/services/api';
 import InvoiceForm from './InvoiceForm.vue';
 
 const items = ref([]);
 const loading = ref(false);
 const dialog = ref(false);
+
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    default: () => ({}),
+  },
+});
+
+watch(
+  () => props.modelValue,
+  newVal => {
+    console.log('watch table', newVal);
+
+    if (!newVal || !newVal.id) return;
+
+    const index = items.value.findIndex(item => item.id === newVal.id);
+    if (index !== -1) {
+      // تحديث العنصر
+      items.value[index] = { ...newVal };
+    } else {
+      // إضافة عنصر جديد
+      items.value.push({ ...newVal });
+    }
+  },
+  { deep: true }
+);
 const editedItem = ref({
   id: null,
   user_id: '',

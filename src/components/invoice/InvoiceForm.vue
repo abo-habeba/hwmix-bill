@@ -225,7 +225,7 @@ function addOrIncrement(product) {
     updateItemQuantity(existingItem);
   } else {
     const newItem = {
-      id: product.id,
+      product_id: productSearch.value.id,
       name: product.name,
       quantity: 1,
       unit_price: price,
@@ -260,6 +260,7 @@ function onSerialInputEnter(value) {
 }
 
 function onProductSelect(product) {
+  productSearch.value = product;
   addOrIncrement(product);
 }
 
@@ -271,6 +272,7 @@ function checkInvoiceTypeBeforeSave() {
   form.value.invoice_type_id = invoiceType.value?.id || null;
   let typeCode = invoiceType.value?.code || null;
   form.value.invoice_type_code = typeCode;
+  form.value.user_id = selectedUser.value?.id;
   if (!form.value.invoice_type_id) {
     itemsError.value = 'يرجى اختيار نوع الفاتورة أولاً';
     return;
@@ -283,40 +285,33 @@ function checkInvoiceTypeBeforeSave() {
     return;
   }
   if (typeCode === 'installment_sale') {
-    console.log('Opening installment dialog for invoice type:', typeCode);
-    // إذا كان نوع الفاتورة هو "تقسيط"
-    // فتح حوار التقسيط
-    console.log('Opening installment dialog with form data:', form.value);
-
     openInstallmentDialog(form.value);
   } else {
-    console.log('Invoice type code:', typeCode);
+    console.log('else installment_sale');
+
+    saveInvoice(form.value);
   }
 
   // saveInvoice();
 }
 
-async function saveInvoice() {
+async function saveInvoice(data) {
   isSaving.value = true;
   itemsError.value = null;
   try {
     // إرسال بيانات الفاتورة إلى API
-    const payload = {
-      ...form.value,
-      user_id: selectedUser.value?.id || null,
-      items: form.value.items.map(i => ({
-        product_id: i.id,
-        quantity: i.quantity,
-        unit_price: i.unit_price,
-        discount: i.discount,
-      })),
-    };
     if (form.value.id) {
-      await saveItem('invoices/' + form.value.id, payload, 'put');
+      await saveItem('invoice', data, form.value.id, true, true).then(res => {
+        console.log('saveInvoice', res);
+        emit('saved', res.data);
+      });
     } else {
-      await saveItem('invoices', payload, 'post');
+      await saveItem('invoice', data, false, true, true).then(res => {
+        console.log('saveInvoice local', res);
+        emit('saved', res.data);
+      });
     }
-    emit('saved');
+
     emit('close');
   } catch (error) {
     itemsError.value = 'حدث خطأ أثناء الحفظ';
@@ -348,9 +343,8 @@ function openInstallmentDialog() {
 }
 
 function handleInstallmentSaved(data) {
-  console.log('Installment data received:', data);
-  // معالجة البيانات التي تم إرجاعها من الدايلوج
-  // يمكن إضافة منطق الحفظ أو التحديث هنا
+  // console.log('da', data);
+  saveInvoice(data);
 }
 
 onMounted(() => {

@@ -36,7 +36,7 @@ const openCreateDialog = event => {
           <!-- 👉 Title -->
           <span class="nav-item-title">
             {{ item.title }}
-            <VIcon v-if="item.createRoute" icon="ri-add-line" class="nav-item-create-icon" @click="openCreateDialog" />
+            <!-- <VIcon v-if="item.createRoute" icon="ri-add-line" class="nav-item-create-icon" @click="openCreateDialog" /> -->
           </span>
           <span v-if="item.badgeContent != 0" class="nav-item-badge" :class="item.badgeClass">
             {{ item.badgeContent }}

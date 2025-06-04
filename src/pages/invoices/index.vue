@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import InvoiceTable from '@/components/invoice/InvoiceTable.vue';
 import InvoiceForm from '@/components/invoice/InvoiceForm.vue';
@@ -10,11 +10,17 @@ const showDetails = ref(false);
 const selectedInvoice = ref(null);
 const formModel = ref({});
 const dialogContext = ref(null);
+const invoice = ref({});
 
 function handleEdit(invoice) {
   formModel.value = { ...invoice };
   dialogContext.value = invoice.invoice_type || 'sales'; // ضبط السياق على نوع الفاتورة لو متوفر
   showForm.value = true;
+}
+
+function handleSaved(data) {
+  invoice.value = data;
+  console.log('handleSaved', data);
 }
 
 function handleShow(invoice) {
@@ -66,13 +72,25 @@ watch(formModel, val => {
       فاتورة تقسيط
     </v-btn>
 
-    <InvoiceTable @edit="handleEdit" @show="handleShow" />
+    <InvoiceTable :model-value="invoice" @edit="handleEdit" @show="handleShow" />
 
     <v-dialog v-model="showForm" :fullscreen="$vuetify.display.xs" max-width="900" scrollable>
-      <InvoiceForm v-if="showForm" :model-value="formModel" :invoiceContext="dialogContext" @saved="showForm = false" @close="showForm = false" />
+      <!-- <InvoiceForm v-if="showForm" :model-value="formModel" :invoiceContext="dialogContext" @saved="showForm = false" @close="showForm = false" /> -->
+      <InvoiceForm
+        v-if="showForm"
+        :model-value="formModel"
+        :invoiceContext="dialogContext"
+        @saved="
+          data => {
+            handleSaved(data);
+            showForm = false;
+          }
+        "
+        @close="showForm = false"
+      />
     </v-dialog>
 
-    <InvoiceDetails :invoice="selectedInvoice" :visible="showDetails" @close="showDetails = false" />
+    <InvoiceDetails @saveItem="handleSaved" :invoice="selectedInvoice" :visible="showDetails" @close="showDetails = false" />
   </div>
 </template>
 
