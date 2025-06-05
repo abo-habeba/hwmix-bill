@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
+  <!-- <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
     <el-form-item label="الطرف" prop="party_id">
       <el-select v-model="formData.party_id" filterable placeholder="اختر الطرف" :loading="loadingUsers">
         <el-option v-for="user in users" :key="user.id" :label="user.full_name || user.nickname" :value="user.id" />
@@ -27,7 +27,7 @@
     <el-form-item>
       <el-button type="primary" @click="submitForm">{{ mode === 'edit' ? 'تعديل' : 'حفظ' }}</el-button>
     </el-form-item>
-  </el-form>
+  </el-form> -->
 </template>
 
 <script setup>

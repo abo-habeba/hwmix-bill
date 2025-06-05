@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
+  <!-- <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
     <el-form-item label="العميل" prop="customer_id">
       <el-select v-model="formData.customer_id" filterable placeholder="اختر العميل" :loading="loadingUsers">
         <el-option v-for="user in users" :key="user.id" :label="user.full_name || user.nickname" :value="user.id" />
@@ -38,7 +38,7 @@
     <el-form-item>
       <el-button type="primary" @click="submitForm">{{ mode === 'edit' ? 'تعديل' : 'حفظ' }}</el-button>
     </el-form-item>
-  </el-form>
+  </el-form> -->
 </template>
 
 <script setup>

@@ -46,6 +46,16 @@ const navItems = [
     },
   },
   {
+    type: 'link',
+    permission: ['super_admin', 'company_owner'],
+    item: {
+      title: 'الأقساط',
+      to: { name: 'installments' },
+      icon: 'ri-calendar-check-line',
+      tooltip: 'متابعة الأقساط المستحقة والمدفوعة',
+    },
+  },
+  {
     type: 'group',
     permission: ['products', 'super_admin', 'company_owner'],
     item: {

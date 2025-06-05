@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
+  <!-- <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
     <el-form-item label="نوع العملية" prop="type">
       <el-select v-model="formData.type" placeholder="نوع العملية">
         <el-option value="stock_transfer" label="تحويل مخزني" />
@@ -46,7 +46,7 @@
     <el-form-item>
       <el-button type="primary" @click="submitForm">{{ mode === 'edit' ? 'تحديث' : 'إنشاء' }}</el-button>
     </el-form-item>
-  </el-form>
+  </el-form> -->
 </template>
 
 <script setup>

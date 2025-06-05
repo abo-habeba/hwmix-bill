@@ -1,5 +1,6 @@
 <template>
-  <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
+  <h1>rrrrrrrrrr</h1>
+  <!-- <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
     <el-form-item label="نوع الإشعار" prop="type">
       <el-select v-model="formData.type" placeholder="اختر نوع الإشعار">
         <el-option value="credit_note" label="إشعار دائن" />
@@ -23,7 +24,7 @@
     <el-form-item>
       <el-button type="primary" @click="submitForm">{{ mode === 'edit' ? 'تعديل' : 'حفظ' }}</el-button>
     </el-form-item>
-  </el-form>
+  </el-form> -->
 </template>
 
 <script setup>

@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { getAll, deleteOne } from '@/services/api';
 import InvoiceForm from './InvoiceForm.vue';
+import dayjs from 'dayjs';
 
 const items = ref([]);
 const loading = ref(false);
@@ -17,21 +18,18 @@ const props = defineProps({
 watch(
   () => props.modelValue,
   newVal => {
-    console.log('watch table', newVal);
-
     if (!newVal || !newVal.id) return;
 
     const index = items.value.findIndex(item => item.id === newVal.id);
     if (index !== -1) {
-      // تحديث العنصر
       items.value[index] = { ...newVal };
     } else {
-      // إضافة عنصر جديد
       items.value.push({ ...newVal });
     }
   },
   { deep: true }
 );
+
 const editedItem = ref({
   id: null,
   user_id: '',
@@ -85,35 +83,90 @@ function onSaved() {
   fetchItems();
 }
 
+// دالة لتحويل الحالة من إنجليزي لعربي
+function statusText(status) {
+  const map = {
+    confirmed: 'مؤكد',
+    pending: 'معلق',
+    cancelled: 'ملغي',
+  };
+  return map[status] || status;
+}
+
+// دالة لتنسيق التاريخ
+function formatDate(date) {
+  return date ? dayjs(date).format('YYYY-MM-DD') : '-';
+}
+
 onMounted(fetchItems);
 </script>
 
 <template>
   <v-card>
     <v-card-title class="ma-1"> الفواتير </v-card-title>
-    <!-- <v-btn class="ms-5 mb-5" color="primary" @click="addItem">إضافة فاتورة</v-btn> -->
+
     <v-data-table
       :items="items"
       :loading="loading"
+      class="no-wrap-table"
       :headers="[
-        { title: 'رقم الفاتورة', value: 'invoice_number' },
-        { title: 'المستخدم', value: 'user_id' },
-        { title: 'نوع الفاتورة', value: 'invoice_type_id' },
-        { title: 'تاريخ الإصدار', value: 'issue_date' },
-        { title: 'تاريخ الاستحقاق', value: 'due_date' },
-        { title: 'المبلغ الإجمالي', value: 'total_amount' },
-        { title: 'الحالة', value: 'status' },
-        { title: 'تاريخ الإنشاء', value: 'created_at' },
+        { title: 'رقم الفاتورة', value: 'invoice_number', sortable: true },
+        { title: 'المستخدم', value: 'user.full_name', sortable: true },
+        { title: 'نوع الفاتورة', value: 'invoice_type.name', sortable: true },
+        { title: 'اسم الشركة', value: 'company.name', sortable: true },
+        { title: 'تاريخ الإصدار', value: 'issue_date', sortable: true },
+        { title: 'تاريخ الاستحقاق', value: 'due_date', sortable: true },
+        { title: 'المبلغ الإجمالي', value: 'total_amount', sortable: true },
+        { title: 'الحالة', value: 'status', sortable: true },
+        { title: 'تاريخ الإنشاء', value: 'created_at', sortable: true },
         { title: 'إجراءات', value: 'actions', sortable: false },
       ]"
       :items-per-page-text="'عدد العناصر في الصفحة:'"
       :no-data-text="'لا توجد بيانات'"
+      item-value="id"
     >
+      <template #item.user.full_name="{ item }">
+        {{ item.user?.full_name || '-' }}
+      </template>
+
+      <template #item.invoice_type.name="{ item }">
+        {{ item.invoice_type?.name || '-' }}
+      </template>
+
+      <template #item.company.name="{ item }">
+        {{ item.company?.name || '-' }}
+      </template>
+
+      <template #item.issue_date="{ item }">
+        {{ formatDate(item.issue_date) }}
+      </template>
+
+      <template #item.due_date="{ item }">
+        {{ formatDate(item.due_date) }}
+      </template>
+
+      <template #item.total_amount="{ item }">
+        {{ Number(item.total_amount).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' }) }}
+      </template>
+
+      <template #item.status="{ item }">
+        {{ statusText(item.status) }}
+      </template>
+
+      <template #item.created_at="{ item }">
+        {{ formatDate(item.created_at) }}
+      </template>
+
       <template #item.actions="{ item }">
-        <v-btn icon @click="editItem(item)"><v-icon>ri-pencil-line</v-icon></v-btn>
-        <v-btn icon color="error" @click="removeItem(item)"><v-icon>ri-delete-bin-line</v-icon></v-btn>
+        <v-btn icon @click="editItem(item)" :title="'تعديل ' + item.invoice_number">
+          <v-icon>ri-pencil-line</v-icon>
+        </v-btn>
+        <v-btn icon color="error" @click="removeItem(item)" :title="'حذف ' + item.invoice_number">
+          <v-icon>ri-delete-bin-line</v-icon>
+        </v-btn>
       </template>
     </v-data-table>
+
     <v-dialog v-model="dialog" max-width="700">
       <InvoiceForm :model-value="editedItem" @saved="onSaved" @close="dialog = false" />
     </v-dialog>
