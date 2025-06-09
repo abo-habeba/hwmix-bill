@@ -1,9 +1,9 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import InvoiceTable from '@/components/invoice/InvoiceTable.vue';
-import InvoiceForm from '@/components/invoice/InvoiceForm.vue';
-import InvoiceDetails from '@/components/invoice/InvoiceDetails.vue';
+import InvoiceTable from '@/components/Invoice/InvoiceTable.vue';
+import InvoiceForm from '@/components/Invoice/InvoiceForm.vue';
+import InvoiceDetails from '@/components/Invoice/InvoiceDetails.vue';
 
 const showForm = ref(false);
 const showDetails = ref(false);

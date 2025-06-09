@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { getAll, deleteOne } from '@/services/api';
-import InvoiceForm from './InvoiceForm.vue';
+import InvoiceForm from '@/components/Invoice/InvoiceForm.vue';
 import dayjs from 'dayjs';
 
 const items = ref([]);

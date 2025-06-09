@@ -123,10 +123,10 @@
 import { ref, onMounted, watch } from 'vue';
 import { getAll, saveItem, getOne } from '@/services/api';
 import UserSearchInput from '@/components/users/UserSearchInput.vue';
-import InvoiceTypeSelect from '@/components/invoice/InvoiceTypeSelect.vue';
+import InvoiceTypeSelect from '@/components/Invoice/InvoiceTypeSelect.vue';
 import ProductSearchInput from '@/components/products/ProductSearchInput.vue';
 import SerialOrBarcodeInput from '@/components/products/SerialOrBarcodeInput.vue';
-import InstallmentDialog from '@/components/invoice/InstallmentDialog.vue';
+import InstallmentDialog from '@/components/Invoice/InstallmentDialog.vue';
 
 const emit = defineEmits(['saved', 'close']);
 
