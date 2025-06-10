@@ -7,7 +7,7 @@ export default [
     meta: {
       title: ' المستخدمين ',
       description: ' ادارة و تعديل المستخدمين ',
-      roles: 'users',
+      roles: ['users', 'users_all', 'users_show', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'تعديل المستخدم',
       description: 'تعديل بيانات المستخدم',
-      roles: ['users_update', 'users_create'],
+      roles: ['users_update', 'users_create', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -27,7 +27,7 @@ export default [
     meta: {
       title: ' الادوار والصلاحيات',
       description: 'تعديل الادوار والصلاحيات',
-      roles: 'roles',
+      roles: ['roles', 'roles_all', 'roles_show', 'super_admin', 'company_owner'],
     },
   },
 ];
