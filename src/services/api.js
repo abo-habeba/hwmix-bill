@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { serialize } from 'object-to-formdata';
 import { useUserStore } from '@/stores/user';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+import translateErrors from '@/utils/translateErrors';
 // http://10.0.0.64:8008/   bill-api.hwnix.com  http://127.0.0.1:8000/
 const apiClient = axios.create({
   // baseURL: process.env.NODE_ENV === 'production' ? 'https://bill-api.hwnix.com/api/' : 'http://10.0.0.64:8008/api/',
@@ -111,8 +114,16 @@ export const saveItem = (apiEndpoint, data, id = false, loading = false, log = f
         .catch(error => {
           log ? console.log(`saveItem:  => `, error) : '';
           loading ? (userStore.loadingApi = false) : '';
-          const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الحفظ';
-          reject(msg);
+          let msg = '';
+          if (error && error.response && error.response.data && error.response.data.errors) {
+            msg = translateErrors(error.response.data.errors);
+          } else if (error && error.response && error.response.data && error.response.data.message) {
+            msg = error.response.data.message;
+          } else {
+            msg = 'حدث خطأ أثناء الحفظ';
+          }
+          toast.error(msg, { autoClose: 7000 });
+          reject(error);
         });
     } else {
       apiClient
@@ -125,8 +136,16 @@ export const saveItem = (apiEndpoint, data, id = false, loading = false, log = f
         .catch(error => {
           log ? console.log(`saveItem:  => `, error) : '';
           loading ? (userStore.loadingApi = false) : '';
-          const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الحفظ';
-          reject(msg);
+          let msg = '';
+          if (error && error.response && error.response.data && error.response.data.errors) {
+            msg = translateErrors(error.response.data.errors);
+          } else if (error && error.response && error.response.data && error.response.data.message) {
+            msg = error.response.data.message;
+          } else {
+            msg = 'حدث خطأ أثناء الحفظ';
+          }
+          toast.error(msg, { autoClose: 7000 });
+          reject(error);
         });
     }
   });

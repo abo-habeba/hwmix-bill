@@ -55,6 +55,7 @@ declare module 'vue' {
     MoreBtn: typeof import('./src/@core/components/MoreBtn.vue')['default']
     NoteForm: typeof import('./src/components/forms/NoteForm.vue')['default']
     PaymentForm: typeof import('./src/components/forms/PaymentForm.vue')['default']
+    PhoneNumberInput: typeof import('./src/components/users/PhoneNumberInput.vue')['default']
     ProductDialog: typeof import('./src/components/products/ProductDialog.vue')['default']
     'ProductDialog copy': typeof import('./src/components/products/ProductDialog copy.vue')['default']
     ProductSearchInput: typeof import('./src/components/products/ProductSearchInput.vue')['default']

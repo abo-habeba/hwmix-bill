@@ -7,6 +7,10 @@ import { useDisplay } from 'vuetify';
 import UsersEditUserRolse from '../../components/users/UsersEditUserRolse.vue';
 import RoleDetails from '@/components/roles/RoleDetails.vue';
 import { useUserStore } from '@/stores/user';
+import PhoneNumberInput from '@/components/users/PhoneNumberInput.vue';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
+import translateErrors from '@/utils/translateErrors';
 const { xs } = useDisplay();
 const route = useRoute();
 const router = useRouter();
@@ -46,7 +50,14 @@ const user = ref({
 const tab = ref(route.params.tab || tabs[0].tab);
 const userFormValid = ref(false);
 
+const nicknameRules = [v => !!v || 'اسم الشهرة مطلوب'];
+const phoneRules = [
+  v => !!v || 'رقم الهاتف مطلوب',
+  v => /^\d{10,15}$/.test(v) || 'رقم الهاتف غير صحيح',
+];
+
 onMounted(() => {
+
   mergedCompanies();
   if (route.params.id) {
     loading.value = true;
@@ -66,9 +77,13 @@ onMounted(() => {
       .finally(e => {
         loading.value = false;
       });
+  } else {
+    // وضع قيمة افتراضية للباسورد في حالة الإضافة فقط
+    user.value.password = '12345678';
   }
 });
 
+// جمع الشركات من مصدرين مع إضافة خاصية disabled:
 function mergedCompanies() {
   const allComp = [
     ...user.value.companies.map(company => ({ ...company, disabled: false })),
@@ -107,9 +122,14 @@ function sendData() {
   user.value.company_ids = companyIds.value.length > 0 ? companyIds.value : null;
   user.value.companies = null;
 
-  saveItem('user', user.value, route.params.id).then(() => {
-    router.go(-1);
-  });
+  saveItem('user', user.value, route.params.id)
+    .then(() => {
+      toast.success(route.params.id ? 'تم تعديل المستخدم بنجاح' : 'تم إضافة المستخدم بنجاح');
+     // تاخير الانتقال للصفحة السابقة
+      setTimeout(() => {
+        router.go(-1);
+      }, 1200);
+    });
 }
 const userRole = ref({});
 function openRoleDetails(role) {
@@ -129,7 +149,8 @@ function openRoleDetails(role) {
       <v-tabs-window-item value="account">
         <VRow>
           <VCol cols="12">
-            <VCard elevation="0" :loading="loading" :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'" class="ma-4">
+            <VCard elevation="0" :loading="loading" :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'"
+              class="ma-4">
               <VDivider />
               <VCardText>
                 <!-- 👉 Form -->
@@ -142,16 +163,24 @@ function openRoleDetails(role) {
 
                     <!-- 👉 Name -->
                     <VCol sm="6" md="4" cols="12">
-                      <VTextField v-model="user.nickname" label=" اسم الشهرة " />
+                      <VTextField required v-model="user.nickname" label=" اسم الشهرة " :rules="nicknameRules" />
                     </VCol>
 
                     <!-- 👉 Email -->
                     <VCol cols="12" sm="6" md="4">
-                      <VTextField required v-model="user.email" label="الايميل" placeholder="johndoe@gmail.com" type="email" />
+                      <VTextField v-model="user.email" label="الايميل" placeholder="johndoe@gmail.com"
+                        type="email" />
                     </VCol>
                     <!-- 👉 Phone -->
                     <VCol cols="12" sm="6" md="4">
-                      <VTextField v-model="user.phone" label=" رقم الهاتف " placeholder="0123456789" />
+                      <PhoneNumberInput
+                        :label="'رقم الهاتف'"
+                        :placeholder="'0123456789'"
+                        :initialPhoneNumber="user.phone"
+                        @update:phoneNumber="val => user.phone = val"
+                        :rules="phoneRules"
+                        required
+                      />
                     </VCol>
 
                     <!-- 👉 username -->
@@ -160,18 +189,10 @@ function openRoleDetails(role) {
                     </VCol>
                     <!-- 👉 نوع المستخدم -->
                     <VCol cols="12" sm="6" md="4">
-                      <v-select
-                        v-model="user.customer_type"
-                        :items="[
-                          { value: 'retail', title: 'عميل قطاعي' },
-                          { value: 'wholesale', title: 'عميل جملة ' },
-                        ]"
-                        label="نوع العميل"
-                        item-title="title"
-                        item-value="value"
-                        required
-                        clearable
-                      />
+                      <v-select v-model="user.customer_type" :items="[
+                        { value: 'retail', title: 'عميل قطاعي' },
+                        { value: 'wholesale', title: 'عميل جملة ' },
+                      ]" label="نوع العميل" item-title="title" item-value="value" clearable />
                     </VCol>
 
                     <VCol cols="12">
@@ -186,6 +207,7 @@ function openRoleDetails(role) {
                         closable-chips
                         multiple
                         :item-props="itemProps"
+                        return-object
                       ></v-select>
                     </VCol>
 
@@ -196,7 +218,8 @@ function openRoleDetails(role) {
                     </VCol>
                     <!-- 👉 Form Actions -->
                     <VCol cols="12" class="d-flex flex-wrap gap-4">
-                      <VBtn :disabled="!userFormValid" :class="{ 'forbidden-cursor': !userFormValid }" @click="sendData"> حفظ </VBtn>
+                      <VBtn :disabled="!userFormValid" :class="{ 'forbidden-cursor': !userFormValid }" @click="sendData">
+                        حفظ </VBtn>
                       <!-- reset Form -->
                       <!-- <VBtn color="secondary" variant="outlined" type="reset" @click.prevent="resetForm"> Reset </VBtn> -->
                     </VCol>

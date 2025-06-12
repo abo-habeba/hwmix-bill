@@ -1,0 +1,32 @@
+/* نجمة تلقائية لكل label مطلوب في Vuetify */
+.v-label[aria-required="true"]:after,
+.v-label.required:after,
+.v-field-label[aria-required="true"]:after,
+.v-field-label.required:after,
+.v-label[for]:has(+ input[required]):after,
+.v-label[for]:has(+ textarea[required]):after,
+.v-field-label[for]:has(+ input[required]):after,
+.v-field-label[for]:has(+ textarea[required]):after,
+.v-label.v-field-label--floating[aria-required="true"]:after,
+.v-field-label.v-field-label--floating[aria-required="true"]:after {
+  content: " *" !important;
+  color: #f44336 !important;
+  font-weight: bold !important;
+  font-size: 1.1em !important;
+  opacity: 1 !important;
+  transition: none !important;
+  pointer-events: none;
+}
+
+/* عند الفوكس أو التحويم، أبقِ النجمة ظاهرة */
+.v-label[aria-required="true"]:after:focus,
+.v-label[aria-required="true"]:after:hover,
+.v-label.required:after:focus,
+.v-label.required:after:hover,
+.v-field-label[aria-required="true"]:after:focus,
+.v-field-label[aria-required="true"]:after:hover,
+.v-field-label.required:after:focus,
+.v-field-label.required:after:hover {
+  opacity: 1 !important;
+  transition: none !important;
+}
