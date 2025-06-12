@@ -26,24 +26,40 @@ watch(initialPhoneNumber, val => {
 });
 
 // Contact Picker
+import { ref as vueRef } from 'vue';
+const showNumbersDialog = vueRef(false);
+const contactNumbers = vueRef([]);
+const contactName = vueRef('');
+
 async function pickContact() {
   if (!('contacts' in navigator) || !('select' in navigator.contacts)) {
     toast.error('جهازك لا يدعم اختيار جهات الاتصال');
     return;
   }
   try {
-    const props = ['tel'];
+    const props = ['tel', 'name'];
     const opts = { multiple: false };
     const contacts = await navigator.contacts.select(props, opts);
     if (contacts && contacts.length && contacts[0].tel && contacts[0].tel.length) {
-      phoneNumber.value = contacts[0].tel[0];
-      toast.success('تم اختيار الرقم بنجاح');
+      if (contacts[0].tel.length === 1) {
+        phoneNumber.value = contacts[0].tel[0];
+        // لا تعرض إشعار نجاح هنا
+      } else {
+        contactNumbers.value = contacts[0].tel;
+        contactName.value = contacts[0].name ? contacts[0].name[0] : '';
+        showNumbersDialog.value = true;
+      }
     } else {
       toast.error('لم يتم العثور على رقم هاتف في جهة الاتصال');
     }
   } catch (e) {
     toast.error('تم إلغاء اختيار جهة الاتصال أو حدث خطأ');
   }
+}
+
+function selectNumberFromDialog(number) {
+  phoneNumber.value = number;
+  showNumbersDialog.value = false;
 }
 
 const isContactSupported =
@@ -63,10 +79,10 @@ const isContactSupported =
       type="number"
       class="phone-input"
       clearable
-      @click:append-inner="pickContact"
-      :append-inner-icon-cb="() => {}"
+      @click:prepend-inner="pickContact"
+      :prepend-inner-icon-cb="() => {}"
     >
-      <template #append-inner>
+      <template #prepend-inner>
         <VTooltip location="top">
           <template #activator="{ props: tooltipProps }">
             <VIcon
@@ -88,6 +104,22 @@ const isContactSupported =
         </VTooltip>
       </template>
     </VTextField>
+    <!-- Dialog لاختيار رقم من عدة أرقام -->
+    <v-dialog v-model="showNumbersDialog" max-width="400">
+      <v-card>
+        <v-card-title class="text-h6">اختر رقم الهاتف <span v-if="contactName">({{ contactName }})</span></v-card-title>
+        <v-divider></v-divider>
+        <v-list>
+          <v-list-item v-for="(num, idx) in contactNumbers" :key="idx" @click="selectNumberFromDialog(num)" style="cursor:pointer">
+            <v-list-item-title>{{ num }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text @click="showNumbersDialog = false">إلغاء</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
