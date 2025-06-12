@@ -31,6 +31,14 @@ const showNumbersDialog = vueRef(false);
 const contactNumbers = vueRef([]);
 const contactName = vueRef('');
 
+function cleanPhoneNumber(num) {
+  // حذف جميع المسافات وعلامة + وأي بادئة دولية تبدأ بـ 2 أو أكثر من الأرقام بعد +
+  let cleaned = num.replace(/\s+/g, '').replace(/^\+/, '');
+  // إذا الرقم يبدأ بـ 20 أو 966 أو أي كود دولي معروف، احذف البادئة
+  cleaned = cleaned.replace(/^(2|966|971|962|965|968|973|974|21|212|218|249|963|90|1|44|33|49|7|380|39|34|351|355|357|358|359|36|420|421|43|45|46|47|48|52|53|54|55|56|57|58|60|61|62|63|64|65|66|81|82|84|86|7|27|234|237|254|255|256|260|263|264|265|266|267|268|20)/, '');
+  return cleaned;
+}
+
 async function pickContact() {
   if (!('contacts' in navigator) || !('select' in navigator.contacts)) {
     toast.error('جهازك لا يدعم اختيار جهات الاتصال');
@@ -42,10 +50,9 @@ async function pickContact() {
     const contacts = await navigator.contacts.select(props, opts);
     if (contacts && contacts.length && contacts[0].tel && contacts[0].tel.length) {
       if (contacts[0].tel.length === 1) {
-        phoneNumber.value = contacts[0].tel[0];
-        // لا تعرض إشعار نجاح هنا
+        phoneNumber.value = cleanPhoneNumber(contacts[0].tel[0]);
       } else {
-        contactNumbers.value = contacts[0].tel;
+        contactNumbers.value = contacts[0].tel.map(cleanPhoneNumber);
         contactName.value = contacts[0].name ? contacts[0].name[0] : '';
         showNumbersDialog.value = true;
       }
@@ -58,7 +65,7 @@ async function pickContact() {
 }
 
 function selectNumberFromDialog(number) {
-  phoneNumber.value = number;
+  phoneNumber.value = cleanPhoneNumber(number);
   showNumbersDialog.value = false;
 }
 

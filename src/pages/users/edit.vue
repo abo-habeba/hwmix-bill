@@ -53,7 +53,6 @@ const userFormValid = ref(false);
 const nicknameRules = [v => !!v || 'اسم الشهرة مطلوب'];
 const phoneRules = [
   v => !!v || 'رقم الهاتف مطلوب',
-  v => /^\d{10,15}$/.test(v) || 'رقم الهاتف غير صحيح',
 ];
 
 onMounted(() => {
