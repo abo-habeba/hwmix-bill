@@ -1,9 +1,10 @@
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue'; // إضافة nextTick
+import { ref, watch, onMounted, nextTick } from 'vue';
 import { useDisplay } from 'vuetify';
 import { getAll, saveItem } from '@/services/api'; // تأكد من أن المسار صحيح لخدمة الـ API
 import ProductGeneralInfoForm from './ProductGeneralInfoForm.vue';
 import ProductVariantForm from './ProductVariantForm.vue';
+import ProductVariantAttributes from './ProductVariantAttributes.vue'; // تأكد من استيراد المكون
 
 const props = defineProps({
   dialog: Boolean,
@@ -20,7 +21,7 @@ const productFormValid = ref(false); // يتم تحديثها بواسطة VForm
 const brands = ref([]);
 const warehouses = ref([]);
 const categories = ref([]);
-const attributes = ref([]);
+const attributes = ref([]); // هذا هو الـ ref الذي يحمل بيانات الخصائص
 
 // دوال مساعدة للتحقق من الأرقام
 const isNumber = v => (typeof v === 'number' && !isNaN(v)) || 'يجب أن يكون رقمًا';
@@ -44,24 +45,24 @@ const defaultProduct = {
       sku: '',
       retail_price: 0,
       wholesale_price: 0,
-      image: null, // سيتطلب v-file-input لرفع الملفات
+      image: null,
       weight: 0,
       dimensions: '',
       tax: 0,
       discount: 0,
-      status: 'active', // حالة الـ variant
-      attributes: [],
+      status: 'active',
+      attributes: [], // مصفوفة فارغة للخصائص
       stocks: [
         {
           qty: 0,
           reserved: 0,
           min_qty: 0,
-          cost: 0, // تعيين قيمة افتراضية لـ cost
+          cost: 0,
           batch: '',
           expiry: null,
           loc: '',
           status: 'available',
-          warehouse_id: null, // سيتم تعيينه بعد جلب المخازن
+          warehouse_id: null,
         },
       ],
     },
@@ -71,7 +72,6 @@ const defaultProduct = {
 const localProduct = ref(JSON.parse(JSON.stringify(defaultProduct)));
 
 function mapProductDataForEdit(apiProduct) {
-  // استخدام التعيين الآمن (??) لضمان قيم افتراضية حتى لو كانت البيانات مفقودة
   return {
     id: apiProduct.id,
     name: apiProduct.name || '',
@@ -103,7 +103,7 @@ function mapProductDataForEdit(apiProduct) {
         qty: stock.qty || 0,
         reserved: stock.reserved || 0,
         min_qty: stock.min_qty || 0,
-        cost: parseFloat(stock.cost) || 0, // التأكد من التحويل لعدد
+        cost: parseFloat(stock.cost) || 0,
         batch: stock.batch || '',
         expiry: stock.expiry ? new Date(stock.expiry).toISOString().substr(0, 10) : null,
         loc: stock.loc || '',
@@ -118,18 +118,15 @@ const productRules = {
   name: [v => !!v || 'اسم المنتج مطلوب', v => (typeof v === 'string' && v.length <= 255) || 'اسم المنتج يجب ألا يزيد عن 255 حرفًا'],
   description: [v => !v || typeof v === 'string' || 'الوصف يجب أن يكون نصًا'],
   description_long: [v => !v || typeof v === 'string' || 'الوصف المفصل يجب أن يكون نصًا'],
-  // قواعد لخصائص الـ variant
   retail_price: [isRequiredNumber, isPositiveOrZero],
   wholesale_price: [isRequiredNumber, isPositiveOrZero],
   tax: [isNumber, isPositiveOrZero],
   discount: [isNumber, isPositiveOrZero],
   weight: [isNumber, isPositiveOrZero],
-  // قواعد لخصائص الـ stock
   qty: [isRequiredNumber, isPositiveOrZero],
   cost: [isNumber, isPositiveOrZero],
 };
 
-// دالة مساعدة لتعيين المخزن الافتراضي للمخزون الأول
 function setInitialWarehouseForFirstStock() {
   if (localProduct.value.variants.length > 0 && localProduct.value.variants[0].stocks.length > 0 && warehouses.value.length > 0) {
     if (localProduct.value.variants[0].stocks[0].warehouse_id === null) {
@@ -141,18 +138,15 @@ function setInitialWarehouseForFirstStock() {
 watch(
   () => props.dialog,
   async val => {
-    // جعلها async لدعم await productForm.value.reset()
     dialog.value = val;
     if (val) {
       if (props.isEditMode && props.product) {
         localProduct.value = mapProductDataForEdit(props.product);
       } else {
         localProduct.value = JSON.parse(JSON.stringify(defaultProduct));
-        // تأكد من تهيئة المخزن الافتراضي عند إضافة منتج جديد
         setInitialWarehouseForFirstStock();
       }
-      // إعادة ضبط التحقق من الصحة عند فتح الحوار
-      await nextTick(); // انتظر حتى يتم تحديث DOM
+      await nextTick();
       if (productForm.value) {
         productForm.value.resetValidation();
       }
@@ -176,36 +170,33 @@ watch(
 
 onMounted(async () => {
   await Promise.all([getBrands(), getAttributes(), getWarehouses(), getCategories()]);
-  // تعيين المخزن الافتراضي للمخزون الأول عند تحميل المكونات
   if (!props.isEditMode) {
     setInitialWarehouseForFirstStock();
   }
 });
-// دالة لجلب العلامات التجارية
+
 async function getBrands() {
   try {
     const res = await getAll('brands', null, true, false);
     brands.value = res.data;
   } catch (error) {
     console.error('Error fetching brands:', error);
-    // يمكن عرض رسالة خطأ للمستخدم هنا
   }
 }
-// دالة لجلب الخصائص
+
 async function getAttributes() {
   try {
-    const res = await getAll('attributes', null, true, false);
+    const res = await getAll('attributes', null, true, true);
     attributes.value = res.data;
   } catch (error) {
     console.error('Error fetching attributes:', error);
   }
 }
-// دالة لجلب المخازن
+
 async function getWarehouses() {
   try {
     const res = await getAll('warehouses', null, true, false);
     warehouses.value = res.data;
-    // تعيين المخزن الافتراضي عند جلب المخازن لأول مرة أو إذا لم يكن هناك مخزن محدد
     if (!props.isEditMode) {
       setInitialWarehouseForFirstStock();
     }
@@ -213,7 +204,7 @@ async function getWarehouses() {
     console.error('Error fetching warehouses:', error);
   }
 }
-// دالة لجلب الفئات
+
 async function getCategories() {
   try {
     const res = await getAll('categories', null, true, false);
@@ -222,49 +213,6 @@ async function getCategories() {
     console.error('Error fetching categories:', error);
   }
 }
-// دالة للحصول على قيم الخصائص بناءً على معرف الخاصية
-function getAttributeValues(attributeId) {
-  if (!attributeId) return [];
-  const attr = attributes.value.find(a => a.id === attributeId);
-  return attr ? attr.values : [];
-}
-
-// دالة لإضافة خاصية جديدة
-function addAttribute(variantIndex) {
-  localProduct.value.variants[variantIndex].attributes.push({
-    attribute_id: null,
-    attribute_value_id: null,
-  });
-}
-// دالة لإزالة خاصية
-function removeAttribute(variantIndex, attrIndex) {
-  localProduct.value.variants[variantIndex].attributes.splice(attrIndex, 1);
-}
-
-function addStock(variantIndex) {
-  const newStock = {
-    qty: 0,
-    reserved: 0,
-    min_qty: 0,
-    cost: 0,
-    batch: '',
-    expiry: null,
-    loc: '',
-    status: true,
-    // تعيين المخزن الافتراضي للمخزون الجديد مباشرة
-    warehouse_id: warehouses.value.length > 0 ? warehouses.value[0].id : null,
-  };
-  localProduct.value.variants[variantIndex].stocks.push(newStock);
-}
-
-function removeStock(variantIndex, stockIndex) {
-  localProduct.value.variants[variantIndex].stocks.splice(stockIndex, 1);
-}
-
-function closeDialog() {
-  emit('close');
-  dialog.value = false;
-}
 
 function addVariant() {
   localProduct.value.variants.push({
@@ -272,9 +220,6 @@ function addVariant() {
     wholesale_price: 0,
     image: null,
     weight: 0,
-    active: true,
-    featured: false,
-    returnable: true,
     dimensions: '',
     tax: 0,
     discount: 0,
@@ -289,18 +234,15 @@ function addVariant() {
         batch: '',
         expiry: null,
         loc: '',
-        status: true,
-        // تعيين المخزن الافتراضي للمخزون الجديد مباشرة
+        status: 'available',
         warehouse_id: warehouses.value.length > 0 ? warehouses.value[0].id : null,
       },
     ],
   });
-  console.log('Updated variants after addition:', localProduct.value.variants);
 }
 
 function removeVariant(index) {
   localProduct.value.variants.splice(index, 1);
-  console.log('Updated variants after removal:', localProduct.value.variants);
 }
 
 async function saveProduct() {
@@ -311,38 +253,30 @@ async function saveProduct() {
   try {
     const payload = JSON.parse(JSON.stringify(localProduct.value));
 
-    // تحويل أسماء الحقول لتتوافق مع الـ API إذا كانت مختلفة
-    // هذا الجزء يبدو أنه تم التعامل معه بشكل جيد بالفعل
-    // ويمكن تركه كما هو إذا كانت تسميات الـ API مختلفة
     if (Object.prototype.hasOwnProperty.call(payload, 'active')) {
-      // استخدم "active" مباشرة
     } else if (Object.prototype.hasOwnProperty.call(payload, 'is_active')) {
       payload.active = payload.is_active;
       delete payload.is_active;
     }
 
     if (Object.prototype.hasOwnProperty.call(payload, 'returnable')) {
-      // استخدم "returnable" مباشرة
     } else if (Object.prototype.hasOwnProperty.call(payload, 'is_returnable')) {
       payload.returnable = payload.is_returnable;
       delete payload.is_returnable;
     }
 
     if (Object.prototype.hasOwnProperty.call(payload, 'desc')) {
-      // استخدم "desc" مباشرة
     } else if (Object.prototype.hasOwnProperty.call(payload, 'description')) {
       payload.desc = payload.description;
       delete payload.description;
     }
 
     if (Object.prototype.hasOwnProperty.call(payload, 'desc_long')) {
-      // استخدم "desc_long" مباشرة
     } else if (Object.prototype.hasOwnProperty.call(payload, 'description_long')) {
       payload.desc_long = payload.description_long;
-      delete payload.description_long;
+      delete payload.desc_long;
     }
 
-    // التأكد من أن warehouse_id موجود لكل stock
     payload.variants.forEach(variant => {
       if (variant.stocks && variant.stocks.length > 0) {
         variant.stocks.forEach(stock => {
@@ -354,14 +288,10 @@ async function saveProduct() {
     });
 
     let res;
-    console.log('Saving product with payload:', payload);
-    console.log('Saving product with payload:', JSON.stringify(payload));
     if (payload.id) {
-      // وضع التعديل
       res = await saveItem('product', payload, payload.id);
     } else {
-      // وضع الإضافة - حذف الـ ID لتجنب إرسال null
-      const { id, ...newProductPayload } = payload; // حذف الـ id
+      const { id, ...newProductPayload } = payload;
       res = await saveItem('product', newProductPayload);
     }
 
@@ -369,7 +299,6 @@ async function saveProduct() {
     closeDialog();
   } catch (e) {
     console.error('Error saving product:', e);
-    // يمكن عرض رسالة خطأ للمستخدم هنا
   }
 }
 
@@ -378,6 +307,11 @@ const statusOptions = [
   { value: 'inactive', text: 'غير نشط' },
   { value: 'discontinued', text: 'متوقف' },
 ];
+
+function closeDialog() {
+  dialog.value = false;
+  emit('close');
+}
 </script>
 
 <template>
@@ -408,9 +342,7 @@ const statusOptions = [
                 :statusOptions="statusOptions"
                 :productRules="productRules"
                 @remove-variant="removeVariant"
-              >
-                <ProductVariantAttributes v-model="variant.attributes" :attributes="attributes" />
-              </ProductVariantForm>
+              />
             </v-row>
           </v-card>
 
@@ -438,5 +370,5 @@ const statusOptions = [
 </template>
 
 <style scoped>
-/* Add any specific styles here */
+/* يمكن إضافة أنماط إضافية هنا */
 </style>

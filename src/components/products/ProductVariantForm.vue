@@ -6,24 +6,12 @@
     <v-col cols="12" sm="4">
       <v-text-field v-model="variant.wholesale_price" label="سعر البيع بالجملة" type="number" hide-details="auto" />
     </v-col>
-    <!-- <v-col cols="12" sm="4">
-      <v-text-field v-model="variant.weight" label="الوزن" type="number" hide-details="auto" />
-    </v-col>
-    <v-col cols="12" sm="4">
-      <v-text-field v-model="variant.dimensions" label="الأبعاد" hide-details="auto" />
-    </v-col> -->
-    <!-- <v-col cols="12" sm="4">
-      <v-text-field v-model="variant.tax" label="الضريبة" type="number" hide-details="auto" />
-    </v-col>
-    <v-col cols="12" sm="4">
-      <v-text-field v-model="variant.discount" label="الخصم" type="number" hide-details="auto" />
-    </v-col> -->
     <v-col cols="12" sm="4">
       <v-select v-model="variant.status" :items="statusOptions" item-value="value" item-title="text" label="الحالة" hide-details="auto" />
     </v-col>
     <v-col cols="12" class="my-0 py-1">
       <v-card class="mb-1 pa-2" outlined>
-        <ProductVariantAttributes v-model="variant.attributes" />
+        <ProductVariantAttributes v-model="variant.attributes" :attributes="attributes" />
       </v-card>
     </v-col>
     <v-col cols="12" class="my-0 py-1">
@@ -38,14 +26,14 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, watch } from 'vue';
 import ProductVariantAttributes from './ProductVariantAttributes.vue';
 import ProductVariantStocks from './ProductVariantStocks.vue';
 
 const props = defineProps({
   variant: Object,
   variantIndex: Number,
-  attributes: Array,
+  attributes: Array, // ProductVariantForm يستقبلها بشكل صحيح
   warehouses: Array,
   statusOptions: Array,
 });

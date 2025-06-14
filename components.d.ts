@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    2: typeof import('./src/components/products/ProductDialog copy 2.vue')['default']
     AddAttribute: typeof import('./src/components/attributes/AddAttribute.vue')['default']
     AddAttributeValues: typeof import('./src/components/attributes/addAttributeValues.vue')['default']
     AddCompany: typeof import('./src/components/companys/addCompany.vue')['default']
@@ -28,6 +29,7 @@ declare module 'vue' {
     CompanysDataTable: typeof import('./src/components/companys/CompanysDataTable.vue')['default']
     CompanysEditUserRolse: typeof import('./src/components/companys/CompanysEditUserRolse.vue')['default']
     ContextMenu: typeof import('./src/components/ContextMenu.vue')['default']
+    copy: typeof import('./src/components/products/ProductDialog copy.vue')['default']
     DataTable: typeof import('./src/components/logs/DataTable.vue')['default']
     DatePicker: typeof import('./src/components/datePicker.vue')['default']
     DefaultAutocomplete: typeof import('./src/@core/components/DefaultAutocomplete.vue')['default']
@@ -61,7 +63,7 @@ declare module 'vue' {
     'ProductDialog copy 2': typeof import('./src/components/products/ProductDialog copy 2.vue')['default']
     ProductGeneralInfoForm: typeof import('./src/components/products/ProductGeneralInfoForm.vue')['default']
     ProductSearchInput: typeof import('./src/components/products/ProductSearchInput.vue')['default']
-    ProductVariantAttributes: typeof import('./src/components/products/ProductVariantAttributes.vue')['default']
+    ProductVariantAttributes: typeof import('./src/components/productVariantAttributes/productVariantAttributes.vue')['default']
     ProductVariantForm: typeof import('./src/components/products/ProductVariantForm.vue')['default']
     ProductVariants: typeof import('./src/components/productVariants/productVariants.vue')['default']
     ProductVariantStocks: typeof import('./src/components/products/ProductVariantStocks.vue')['default']

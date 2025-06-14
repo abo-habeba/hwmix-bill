@@ -4,7 +4,7 @@
     <v-col cols="5">
       <v-select
         v-model="attr.attribute_id"
-        :items="getAttributeValues(attr.attribute_id)"
+        :items="attributes"
         item-title="name"
         item-value="id"
         label="اختر الخاصية"
@@ -24,7 +24,6 @@
         dense
         outlined
         :disabled="!attr.attribute_id"
-        :return-object="false"
         hide-details="auto"
         :style="getAttributeStyle(attr.attribute_id, attr.attribute_value_id)"
       />
@@ -37,18 +36,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 
 const props = defineProps({
   modelValue: Array,
+  attributes: {
+    type: Array,
+    // إزالة `required: true` والاعتماد على `default`
+    default: () => [],
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
 
 function getAttributeValues(attributeId) {
-  if (!attributeId) return [];
-  const attr = props.modelValue.find(a => a.id === attributeId);
-  return attr ? attr.values : [];
+  const attribute = props.attributes.find(attr => attr.id === attributeId);
+  return attribute ? attribute.values : [];
 }
 
 function getAttributeStyle(attributeId, attributeValueId) {
@@ -68,18 +71,14 @@ function getContrastColor(hexcolor) {
 }
 
 function addAttribute() {
-  console.log('Adding attribute...');
   const newAttribute = { attribute_id: null, attribute_value_id: null };
   emit('update:modelValue', [...props.modelValue, newAttribute]);
-  console.log('Updated attributes:', [...props.modelValue, newAttribute]);
 }
 
 function removeAttribute(index) {
-  console.log('Removing attribute at index:', index);
   const updatedModelValue = [...props.modelValue];
   updatedModelValue.splice(index, 1);
   emit('update:modelValue', updatedModelValue);
-  console.log('Updated attributes after removal:', updatedModelValue);
 }
 </script>
 

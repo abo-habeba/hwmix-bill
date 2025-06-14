@@ -87,8 +87,6 @@ function openEditDialog(product) {
   dialog.value = true;
   isEditMode.value = true;
   dialogProduct.value = JSON.parse(JSON.stringify(product));
-  console.log('Edit Mode: dialogProduct stringify', JSON.stringify(dialogProduct.value));
-  console.log('Edit Mode: dialogProduct updated', dialogProduct.value);
 }
 
 function onProductSaved(product) {
