@@ -1,11 +1,11 @@
-import { fileURLToPath } from 'node:url'
-import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
-import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
-import { defineConfig } from 'vite'
-import vuetify from 'vite-plugin-vuetify'
-import svgLoader from 'vite-svg-loader'
+import { fileURLToPath } from 'node:url';
+import vue from '@vitejs/plugin-vue';
+import vueJsx from '@vitejs/plugin-vue-jsx';
+import AutoImport from 'unplugin-auto-import/vite';
+import Components from 'unplugin-vue-components/vite';
+import { defineConfig } from 'vite';
+import vuetify from 'vite-plugin-vuetify';
+import svgLoader from 'vite-svg-loader';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,6 +18,17 @@ export default defineConfig({
       styles: {
         configFile: 'src/assets/styles/variables/_vuetify.scss',
       },
+      defaults: {
+        VTextField: {
+          hideDetails: 'auto',
+        },
+        VSelect: {
+          hideDetails: 'auto',
+        },
+        VTextarea: {
+          hideDetails: 'auto',
+        },
+      },
     }),
     Components({
       dirs: ['src/@core/components', 'src/components'],
@@ -25,8 +36,7 @@ export default defineConfig({
       resolvers: [
         componentName => {
           // Auto import `VueApexCharts`
-          if (componentName === 'VueApexCharts')
-            return { name: 'default', from: 'vue3-apexcharts', as: 'VueApexCharts' }
+          if (componentName === 'VueApexCharts') return { name: 'default', from: 'vue3-apexcharts', as: 'VueApexCharts' };
         },
       ],
     }),
@@ -61,8 +71,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ['vuetify'],
-    entries: [
-      './src/**/*.vue',
-    ],
+    entries: ['./src/**/*.vue'],
   },
-})
+});

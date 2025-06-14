@@ -2,8 +2,6 @@
 import { ref, watch, onMounted, nextTick } from 'vue'; // إضافة nextTick
 import { useDisplay } from 'vuetify';
 import { getAll, saveItem } from '@/services/api'; // تأكد من أن المسار صحيح لخدمة الـ API
-import ProductGeneralInfoForm from './ProductGeneralInfoForm.vue';
-import ProductVariantForm from './ProductVariantForm.vue';
 
 const props = defineProps({
   dialog: Boolean,
@@ -60,7 +58,7 @@ const defaultProduct = {
           batch: '',
           expiry: null,
           loc: '',
-          status: 'available',
+          status: true,
           warehouse_id: null, // سيتم تعيينه بعد جلب المخازن
         },
       ],
@@ -107,7 +105,7 @@ function mapProductDataForEdit(apiProduct) {
         batch: stock.batch || '',
         expiry: stock.expiry ? new Date(stock.expiry).toISOString().substr(0, 10) : null,
         loc: stock.loc || '',
-        status: stock.status ?? 'available',
+        status: stock.status ?? true,
         warehouse_id: stock.warehouse ? stock.warehouse.id : null,
       })),
     })),
@@ -176,12 +174,14 @@ watch(
 
 onMounted(async () => {
   await Promise.all([getBrands(), getAttributes(), getWarehouses(), getCategories()]);
-  // تعيين المخزن الافتراضي للمخزون الأول عند تحميل المكونات
+
+  // بعد جلب المخازن، تأكد من تعيين المخزن الافتراضي لـ localProduct إذا لم يكن معيناً
+  // وهذا يضمن أن يكون هناك مخزن افتراضي للـ variant الأول في وضع الإضافة.
   if (!props.isEditMode) {
     setInitialWarehouseForFirstStock();
   }
 });
-// دالة لجلب العلامات التجارية
+
 async function getBrands() {
   try {
     const res = await getAll('brands', null, true, false);
@@ -191,7 +191,6 @@ async function getBrands() {
     // يمكن عرض رسالة خطأ للمستخدم هنا
   }
 }
-// دالة لجلب الخصائص
 async function getAttributes() {
   try {
     const res = await getAll('attributes', null, true, false);
@@ -200,7 +199,6 @@ async function getAttributes() {
     console.error('Error fetching attributes:', error);
   }
 }
-// دالة لجلب المخازن
 async function getWarehouses() {
   try {
     const res = await getAll('warehouses', null, true, false);
@@ -213,7 +211,6 @@ async function getWarehouses() {
     console.error('Error fetching warehouses:', error);
   }
 }
-// دالة لجلب الفئات
 async function getCategories() {
   try {
     const res = await getAll('categories', null, true, false);
@@ -222,21 +219,31 @@ async function getCategories() {
     console.error('Error fetching categories:', error);
   }
 }
-// دالة للحصول على قيم الخصائص بناءً على معرف الخاصية
+
 function getAttributeValues(attributeId) {
   if (!attributeId) return [];
   const attr = attributes.value.find(a => a.id === attributeId);
   return attr ? attr.values : [];
 }
 
-// دالة لإضافة خاصية جديدة
+function getContrastColor(hexcolor) {
+  if (!hexcolor) return '#000';
+  const c = hexcolor.substring(1);
+  const rgb = parseInt(c, 16);
+  const r = (rgb >> 16) & 0xff;
+  const g = (rgb >> 8) & 0xff;
+  const b = (rgb >> 0) & 0xff;
+  const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luma > 186 ? '#000' : '#fff';
+}
+
 function addAttribute(variantIndex) {
   localProduct.value.variants[variantIndex].attributes.push({
     attribute_id: null,
     attribute_value_id: null,
   });
 }
-// دالة لإزالة خاصية
+
 function removeAttribute(variantIndex, attrIndex) {
   localProduct.value.variants[variantIndex].attributes.splice(attrIndex, 1);
 }
@@ -268,13 +275,12 @@ function closeDialog() {
 
 function addVariant() {
   localProduct.value.variants.push({
+    barcode: '',
+    sku: '',
     retail_price: 0,
     wholesale_price: 0,
     image: null,
     weight: 0,
-    active: true,
-    featured: false,
-    returnable: true,
     dimensions: '',
     tax: 0,
     discount: 0,
@@ -295,12 +301,10 @@ function addVariant() {
       },
     ],
   });
-  console.log('Updated variants after addition:', localProduct.value.variants);
 }
 
 function removeVariant(index) {
   localProduct.value.variants.splice(index, 1);
-  console.log('Updated variants after removal:', localProduct.value.variants);
 }
 
 async function saveProduct() {
@@ -354,8 +358,6 @@ async function saveProduct() {
     });
 
     let res;
-    console.log('Saving product with payload:', payload);
-    console.log('Saving product with payload:', JSON.stringify(payload));
     if (payload.id) {
       // وضع التعديل
       res = await saveItem('product', payload, payload.id);
@@ -376,7 +378,7 @@ async function saveProduct() {
 const statusOptions = [
   { value: 'active', text: 'نشط' },
   { value: 'inactive', text: 'غير نشط' },
-  { value: 'discontinued', text: 'متوقف' },
+  { value: 'expired', text: 'منتهي' },
 ];
 </script>
 
@@ -384,42 +386,273 @@ const statusOptions = [
   <v-dialog :fullscreen="xs" v-model="dialog">
     <v-card>
       <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line" @click="closeDialog"></v-btn>
-      <v-card-title class="ma-3 text-center">
+      <v-card-title class="ma-5 text-center">
         <h2>{{ isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد' }}</h2>
       </v-card-title>
       <v-card-text :class="xs ? 'px-2' : 'px-5'">
         <v-form ref="productForm" v-model="productFormValid">
-          <ProductGeneralInfoForm
-            :modelValue="localProduct"
-            :categories="categories"
-            :brands="brands"
-            :productRules="productRules"
-            @update:modelValue="value => (localProduct = value)"
-          />
-
-          <v-card class="py-2 px-4 ma-2">
+          <v-row class="my-3">
+            <v-col cols="12" md="6">
+              <v-text-field v-model="localProduct.name" label="اسم المنتج" :rules="productRules.name" required hide-details="auto" />
+            </v-col>
+            <v-col cols="12">
+              <v-row>
+                <v-col>
+                  <v-switch v-model="localProduct.active" label="نشط" :color="localProduct.active ? 'primary' : 'grey'" hide-details="auto" />
+                </v-col>
+                <v-col>
+                  <v-switch v-model="localProduct.featured" label="مميز" :color="localProduct.featured ? 'primary' : 'grey'" hide-details="auto" />
+                </v-col>
+                <v-col>
+                  <v-switch
+                    v-model="localProduct.returnable"
+                    label="قابل للإرجاع"
+                    :color="localProduct.returnable ? 'primary' : 'grey'"
+                    hide-details="auto"
+                  />
+                </v-col>
+              </v-row>
+            </v-col>
+            <v-col cols="12">
+              <v-row>
+                <v-col>
+                  <v-combobox
+                    v-model="localProduct.category_id"
+                    item-value="id"
+                    item-title="name"
+                    :items="categories || []"
+                    label="الفئة"
+                    :rules="[v => !!v || 'الفئة مطلوبة']"
+                    required
+                    hide-details="auto"
+                    :return-object="false"
+                  />
+                </v-col>
+                <v-col class="px-0">
+                  <v-combobox
+                    v-model="localProduct.brand_id"
+                    item-value="id"
+                    item-title="name"
+                    :items="brands || []"
+                    label="العلامة التجارية"
+                    hide-details="auto"
+                    :return-object="false"
+                  />
+                </v-col>
+              </v-row>
+            </v-col>
+            <v-col cols="12">
+              <v-textarea rows="1" auto-grow v-model="localProduct.desc" label="الوصف القصير" :rules="productRules.description" hide-details="auto" />
+            </v-col>
+            <v-col cols="12">
+              <v-textarea
+                rows="2"
+                auto-grow
+                v-model="localProduct.desc_long"
+                label="الوصف المفصل"
+                :rules="productRules.description_long"
+                hide-details="auto"
+              />
+            </v-col>
+          </v-row>
+          <v-card class="bg-grey-lighten-4 pa-2">
             <v-card-title> خيارات المنتج </v-card-title>
             <v-row class="bg-grey-lighten-4 pa-2" v-for="(variant, vIndex) in localProduct.variants" :key="vIndex">
-              <ProductVariantForm
-                :variant="variant"
-                :variantIndex="vIndex"
-                :attributes="attributes"
-                :warehouses="warehouses"
-                :statusOptions="statusOptions"
-                :productRules="productRules"
-                @remove-variant="removeVariant"
-              >
-                <ProductVariantAttributes v-model="variant.attributes" :attributes="attributes" />
-              </ProductVariantForm>
+              <v-col cols="12">
+                <v-row>
+                  <v-col cols="4">
+                    <v-text-field
+                      v-model.number="variant.retail_price"
+                      label="سعر التجزئة"
+                      type="number"
+                      :rules="productRules.retail_price"
+                      hide-details="auto"
+                    />
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      v-model.number="variant.wholesale_price"
+                      label="سعر الجملة"
+                      type="number"
+                      :rules="productRules.wholesale_price"
+                      hide-details="auto"
+                    />
+                  </v-col>
+                  <v-col cols="4">
+                    <v-select
+                      v-model="variant.status"
+                      :items="statusOptions"
+                      item-value="value"
+                      item-title="text"
+                      label="حالة المتغير"
+                      hide-details="auto"
+                      :rules="[v => !!v || 'حالة المتغير مطلوبة']"
+                      required
+                    />
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field v-model.number="variant.tax" label="نسبة الضريبة" type="number" :rules="productRules.tax" hide-details="auto" />
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field v-model.number="variant.discount" label="الخصم" type="number" :rules="productRules.discount" hide-details="auto" />
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field v-model="variant.image" label="رابط الصورة" hide-details="auto" />
+                  </v-col>
+                  <v-col cols="6">
+                    <v-text-field v-model="variant.dimensions" label="الأبعاد" hide-details="auto" />
+                  </v-col>
+                  <v-col cols="12">
+                    <v-text-field v-model="variant.barcode" label="الباركود" hide-details="auto" />
+                  </v-col>
+                  <v-col cols="12">
+                    <v-text-field v-model="variant.sku" label="رمز المنتج (SKU)" hide-details="auto" />
+                  </v-col>
+                </v-row>
+              </v-col>
+
+              <v-col cols="12" class="mt-1">
+                <v-card-subtitle class="ma-1">المخزون (Stocks)</v-card-subtitle>
+                <v-card class="mb-4 pa-3" outlined v-for="(stock, sIndex) in variant.stocks" :key="sIndex">
+                  <v-row dense>
+                    <v-col cols="4">
+                      <v-text-field v-model.number="stock.cost" label="سعر الشراء" type="number" :rules="productRules.cost" hide-details="auto" />
+                    </v-col>
+                    <v-col cols="4">
+                      <v-text-field v-model.number="stock.qty" label="الكمية" type="number" :rules="productRules.qty" hide-details="auto" />
+                    </v-col>
+                    <v-col cols="4">
+                      <v-select
+                        v-if="warehouses.length"
+                        v-model="stock.warehouse_id"
+                        item-value="id"
+                        item-title="name"
+                        :items="warehouses || []"
+                        label="المخزن"
+                        :rules="[v => !!v || 'المخزن مطلوب']"
+                        required
+                        hide-details="auto"
+                        :return-object="false"
+                      />
+                      <v-select
+                        v-else
+                        :items="[{ id: null, name: 'لا يوجد مخازن، يرجى إضافة مخزن أولاً', disabled: true }]"
+                        label="المخزن"
+                        item-title="name"
+                        :value="null"
+                        :rules="[v => !!v || 'المخزن مطلوب']"
+                        required
+                        hide-details="auto"
+                      />
+                    </v-col>
+                    <v-col cols="4">
+                      <v-select
+                        v-model="stock.status"
+                        :items="statusOptions"
+                        item-value="value"
+                        item-title="text"
+                        label="حالة المتغير"
+                        hide-details="auto"
+                        :rules="[v => !!v || 'حالة المتغير مطلوبة']"
+                        required
+                      />
+                    </v-col>
+                    <v-col cols="4">
+                      <v-text-field v-model="stock.expiry" label="تاريخ الانتهاء" type="date" hide-details="auto" />
+                    </v-col>
+                    <v-col cols="4">
+                      <v-text-field v-model="stock.loc" label="الموقع" hide-details="auto" />
+                    </v-col>
+                  </v-row>
+                  <v-btn
+                    v-if="variant.stocks.length > 1"
+                    class="mt-2"
+                    icon="ri-delete-bin-line"
+                    color="error"
+                    size="small"
+                    @click="removeStock(vIndex, sIndex)"
+                  ></v-btn>
+                </v-card>
+                <!-- <v-btn class="my-2" text color="primary" small @click="addStock(vIndex)">+ إضافة مخزون جديد لهذا الخيار</v-btn> -->
+              </v-col>
+
+              <v-col cols="12" class="mt-2">
+                <v-card-subtitle>الخصائص (Attributes)</v-card-subtitle>
+                <v-row dense v-for="(attr, aIndex) in variant.attributes" :key="aIndex" class="d-flex align-center">
+                  <v-col cols="5">
+                    <v-select
+                      v-model="attr.attribute_id"
+                      :items="attributes"
+                      item-title="name"
+                      item-value="id"
+                      label="اختر الخاصية"
+                      dense
+                      outlined
+                      hide-details="auto"
+                      @update:modelValue="() => (attr.attribute_value_id = null)"
+                    />
+                  </v-col>
+                  <v-col cols="5">
+                    <v-select
+                      v-model="attr.attribute_value_id"
+                      :items="getAttributeValues(attr.attribute_id)"
+                      item-title="name"
+                      item-value="id"
+                      label="اختر القيمة"
+                      dense
+                      outlined
+                      :disabled="!attr.attribute_id"
+                      :return-object="false"
+                      hide-details="auto"
+                      :style="
+                        (() => {
+                          const selected = getAttributeValues(attr.attribute_id).find(v => v.id === attr.attribute_value_id);
+                          return selected && selected.color
+                            ? `background:${selected.color};color:${getContrastColor(selected.color)};border-radius:6px;`
+                            : '';
+                        })()
+                      "
+                    >
+                      <template #item="{ item, props: itemProps }">
+                        <v-list-item
+                          v-bind="itemProps"
+                          :style="item.raw.color ? `background:${item.raw.color};color:${getContrastColor(item.raw.color)};border-radius:6px;` : ''"
+                        >
+                        </v-list-item>
+                      </template>
+                      <template #selection="{ item }">
+                        <span
+                          :style="
+                            item.raw.color
+                              ? `background:${item.raw.color};color:${getContrastColor(
+                                  item.raw.color
+                                )};padding:2px 8px;border-radius:6px;display:inline-block`
+                              : ''
+                          "
+                        >
+                          {{ item.raw.name }}
+                        </span>
+                      </template>
+                    </v-select>
+                  </v-col>
+                  <v-col cols="2">
+                    <v-btn class="my-a" icon="ri-delete-bin-line" color="error" size="small" @click="removeAttribute(vIndex, aIndex)"> </v-btn>
+                  </v-col>
+                </v-row>
+
+                <v-btn class="my-2" text color="primary" small @click="addAttribute(vIndex)">+ إضافة خاصية جديدة</v-btn>
+              </v-col>
+              <v-col cols="12">
+                <v-btn variant="text" color="error" append-icon="ri-delete-bin-line" @click="removeVariant(vIndex)">حذف هذا الخيار</v-btn>
+              </v-col>
+              <v-col cols="12" v-if="vIndex < localProduct.variants.length - 1"> <v-divider class="my-4"></v-divider> </v-col>
             </v-row>
           </v-card>
-
           <v-row>
             <v-col cols="12">
               <v-btn class="my-3" color="primary" @click="addVariant">+ اضافة خيار جديد </v-btn>
             </v-col>
           </v-row>
-
           <v-divider class="my-4"></v-divider>
           <v-row>
             <v-col cols="6">
@@ -438,5 +671,5 @@ const statusOptions = [
 </template>
 
 <style scoped>
-/* Add any specific styles here */
+/* إزالة .forbidden-cursor لأننا نستخدم :disabled الآن */
 </style>

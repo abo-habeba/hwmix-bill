@@ -1,0 +1,55 @@
+<template>
+  <v-row>
+    <v-col cols="12" sm="4">
+      <v-switch v-model="modelValue.active" label="نشط" color="primary" hide-details="auto"></v-switch>
+    </v-col>
+
+    <v-col cols="12" sm="4">
+      <v-switch v-model="modelValue.featured" label="مميز" color="primary" hide-details="auto"></v-switch>
+    </v-col>
+
+    <v-col cols="12" sm="4">
+      <v-switch v-model="modelValue.returnable" label="قابل للإرجاع" color="primary" hide-details="auto"></v-switch>
+    </v-col>
+    <v-col cols="12" sm="4">
+      <v-text-field v-model="modelValue.name" label="اسم المنتج" :rules="productRules.name" required hide-details="auto" />
+    </v-col>
+    <v-col cols="12" sm="4">
+      <v-select v-model="modelValue.category_id" :items="categories" item-value="id" item-title="name" label="التصنيف" required hide-details="auto" />
+    </v-col>
+    <v-col cols="12" sm="4">
+      <v-select
+        v-model="modelValue.brand_id"
+        :items="brands"
+        item-value="id"
+        item-title="name"
+        label="العلامة التجارية"
+        required
+        hide-details="auto"
+      />
+    </v-col>
+    <v-col cols="12" sm="6">
+      <v-text-field v-model="modelValue.desc" label="الوصف" :rules="productRules.description" hide-details="auto" />
+    </v-col>
+    <v-col cols="12" sm="6">
+      <v-text-field v-model="modelValue.desc_long" label="الوصف المفصل" :rules="productRules.description_long" hide-details="auto" />
+    </v-col>
+  </v-row>
+</template>
+
+<script setup>
+import { defineProps, defineEmits } from 'vue';
+
+const props = defineProps({
+  modelValue: Object,
+  categories: Array,
+  brands: Array,
+  productRules: Object,
+});
+
+const emit = defineEmits(['update:modelValue']);
+</script>
+
+<style scoped>
+/* Add any specific styles here */
+</style>

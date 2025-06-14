@@ -87,6 +87,8 @@ function openEditDialog(product) {
   dialog.value = true;
   isEditMode.value = true;
   dialogProduct.value = JSON.parse(JSON.stringify(product));
+  console.log('Edit Mode: dialogProduct stringify', JSON.stringify(dialogProduct.value));
+  console.log('Edit Mode: dialogProduct updated', dialogProduct.value);
 }
 
 function onProductSaved(product) {
@@ -132,6 +134,8 @@ function openVariantEditDialog(variant, productId) {
   variantToEdit.value = JSON.parse(JSON.stringify(variant));
   // أضف id المنتج للمتغير
   variantToEdit.value.product_id = productId;
+  console.log('openVariantEditDialog', variantToEdit.value);
+  console.log('attributes', attributes.value);
   variantDialog.value = true;
 }
 
