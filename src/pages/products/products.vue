@@ -29,7 +29,7 @@ const attributes = ref([]);
 
 const headers = [
   { title: 'الاسم', key: 'name' },
-  { title: 'الكمية', key: 'stock_quantity' },
+  // { title: 'الكمية', key: 'stock_quantity' },
   { title: 'القسم', key: 'category' },
   { title: 'الماركة', key: 'brand' },
   { title: 'الإجراء', key: 'actions', sortable: false },
@@ -38,6 +38,7 @@ const headers = [
 const variantHeaders = [
   { title: 'SKU', key: 'sku' },
   { title: 'الباركود', key: 'barcode' },
+  { title: 'الكمية', key: 'quantity' },
   { title: 'سعر الشراء', key: 'purchase_price' },
   { title: 'سعر الجملة', key: 'wholesale_price' },
   { title: 'سعر التجزئة', key: 'retail_price' },
@@ -201,7 +202,6 @@ function saveVariant(editedVariant) {
         <template #item="{ item }">
           <tr :class="{ 'bg-product-expanded': expandedId === item.id }" @click="toggleExpand(item.id)" style="cursor: pointer">
             <td>{{ item.name }}</td>
-            <td>{{ item.stock_quantity ?? item.variants?.[0]?.stock_quantity ?? 0 }}</td>
             <td>{{ item.category?.name ?? '-' }}</td>
             <td>{{ item.brand?.name ?? '-' }}</td>
             <td @click.stop>
@@ -224,6 +224,7 @@ function saveVariant(editedVariant) {
                   <tr class="bg-variant-table">
                     <td>{{ variant.sku }}</td>
                     <td>{{ variant.barcode }}</td>
+                    <td>{{ variant.quantity }}</td>
                     <td>{{ variant.purchase_price }}</td>
                     <td>{{ variant.wholesale_price }}</td>
                     <td>{{ variant.retail_price }}</td>

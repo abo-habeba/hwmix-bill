@@ -34,6 +34,9 @@
           <v-col cols="12">
             <v-text-field v-model="startDate" label="تاريخ البدء" type="date" :max="maxDate" @input="validateStartDate" outlined dense />
           </v-col>
+          <v-col cols="12">
+            <v-text-field v-model="dueDate" label="تاريخ الاستحقاق" type="date" :max="maxDate" @input="validateStartDate" outlined dense />
+          </v-col>
         </v-row>
       </v-card-text>
 
@@ -64,6 +67,7 @@ const months = ref(12);
 const monthlyInstallment = ref(0);
 const totalAfterInstallment = ref(0);
 const startDate = ref(new Date().toISOString());
+const dueDate = ref(new Date().toISOString());
 const maxDate = ref(new Date().toISOString().split('T')[0]);
 
 function formatCurrency(value) {
@@ -92,6 +96,7 @@ function saveInstallment() {
       installment_amount: monthlyInstallment.value,
       total_amount: totalAfterInstallment.value,
       start_date: startDate.value, // تاريخ البدء يحدده المستخدم
+      due_date: dueDate.value, // تاريخ الاستحقاق يحدده المستخدم
     },
   };
   emit('installment-saved', data);

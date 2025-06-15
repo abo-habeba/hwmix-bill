@@ -50,7 +50,7 @@ function userTitle(item) {
 }
 
 const userNoDataText = computed(() => {
-  if (userSearchText.value.length < 3) {
+  if (!userSearchText.value || userSearchText.value.length < 3) {
     return 'أدخل 3 أحرف على الأقل';
   }
   return isLoadingUsers.value ? 'جاري البحث...' : 'لم يتم العثور على عميل';
@@ -58,7 +58,7 @@ const userNoDataText = computed(() => {
 
 let userSearchTimeout = null;
 function onUserSearch(val) {
-  if (val.length < 3) {
+  if (!val || val.length < 3) {
     return;
   }
   if (userSearchTimeout) clearTimeout(userSearchTimeout);

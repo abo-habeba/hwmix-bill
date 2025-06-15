@@ -113,9 +113,9 @@ onMounted(fetchItems);
         { title: 'رقم الفاتورة', value: 'invoice_number', sortable: true },
         { title: 'المستخدم', value: 'user.full_name', sortable: true },
         { title: 'نوع الفاتورة', value: 'invoice_type.name', sortable: true },
-        { title: 'اسم الشركة', value: 'company.name', sortable: true },
-        { title: 'تاريخ الإصدار', value: 'issue_date', sortable: true },
-        { title: 'تاريخ الاستحقاق', value: 'due_date', sortable: true },
+        // { title: 'اسم الشركة', value: 'company.name', sortable: true },
+        // { title: 'تاريخ الإصدار', value: 'issue_date', sortable: true },
+        // { title: 'تاريخ الاستحقاق', value: 'due_date', sortable: true },
         { title: 'المبلغ الإجمالي', value: 'total_amount', sortable: true },
         { title: 'الحالة', value: 'status', sortable: true },
         { title: 'تاريخ الإنشاء', value: 'created_at', sortable: true },
@@ -146,7 +146,7 @@ onMounted(fetchItems);
       </template>
 
       <template #item.total_amount="{ item }">
-        {{ Number(item.total_amount).toLocaleString('ar-EG', { style: 'currency', currency: 'EGP' }) }}
+        {{ Number(item.total_amount).toLocaleString({ style: 'currency', currency: 'EGP' }) }}
       </template>
 
       <template #item.status="{ item }">

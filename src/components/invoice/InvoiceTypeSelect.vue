@@ -1,79 +1,61 @@
 <template>
-  <v-autocomplete
-    v-model="selectedType"
-    :items="invoiceTypes"
+  <v-select
+    v-model="localValue"
+    :items="types"
     item-title="name"
     item-value="id"
-    label="نوع الفاتورة"
-    prepend-inner-icon="ri-file-list-3-line"
-    :rules="[v => !!v || 'حقل نوع الفاتورة مطلوب']"
-    clearable
-    required
     return-object
-    @update:model-value="emitType"
-    :loading="isLoadingTypes"
-    :no-data-text="noDataText"
-    hide-details="auto"
+    :loading="loading"
+    :disabled="loading || !types.length"
+    label="نوع الفاتورة"
   />
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watchEffect, onMounted, watch } from 'vue';
 import { getAll } from '@/services/api';
 
 const emit = defineEmits(['update:modelValue']);
 const props = defineProps({
   modelValue: Object,
-  invoiceContext: Object,
+  invoiceContext: { type: Object, default: () => ({ context: 'sales', code: 'sales' }) },
 });
 
-const selectedType = ref(props.modelValue || null);
-const invoiceTypes = ref([]);
-const isLoadingTypes = ref(false);
-const noDataText = ref('لا يوجد أنواع فواتير');
+const localValue = ref(props.modelValue || null);
+const types = ref([]);
+const loading = ref(false);
 
-async function fetchInvoiceTypes(context) {
-  isLoadingTypes.value = true;
+watchEffect(() => {
+  localValue.value = props.modelValue;
+});
+
+watch(localValue, newVal => {
+  emit('update:modelValue', newVal);
+});
+
+onMounted(fetchTypes);
+
+async function fetchTypes() {
+  loading.value = true;
   try {
-    const response = await getAll('invoice-types', { context });
-    invoiceTypes.value = response.data || [];
+    const { data } = await getAll('invoice-types', {
+      context: props.invoiceContext?.context,
+    });
 
-    // اختر النوع المناسب تلقائيًا لو مش متحدد
-    if (!selectedType.value && invoiceTypes.value.length && props.invoiceContext?.code) {
-      const found = invoiceTypes.value.find(i => i.code === props.invoiceContext.code);
-      if (found) {
-        selectedType.value = found;
-        emitType(found);
+    types.value = Array.isArray(data) ? data : data.items || [];
+
+    // 🟢 تعيين النوع المناسب حسب الـ context بعد تحميل الأنواع
+    if (!props.modelValue && props.invoiceContext?.code) {
+      const match = types.value.find(type => type.code === props.invoiceContext.code);
+      if (match) {
+        localValue.value = match;
+        // emit('update:modelValue', match);
       }
     }
   } catch (e) {
-    invoiceTypes.value = [];
+    console.error('خطأ فى تحميل أنواع الفواتير:', e);
   } finally {
-    isLoadingTypes.value = false;
+    loading.value = false;
   }
 }
-
-function emitType(val) {
-  if (val && typeof val === 'object' && val.id) {
-    emit('update:modelValue', val);
-  } else {
-    console.warn('emitType: قيمة غير صالحة', val);
-  }
-}
-
-// راقب التغيرات في القيمة من الكمبوننت الأب
-watch(
-  () => props.modelValue,
-  newVal => {
-    if (newVal && newVal.id !== selectedType.value?.id) {
-      selectedType.value = newVal;
-    }
-  }
-);
-
-onMounted(() => {
-  if (props.invoiceContext.context) {
-    fetchInvoiceTypes(props.invoiceContext.context);
-  }
-});
 </script>
