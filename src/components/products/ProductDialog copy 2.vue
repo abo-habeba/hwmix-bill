@@ -463,7 +463,7 @@ const statusOptions = [
                   <v-col cols="4">
                     <v-text-field
                       v-model.number="variant.retail_price"
-                      label="سعر التجزئة"
+                      label="سعر القطاعي "
                       type="number"
                       :rules="productRules.retail_price"
                       hide-details="auto"

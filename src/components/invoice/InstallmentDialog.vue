@@ -32,10 +32,10 @@
             </v-chip>
           </v-col>
           <v-col cols="12">
-            <v-text-field v-model="startDate" label="تاريخ البدء" type="date" :max="maxDate" @input="validateStartDate" outlined dense />
+            <v-text-field v-model="startDate" label="تاريخ البدء" type="date" outlined dense />
           </v-col>
           <v-col cols="12">
-            <v-text-field v-model="dueDate" label="تاريخ الاستحقاق" type="date" :max="maxDate" @input="validateStartDate" outlined dense />
+            <v-text-field v-model="dueDate" label="تاريخ الاستحقاق" type="date" outlined dense />
           </v-col>
         </v-row>
       </v-card-text>

@@ -39,9 +39,9 @@ const variantHeaders = [
   { title: 'SKU', key: 'sku' },
   { title: 'الباركود', key: 'barcode' },
   { title: 'الكمية', key: 'quantity' },
-  { title: 'سعر الشراء', key: 'purchase_price' },
+  { title: 'سعر الشراء', key: 'cost' },
   { title: 'سعر الجملة', key: 'wholesale_price' },
-  { title: 'سعر التجزئة', key: 'retail_price' },
+  { title: 'سعر القطاعي', key: 'retail_price' },
   { title: 'الخصم', key: 'discount' },
   { title: 'الخصائص', key: 'attributes' },
   { title: 'الإجراء', key: 'actions', sortable: false },
@@ -225,7 +225,7 @@ function saveVariant(editedVariant) {
                     <td>{{ variant.sku }}</td>
                     <td>{{ variant.barcode }}</td>
                     <td>{{ variant.quantity }}</td>
-                    <td>{{ variant.purchase_price }}</td>
+                    <td>{{ variant.cost }}</td>
                     <td>{{ variant.wholesale_price }}</td>
                     <td>{{ variant.retail_price }}</td>
                     <td>{{ variant.discount }}</td>

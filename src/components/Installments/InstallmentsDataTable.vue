@@ -1,136 +1,141 @@
 <template>
-  <v-data-table :headers="headers" :items="installments || []" item-key="id" class="elevation-1" hide-default-footer density="compact">
-    <template #item.actions="{ item }">
-      <v-btn color="primary" small @click="openPayDialog(item)">دفع القسط</v-btn>
+  <v-data-table-server
+    item-value="id"
+    v-model:options="options"
+    :headers="headers"
+    :items="installments"
+    :items-length="totalItems"
+    :loading="loading"
+    hover
+    show-current-page
+    @update:options="fetchInstallments"
+    :row-props="getRowProps"
+    loading-text="جاري تحميل البيانات"
+    no-data-text="لا توجد بيانات"
+    items-per-page-text="عدد الصفوف في الصفحة"
+  >
+    <template #item.index="{ index }">
+      {{ index + 1 }}
     </template>
 
-    <template #no-data>
-      <v-row class="pa-4">
-        <v-col class="text-center text-grey">لا توجد بيانات مستخدمين</v-col>
-      </v-row>
+    <template #item.actions="{ item }">
+      <v-btn
+        :color="item.status === 'تم الدفع' ? 'grey' : 'primary'"
+        :disabled="item.status === 'تم الدفع'"
+        density="compact"
+        @click="openPayDialog(item)"
+      >
+        {{ item.status === 'تم الدفع' ? 'تم الدفع' : 'دفع القسط' }}
+      </v-btn>
     </template>
-  </v-data-table>
+  </v-data-table-server>
+
+  <v-pagination
+    v-model="currentPage"
+    :length="Math.ceil(totalItems / itemsPerPage)"
+    class="mt-4"
+    :show-first-last="true"
+    :total-visible="5"
+  ></v-pagination>
 
   <!-- Dialog دفع القسط -->
-  <v-dialog v-model="payDialog" max-width="400px">
-    <v-card>
-      <v-card-title>سداد القسط</v-card-title>
-      <v-card-text>
-        <v-form ref="payForm" v-model="valid">
-          <v-text-field
-            label="مبلغ السداد"
-            v-model="payData.amount"
-            type="number"
-            :rules="[v => !!v || 'المبلغ مطلوب', v => v > 0 || 'المبلغ يجب أن يكون أكبر من صفر']"
-            required
-          ></v-text-field>
-
-          <v-text-field label="تاريخ السداد" v-model="payData.paid_at" type="date" :rules="[v => !!v || 'التاريخ مطلوب']" required></v-text-field>
-
-          <v-select
-            label="طريقة الدفع"
-            v-model="payData.payment_method"
-            :items="paymentMethods"
-            :rules="[v => !!v || 'اختر طريقة الدفع']"
-            required
-          ></v-select>
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn text @click="closePayDialog">إلغاء</v-btn>
-        <v-btn color="primary" :disabled="!valid" @click="submitPayment">دفع القسط</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <PayInstallmentDialog v-model="payDialog" :installment="currentInstallment" @update:installment="updateInstallment" />
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { getAll } from '@/services/api';
+import PayInstallmentDialog from './PayInstallmentDialog.vue';
 
-const installments = ref([]);
-const payDialog = ref(false);
-const valid = ref(false);
-const currentInstallment = ref(null);
-
-const payData = ref({
-  amount: '',
-  paid_at: new Date().toISOString().substr(0, 10), // اليوم بالتاريخ yyyy-mm-dd
-  payment_method: null,
-});
-
-const paymentMethods = ['نقدي', 'تحويل بنكي', 'بطاقة ائتمان', 'شبكة الدفع الإلكتروني'];
-
-let headers = [
-  { title: 'ID', key: 'id' },
-  { title: 'installment_number', key: 'رقم' },
+const headers = [
+  { title: 'رقم القسط', key: 'installment_number' },
+  { title: 'العميل', key: 'user.nickname', sortable: false },
+  { title: 'تاريخ الاستحقاق', key: 'due_date' },
   { title: 'قيمة القسط', key: 'amount' },
   { title: 'الحالة', key: 'status' },
   { title: 'المتبقي', key: 'remaining' },
-  { title: 'تاريخ الاستحقاق', key: 'due_date' },
   { title: 'الإجراءات', key: 'actions', sortable: false },
 ];
 
-onMounted(() => {
-  getAll('installments', null, true, true, true).then(res => {
-    installments.value = res.data;
-  });
+const installments = ref([]);
+const payDialog = ref(false);
+const currentInstallment = ref(null);
+const currentPage = ref(1);
+const itemsPerPage = ref(10);
+const totalItems = ref(0);
+const loading = ref(false);
+
+const options = ref({
+  page: 1,
+  itemsPerPage: 10,
+  sortBy: ['due_date'],
+  sortDesc: [false],
 });
 
-function openPayDialog(installment) {
-  currentInstallment.value = installment;
-  // نحدد المبلغ الافتراضي ليكون المتبقي
-  payData.value.amount = installment.remaining;
-  payData.value.paid_at = new Date().toISOString().substr(0, 10);
-  payData.value.payment_method = null;
+function openPayDialog(item) {
+  currentInstallment.value = item;
   payDialog.value = true;
 }
 
-function closePayDialog() {
-  payDialog.value = false;
-  currentInstallment.value = null;
-  payData.value = {
-    amount: '',
-    paid_at: new Date().toISOString().substr(0, 10),
-    payment_method: null,
-  };
-  valid.value = false;
+function updateInstallment(newInstallments) {
+  newInstallments.forEach(newInstallment => {
+    const index = installments.value.findIndex(i => i.id === newInstallment.id);
+    if (index !== -1) {
+      installments.value[index] = newInstallment;
+    }
+  });
 }
 
-async function submitPayment() {
-  if (!valid.value) return;
+async function fetchInstallments() {
+  loading.value = true;
 
-  // تحقق من عدم تجاوز المبلغ للمتبقي
-  if (Number(payData.value.amount) > Number(currentInstallment.value.remaining)) {
-    alert('مبلغ السداد لا يمكن أن يكون أكبر من المتبقي');
-    return;
-  }
+  const { page, itemsPerPage, sortBy } = options.value;
+
+  const sortField = sortBy.length ? sortBy[0].key : 'due_date';
+  const sortOrder = sortBy.length && sortBy[0].order ? sortBy[0].order : 'asc';
+
+  const params = {
+    page: page || 1,
+    limit: itemsPerPage || 10,
+    sort_by: sortField,
+    sort_order: sortOrder,
+  };
 
   try {
-    // مثال: endpoint الدفع عندك يكون /installments/{id}/pay
-    // const response = await postData(`installments/${currentInstallment.value.id}/pay`, {
-    //   amount: payData.value.amount,
-    //   paid_at: payData.value.paid_at,
-    //   payment_method: payData.value.payment_method,
-    // });
-
-    alert('جاري العمل علي سداد القسط ');
-
-    // تحديث قائمة الأقساط
-    // const index = installments.value.findIndex(i => i.id === currentInstallment.value.id);
-    // if (index !== -1) {
-    //   installments.value[index] = response.data; // افترض أنك ترجع القسط بعد التحديث من السيرفر
-    // }
-
-    closePayDialog();
+    const res = await getAll('installments', params, true, true, true);
+    installments.value = res.data;
+    totalItems.value = res.total;
   } catch (error) {
-    alert('حدث خطأ أثناء عملية الدفع');
-    console.error(error);
+    console.error('فشل في جلب الأقساط:', error);
+  } finally {
+    loading.value = false;
   }
+}
+
+onMounted(() => {
+  fetchInstallments();
+});
+
+watch(
+  () => options.value.page,
+  () => {
+    fetchInstallments();
+  }
+);
+
+function getRowProps({ item, index }) {
+  return {
+    class: item.status === 'تم الدفع' ? 'paid-row' : 'unpaid-row',
+    'data-index': index,
+  };
 }
 </script>
 
 <style scoped>
-/* تحسينات بسيطة */
+.paid-row {
+  background-color: #d4edda;
+}
+.unpaid-row {
+  background-color: #f8d7da;
+}
 </style>

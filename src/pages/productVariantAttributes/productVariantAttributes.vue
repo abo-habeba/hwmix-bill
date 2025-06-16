@@ -55,7 +55,7 @@ const variantHeaders = [
   { text: 'SKU', value: 'sku' },
   { text: 'سعر الشراء', value: 'purchase_price' },
   { text: 'سعر الجملة', value: 'wholesale_price' },
-  { text: 'سعر التجزئة', value: 'retail_price' },
+  { text: 'سعر القطاعي', value: 'retail_price' },
   { text: 'الخصم', value: 'discount' },
   { text: 'اللون', value: 'color' },
   { text: 'هشام', value: 'hisham' },

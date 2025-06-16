@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col cols="12" sm="4">
-      <v-text-field v-model="variant.retail_price" label="سعر البيع بالتجزئة" type="number" hide-details="auto" />
+      <v-text-field v-model="variant.retail_price" label="سعر البيع قطاعي" type="number" hide-details="auto" />
     </v-col>
     <v-col cols="12" sm="4">
       <v-text-field v-model="variant.wholesale_price" label="سعر البيع بالجملة" type="number" hide-details="auto" />

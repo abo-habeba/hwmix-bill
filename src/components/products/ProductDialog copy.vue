@@ -298,7 +298,7 @@ function saveProduct() {
                     <v-text-field v-model="variant.purchase_price" label="سعر الشراء" type="number" hide-details="auto" />
                   </v-col>
                   <v-col cols="4">
-                    <v-text-field v-model="variant.retail_price" label="سعر التجزئة" type="number" hide-details="auto" />
+                    <v-text-field v-model="variant.retail_price" label="سعر القطاعي " type="number" hide-details="auto" />
                   </v-col>
                   <v-col cols="4">
                     <v-text-field v-model="variant.wholesale_price" label="سعر الجملة" type="number" hide-details="auto" />
