@@ -3,44 +3,52 @@
     <v-card>
       <v-card-title>سداد القسط</v-card-title>
       <v-card-text>
-        <v-form ref="payForm" v-model="valid">
-          <v-text-field
-            label="مبلغ السداد"
-            v-model="payData.amount"
-            type="number"
-            :rules="[v => !!v || 'المبلغ مطلوب', v => v > 0 || 'المبلغ يجب أن يكون أكبر من صفر']"
-            required
-          ></v-text-field>
+        <template v-if="directPay">
+          <div class="d-flex flex-column align-center justify-center" style="height: 150px">
+            <v-progress-circular indeterminate color="primary" class="mb-2"></v-progress-circular>
+            <p>جاري الدفع...</p>
+          </div>
+        </template>
+        <template v-else>
+          <v-form ref="payForm" v-model="valid">
+            <v-text-field
+              label="مبلغ السداد"
+              v-model="payData.amount"
+              type="number"
+              :rules="[v => !!v || 'المبلغ مطلوب', v => v > 0 || 'المبلغ يجب أن يكون أكبر من صفر']"
+              required
+            ></v-text-field>
 
-          <v-text-field label="تاريخ السداد" v-model="payData.paid_at" type="date"></v-text-field>
+            <v-text-field label="تاريخ السداد" v-model="payData.paid_at" type="date"></v-text-field>
 
-          <v-select
-            label="طريقة الدفع"
-            v-model="payData.payment_method_id"
-            :items="paymentMethods"
-            item-title="name"
-            item-value="id"
-            :rules="[v => !!v || 'اختر طريقة الدفع']"
-            required
-          ></v-select>
+            <v-select
+              label="طريقة الدفع"
+              v-model="payData.payment_method_id"
+              :items="paymentMethods"
+              item-title="name"
+              item-value="id"
+              :rules="[v => !!v || 'اختر طريقة الدفع']"
+              required
+            ></v-select>
 
-          <v-select
-            label="صندوق النقدية"
-            v-model="payData.cash_box_id"
-            :items="cashboxes"
-            item-title="name"
-            item-value="id"
-            :rules="[v => !!v || 'اختر صندوق النقدية']"
-          ></v-select>
+            <v-select
+              label="صندوق النقدية"
+              v-model="payData.cash_box_id"
+              :items="cashboxes"
+              item-title="name"
+              item-value="id"
+              :rules="[v => !!v || 'اختر صندوق النقدية']"
+            ></v-select>
 
-          <v-text-field label="ملاحظات" v-model="payData.notes"></v-text-field>
-        </v-form>
+            <v-text-field label="ملاحظات" v-model="payData.notes"></v-text-field>
+          </v-form>
+        </template>
       </v-card-text>
 
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click="closePayDialog">إلغاء</v-btn>
-        <v-btn color="primary" :disabled="!valid" @click="submitPayment">دفع القسط</v-btn>
+        <v-btn v-if="!directPay" color="primary" :disabled="!valid" @click="submitPayment">دفع القسط</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -54,6 +62,10 @@ import { useUserStore } from '@/stores/user';
 const props = defineProps({
   installment: Object,
   modelValue: Boolean,
+  directPay: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const emit = defineEmits(['update:modelValue', 'update:installment']);
@@ -99,32 +111,45 @@ onMounted(async () => {
   }
 });
 
-// عند تغيير القسط، إعداد القيم
+const installmentReady = ref(false);
+// مراقبة القسط وتحديث البيانات
 watch(
   () => props.installment,
   newInstallment => {
-    console.log('📥 استلام قسط جديد:', props.installment);
-    console.log('🔄 تحديث القسط:', newInstallment);
     if (newInstallment) {
+      console.log('📥 استلام قسط جديد:', newInstallment);
+      console.log('installmentReady', installmentReady.value);
       payData.value.installment_ids = [newInstallment.id];
       payData.value.amount = newInstallment.remaining;
-      // payData.value.remaining = newInstallment.remaining;
-      payData.value.user_id = newInstallment.user.id;
+      payData.value.user_id = newInstallment.user_id;
       payData.value.installment_plan_id = newInstallment.installment_plan_id;
       payData.value.notes = '';
       payData.value.paid_at = new Date().toISOString().substr(0, 10);
 
-      // // إعادة تعيين الافتراضيات
       const cashMethod = paymentMethods.value.find(method => method.code?.trim().toLowerCase() === 'cash');
       payData.value.payment_method_id = cashMethod?.id || '';
 
       const defaultBox = cashboxes.value.find(box => box.is_default);
       payData.value.cash_box_id = defaultBox?.id || null;
+
+      // البيانات جاهزة
+      installmentReady.value = true;
+    }
+  }
+);
+// تنفيذ الدفع تلقائي لما تكون البيانات جاهزة والشروط مكتملة
+watch(
+  () => installmentReady.value,
+  ready => {
+    console.log('🔄 مراقبة جاهزية القسط:', ready);
+    if (ready && props.directPay) {
+      console.log('🚀 البيانات جاهزة والدفع مباشر، جاري التنفيذ...');
+      submitPayment();
     }
   }
 );
 
-// التحكم في فتح/إغلاق الديالوج بناءً على modelValue
+// فتح الديالوج فقط
 watch(
   () => props.modelValue,
   newVal => {
@@ -138,29 +163,32 @@ function closePayDialog() {
 }
 
 function submitPayment() {
-  if (!valid.value) return;
-
-  // const payload = {
-  //   installment_plan_id: props.installment.installment_plan_id,
-  //   due_date: props.installment.due_date,
-  //   amount: payData.value.amount,
-  //   status: 'تم الدفع',
-  //   paid_at: payData.value.paid_at,
-  //   remaining: props.installment.remaining - payData.value.amount,
-  // };
-
-  // console.log('Submitting payment with payload:', payload);
-
+  if (!props.directPay && !valid.value) return;
   // إرسال الطلب
   saveItem('installment-payment/pay', payData.value)
     .then(newInstallments => {
       console.log('تم تحديث القسط:', newInstallments);
-      // Object.assign(props.installment, newInstallments);
       emit('update:installment', newInstallments.installments);
       closePayDialog();
+      Toastify({
+        text: 'تم الدفع بنجاح',
+        duration: 3000,
+        close: true,
+        gravity: 'top',
+        position: 'right',
+        backgroundColor: '#4CAF50',
+      }).showToast();
     })
     .catch(error => {
       console.error('Error submitting payment:', error);
+      Toastify({
+        text: 'حدث خطأ أثناء الدفع',
+        duration: 3000,
+        close: true,
+        gravity: 'top',
+        position: 'right',
+        backgroundColor: '#F44336',
+      }).showToast();
     });
 }
 </script>

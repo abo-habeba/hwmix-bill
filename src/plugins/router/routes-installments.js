@@ -19,4 +19,13 @@ export default [
   //     roles: ['installments_update', 'installments_create'],
   //   },
   // },
+  {
+    path: 'installment-plans',
+    component: () => import('@/pages/installments/InstallmentPlansTable.vue'),
+    name: 'installment-plans',
+    meta: {
+      title: 'خطط الأقساط',
+      description: 'إدارة خطط الأقساط',
+    },
+  },
 ];

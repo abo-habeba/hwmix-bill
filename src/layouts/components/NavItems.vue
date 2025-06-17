@@ -46,13 +46,21 @@ const navItems = [
     },
   },
   {
-    type: 'link',
+    type: 'group',
     permission: ['super_admin', 'company_owner'],
     item: {
-      title: 'الأقساط',
-      to: { name: 'installments' },
-      icon: 'ri-calendar-check-line',
-      tooltip: 'متابعة الأقساط المستحقة والمدفوعة',
+      title: 'إدارة الأقساط',
+      icon: 'ri-file-list-line',
+      children: [
+        {
+          title: 'الأقساط',
+          to: '/installments',
+        },
+        {
+          title: 'خطط الأقساط',
+          to: '/installment-plans',
+        },
+      ],
     },
   },
   {
