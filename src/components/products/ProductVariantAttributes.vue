@@ -1,7 +1,7 @@
 <template>
   <v-card-subtitle class="ma-1">الخصائص (Attributes)</v-card-subtitle>
   <v-row dense v-for="(attr, aIndex) in modelValue" :key="aIndex" class="d-flex align-center">
-    <v-col cols="5">
+    <v-col cols="5" class="pa-0 ma-0">
       <v-select
         v-model="attr.attribute_id"
         :items="attributes"
@@ -12,9 +12,10 @@
         outlined
         hide-details="auto"
         @update:modelValue="() => (attr.attribute_value_id = null)"
+        class="pa-0 ma-0"
       />
     </v-col>
-    <v-col cols="5">
+    <v-col cols="5" class="pa-0 ma-0">
       <v-select
         v-model="attr.attribute_value_id"
         :items="getAttributeValues(attr.attribute_id)"
@@ -26,6 +27,7 @@
         :disabled="!attr.attribute_id"
         hide-details="auto"
         :style="getAttributeStyle(attr.attribute_id, attr.attribute_value_id)"
+        class="pa-0 ma-0"
       />
     </v-col>
     <v-col cols="2">

@@ -1,5 +1,5 @@
 <template>
-  <v-card class="w-100 h-100 pa-4">
+  <v-card class="w-100 h-100 py-4 px-0">
     <!-- رأس البطاقة -->
     <v-card-title class="d-flex align-center justify-space-between pb-2">
       <div class="d-flex align-center">
@@ -35,18 +35,18 @@
       <v-form ref="formRef" v-model="formValid" @submit.prevent="checkInvoiceTypeBeforeSave">
         <v-row class="ma-0">
           <!-- اختيار العميل -->
-          <v-col cols="12" sm="6" class="py-1"><UserSearchInput v-model="selectedUser" /></v-col>
+          <v-col cols="12" sm="6" class="py-1 px-0"><UserSearchInput v-model="selectedUser" /></v-col>
 
           <!-- نوع الفاتورة -->
-          <v-col cols="12" sm="6" class="py-1">
+          <v-col cols="12" sm="6" class="py-1 px-0">
             <InvoiceTypeSelect v-model="invoiceType" :invoiceContext="invoiceContext" @update:model-value="handleInvoiceTypeUpdate" />
           </v-col>
 
           <!-- إدخال سيريال / باركود -->
-          <v-col cols="12" sm="6" class="py-1"><SerialOrBarcodeInput v-model="serialInput" @update:model-value="onSerialInputEnter" /></v-col>
+          <v-col cols="12" sm="6" class="py-1 px-0"><SerialOrBarcodeInput v-model="serialInput" @update:model-value="onSerialInputEnter" /></v-col>
 
           <!-- بحث المنتج -->
-          <v-col cols="12" sm="6" class="py-1"
+          <v-col cols="12" sm="6" class="py-1 px-0"
             ><ProductSearchInput v-model="productSearch" label="ابحث عن منتج" @update:model-value="onProductSelect"
           /></v-col>
         </v-row>

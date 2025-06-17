@@ -15,7 +15,7 @@
     <InvoiceTable :model-value="invoice" @edit="handleEdit" @show="handleShow" />
 
     <!-- نموذج إضافة / تعديل الفاتورة -->
-    <v-dialog v-model="showForm" :fullscreen="$vuetify.display.xs" max-width="900" scrollable>
+    <v-dialog v-model="showForm" max-width="900" scrollable>
       <InvoiceForm v-if="showForm" :model-value="formModel" :invoiceContext="dialogContext" @saved="onFormSaved" @close="closeForm" />
     </v-dialog>
 

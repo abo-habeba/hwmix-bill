@@ -37,6 +37,7 @@ declare module 'vue' {
     DeletedItem: typeof import('./src/components/DeletedItem.vue')['default']
     ErrorHeader: typeof import('./src/components/ErrorHeader.vue')['default']
     InstallmentDialog: typeof import('./src/components/Invoice/InstallmentDialog.vue')['default']
+    'InstallmentDialog copy': typeof import('./src/components/Invoice/InstallmentDialog copy.vue')['default']
     InstallmentsDataTable: typeof import('./src/components/Installments/InstallmentsDataTable.vue')['default']
     InstallmentsDataTableServer: typeof import('./src/components/Installments/InstallmentsDataTableServer.vue')['default']
     InstallmentsSearchInput: typeof import('./src/components/Installments/InstallmentsSearchInput.vue')['default']

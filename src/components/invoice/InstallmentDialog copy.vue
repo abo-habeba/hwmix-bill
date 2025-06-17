@@ -7,58 +7,32 @@
 
       <v-card-text>
         <v-row>
-          <!-- <v-col cols="12" class="pa-1">
+          <v-col cols="12">
             <v-chip color="primary" class="pa-3 text-h6">
               <v-icon left>ri-calculator-line</v-icon>
               إجمالي الفاتورة: {{ formatCurrency(form.total_amount) }}
             </v-chip>
-          </v-col> -->
-          <v-col class="pa-1" cols="6" sm="6" md="4">
-            <v-card class="d-flex align-center justify-center pa-1 rounded-xl elevation-6" dark>
-              <div class="d-flex align-center mb-0">
-                <v-icon class="ma-0 pa-0" size="default">ri-calculator-line</v-icon>
-                <span class="text-center pa-2"> اجمالي الفاتورة </span>
-              </div>
-              <div class="text-h5 align-center font-weight-bold">
-                <span class="text-subtitle-1 font-weight-bold">{{ formatCurrency(form.total_amount) }}</span>
-              </div>
-            </v-card>
           </v-col>
-          <v-col class="pa-1" cols="6" sm="6" md="4">
-            <v-card class="d-flex align-center justify-center pa-1 rounded-xl elevation-6" dark>
-              <v-text-field hide-details="auto" v-model="form.round_step" label="نسبة التقريب" type="number" @input="calculateInstallment" outlined />
-            </v-card>
+          <v-col cols="12">
+            <v-text-field v-model="downPayment" label="المقدم المدفوع" type="number" @input="calculateInstallment" outlined dense />
           </v-col>
-          <v-col cols="12" class="pa-1">
-            <v-text-field
-              hide-details="auto"
-              v-model="downPayment"
-              label="المقدم المدفوع"
-              type="number"
-              @input="calculateInstallment"
-              outlined
-              dense
-            />
+          <v-col cols="12">
+            <v-text-field v-model="months" label="عدد الشهور" type="number" @input="calculateInstallment" outlined dense />
           </v-col>
-          <v-col cols="12" class="pa-1">
-            <v-text-field hide-details="auto" v-model="months" label="عدد الشهور" type="number" @input="calculateInstallment" outlined dense />
-          </v-col>
-          <v-col cols="12" class="pa-1">
-            <v-text-field hide-details="auto" v-model="startDate" label="تاريخ البدء" type="date" outlined dense />
+          <v-col cols="12">
+            <v-text-field v-model="startDate" label="تاريخ البدء" type="date" outlined dense />
           </v-col>
 
           <v-row dense class="mt-0">
-            <v-col v-for="(item, index) in previewPlan" :key="index" class="pa-1" cols="6" sm="6" md="4">
-              <v-card :color="item.color" class="d-flex align-center flex-column justify-center pa-1 rounded-xl elevation-6" dark>
-                <div class="d-flex align-center mb-0">
-                  <v-icon class="ma-0 pa-0" size="default">{{ item.icon }}</v-icon>
-                  <span class="text-subtitle-1 font-weight-medium">{{ item.label }}</span>
-                </div>
-                <div class="text-h5 align-center font-weight-bold">
-                  <span class="text-center">
-                    {{ item.format === 'currency' ? formatCurrency(item.value) : item.value }}
-                  </span>
-                </div>
+            <v-col v-for="(item, index) in previewPlan" :key="index" cols="12" sm="6">
+              <v-card elevation="2" class="pa-0 rounded-xl text-white" :color="item.color">
+                <v-card-title class="text-subtitle-1 font-weight-bold d-flex align-center">
+                  <v-icon class="me-3">{{ item.icon }}</v-icon>
+                  {{ item.label }}
+                </v-card-title>
+                <v-card-text class="text-h6 font-weight-bold">
+                  {{ item.format === 'currency' ? formatCurrency(item.value) : item.value }}
+                </v-card-text>
               </v-card>
             </v-col>
           </v-row>
@@ -177,18 +151,18 @@ const previewPlan = computed(() => {
     //   color: 'deep-orange-darken-2',
     //   format: 'currency',
     // },
-    // {
-    //   label: 'تاريخ أول قسط',
-    //   value: start.format('YYYY-MM-DD'),
-    //   icon: 'ri-calendar-line',
-    //   color: 'cyan-darken-2',
-    // },
-    // {
-    //   label: 'تاريخ آخر قسط',
-    //   value: lastInstallmentDate,
-    //   icon: 'ri-calendar-event-line',
-    //   color: 'orange-darken-2',
-    // },
+    {
+      label: 'تاريخ أول قسط',
+      value: start.format('YYYY-MM-DD'),
+      icon: 'ri-calendar-line',
+      color: 'cyan-darken-2',
+    },
+    {
+      label: 'تاريخ آخر قسط',
+      value: lastInstallmentDate,
+      icon: 'ri-calendar-event-line',
+      color: 'orange-darken-2',
+    },
   ];
 });
 
@@ -239,14 +213,7 @@ function closeDialog() {
 }
 
 // == Watchers ==
-watch(
-  [downPayment, months],
-  () => {
-    props.form.round_step = 10;
-    calculateInstallment();
-  },
-  { immediate: true }
-);
+watch([downPayment, months], calculateInstallment, { immediate: true });
 watch(() => props.form.total_amount, calculateInstallment);
 </script>
 
