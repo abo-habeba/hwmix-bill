@@ -109,7 +109,7 @@ const installmentsHeaders = [
   { title: 'رقم القسط', key: 'installment_number' },
   { title: 'تاريخ الاستحقاق', key: 'due_date' },
   { title: 'المبلغ', key: 'amount' },
-  { title: 'المبلغ', key: 'remaining' },
+  { title: 'المتبقي', key: 'remaining' },
   { title: 'الحالة', key: 'status' },
   { title: 'الإجراءات', key: 'actions', sortable: false },
 ];

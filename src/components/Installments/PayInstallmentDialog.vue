@@ -12,6 +12,7 @@
         <template v-else>
           <v-form ref="payForm" v-model="valid">
             <v-text-field
+              class="ma-1"
               label="مبلغ السداد"
               v-model="payData.amount"
               type="number"
@@ -19,9 +20,10 @@
               required
             ></v-text-field>
 
-            <v-text-field label="تاريخ السداد" v-model="payData.paid_at" type="date"></v-text-field>
+            <v-text-field class="ma-1" label="تاريخ السداد" v-model="payData.paid_at" type="date"></v-text-field>
 
             <v-select
+              class="ma-1"
               label="طريقة الدفع"
               v-model="payData.payment_method_id"
               :items="paymentMethods"
@@ -32,6 +34,7 @@
             ></v-select>
 
             <v-select
+              class="ma-1"
               label="صندوق النقدية"
               v-model="payData.cash_box_id"
               :items="cashboxes"
@@ -40,7 +43,7 @@
               :rules="[v => !!v || 'اختر صندوق النقدية']"
             ></v-select>
 
-            <v-text-field label="ملاحظات" v-model="payData.notes"></v-text-field>
+            <v-text-field class="ma-1" label="ملاحظات" v-model="payData.notes"></v-text-field>
           </v-form>
         </template>
       </v-card-text>
