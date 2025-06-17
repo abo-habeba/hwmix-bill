@@ -31,7 +31,7 @@
     <v-divider class="mb-3" />
 
     <!-- نموذج الفاتورة -->
-    <v-card-text class="overflow-y-auto" style="max-height: calc(100vh - 200px)">
+    <v-card-text class="f" style="max-height: calc(100vh - 200px)">
       <v-form ref="formRef" v-model="formValid" @submit.prevent="checkInvoiceTypeBeforeSave">
         <v-row class="ma-0">
           <!-- اختيار العميل -->
@@ -299,6 +299,6 @@ async function saveInvoice(payload) {
   bottom: 0;
   background: white;
   z-index: 10;
-  padding: 12px 0;
+  /* padding: 12px 0; */
 }
 </style>

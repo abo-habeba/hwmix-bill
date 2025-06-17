@@ -20,6 +20,8 @@ export default {
   VBtn: {
     // set v-btn default color to primary
     color: 'primary',
+    // إذا كنت تريد أن يكون زر Vuetify الافتراضي "outlined" أيضًا، أضف هذا
+    // variant: 'outlined',
   },
   VChip: {
     elevation: 0,
@@ -28,7 +30,7 @@ export default {
     offset: '2px',
   },
   VPagination: {
-    density: 'comfortable',
+    density: 'compact',
     showFirstLastPage: true,
     variant: 'tonal',
   },
@@ -49,23 +51,23 @@ export default {
   VCheckbox: {
     // set v-checkbox default color to primary
     color: 'primary',
-    density: 'comfortable',
+    density: 'compact',
     hideDetails: 'auto',
   },
   VRadioGroup: {
     color: 'primary',
-    density: 'comfortable',
+    density: 'compact',
     hideDetails: 'auto',
   },
   VRadio: {
-    density: 'comfortable',
+    density: 'compact',
     hideDetails: 'auto',
   },
   VSelect: {
-    variant: 'outlined',
+    variant: 'outlined', // موجود بالفعل، ممتاز!
     color: 'primary',
     hideDetails: 'auto',
-    density: 'comfortable',
+    density: 'compact',
   },
   VRangeSlider: {
     // set v-range-slider default color to primary
@@ -102,34 +104,34 @@ export default {
     },
   },
   VTextField: {
-    variant: 'outlined',
-    density: 'comfortable',
+    variant: 'outlined', // موجود بالفعل، ممتاز!
+    density: 'compact',
     color: 'primary',
     hideDetails: 'auto',
   },
   VAutocomplete: {
-    variant: 'outlined',
+    variant: 'outlined', // موجود بالفعل، ممتاز!
     color: 'primary',
-    density: 'comfortable',
+    density: 'compact',
     hideDetails: 'auto',
   },
   VCombobox: {
-    variant: 'outlined',
+    variant: 'outlined', // موجود بالفعل، ممتاز!
     color: 'primary',
     hideDetails: 'auto',
-    density: 'comfortable',
+    density: 'compact',
   },
   VFileInput: {
-    variant: 'outlined',
+    variant: 'outlined', // موجود بالفعل، ممتاز!
     color: 'primary',
     hideDetails: 'auto',
-    density: 'comfortable',
+    density: 'compact',
   },
   VTextarea: {
-    variant: 'outlined',
+    variant: 'outlined', // موجود بالفعل، ممتاز!
     color: 'primary',
     hideDetails: 'auto',
-    density: 'comfortable',
+    density: 'compact',
   },
   VSwitch: {
     // set v-switch default color to primary
@@ -140,4 +142,4 @@ export default {
   VNavigationDrawer: {
     touchless: true,
   },
-}
+};

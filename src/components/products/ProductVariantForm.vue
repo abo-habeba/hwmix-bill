@@ -19,7 +19,7 @@
         <ProductVariantStocks v-model="variant.stocks" :warehouses="warehouses" />
       </v-card>
     </v-col>
-    <v-col cols="12" class="my-0 py-1">
+    <v-col cols="12" class="my-2 py-1">
       <v-btn color="error" @click="$emit('remove-variant', variantIndex)">حذف هذا الخيار</v-btn>
     </v-col>
   </v-row>

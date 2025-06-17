@@ -315,13 +315,13 @@ function closeDialog() {
 </script>
 
 <template>
-  <v-dialog v-model="dialog">
+  <v-dialog v-model="dialog" max-width="800px">
     <v-card>
       <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line" @click="closeDialog"></v-btn>
       <v-card-title class="ma-3 text-center">
         <h2>{{ isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد' }}</h2>
       </v-card-title>
-      <v-card-text :class="xs ? 'px-2' : 'px-5'">
+      <v-card-text>
         <v-form ref="productForm" v-model="productFormValid">
           <ProductGeneralInfoForm
             :modelValue="localProduct"
@@ -332,7 +332,7 @@ function closeDialog() {
           />
 
           <v-card class="py-2 px-4 ma-2">
-            <v-card-title> خيارات المنتج </v-card-title>
+            <v-card-title class="ma-2"> خيارات المنتج </v-card-title>
             <v-row class="bg-grey-lighten-4 pa-2" v-for="(variant, vIndex) in localProduct.variants" :key="vIndex">
               <ProductVariantForm
                 :variant="variant"
