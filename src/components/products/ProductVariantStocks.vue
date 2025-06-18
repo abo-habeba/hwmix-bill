@@ -1,57 +1,35 @@
 <template>
-  <v-card-subtitle class="ma-1">المخزون (Stocks)</v-card-subtitle>
+  <v-card-subtitle class="ma-2">المخزون</v-card-subtitle>
   <v-row dense v-for="(stock, sIndex) in modelValue" :key="stock.id || sIndex">
-    <v-col cols="4">
-      <v-text-field v-model.number="stock.cost" label="سعر الشراء" type="number" :rules="stockRules.cost" hide-details="auto" />
+    <v-col cols="6" sm='6' md="4" lg="2">
+      <v-text-field v-model.number="stock.cost" label="سعر الشراء" type="number" :rules="stockRules.cost"
+        hide-details="auto" />
     </v-col>
-    <v-col cols="4">
-      <v-text-field v-model.number="stock.qty" label="الكمية" type="number" :rules="stockRules.qty" hide-details="auto" />
+    <v-col cols="6" sm='6' md="4" lg="2">
+      <v-text-field v-model.number="stock.qty" label="الكمية" type="number" :rules="stockRules.qty"
+        hide-details="auto" />
     </v-col>
-    <v-col cols="4">
-      <v-select
-        v-if="warehouses && warehouses.length > 0"
-        v-model="stock.warehouse_id"
-        item-value="id"
-        item-title="name"
-        :items="warehouses"
-        label="المخزن"
-        :rules="[v => !!v || 'المخزن مطلوب']"
-        required
-        hide-details="auto"
-        :return-object="false"
-      />
-      <v-select
-        v-else
-        :items="[{ id: null, name: 'لا يوجد مخازن، يرجى إضافة مخزن أولاً', disabled: true }]"
-        label="المخزن"
-        item-title="name"
-        :value="null"
-        :rules="[v => !!v || 'المخزن مطلوب']"
-        required
-        hide-details="auto"
-        disabled
-      />
+    <v-col cols="6" sm='6' md="4" lg="2">
+      <v-select v-if="warehouses && warehouses.length > 0" v-model="stock.warehouse_id" item-value="id"
+        item-title="name" :items="warehouses" label="المخزن" :rules="[v => !!v || 'المخزن مطلوب']" required
+        hide-details="auto" :return-object="false" />
+      <v-select v-else :items="[{ id: null, name: 'لا يوجد مخازن، يرجى إضافة مخزن أولاً', disabled: true }]"
+        label="المخزن" item-title="name" :value="null" :rules="[v => !!v || 'المخزن مطلوب']" required
+        hide-details="auto" disabled />
     </v-col>
-    <v-col cols="4">
-      <v-select
-        v-model="stock.status"
-        :items="statusOptions"
-        item-value="value"
-        item-title="text"
-        label="حالة المخزون"
-        hide-details="auto"
-        :rules="[v => !!v || 'حالة المخزون مطلوبة']"
-        required
-      />
+    <v-col cols="6" sm='6' md="4" lg="2">
+      <v-select v-model="stock.status" :items="statusOptions" item-value="value" item-title="text" label="حالة المخزون"
+        hide-details="auto" :rules="[v => !!v || 'حالة المخزون مطلوبة']" required />
     </v-col>
-    <v-col cols="4">
+    <v-col cols="6" sm='6' md="4" lg="2">
       <v-text-field v-model="stock.expiry" label="تاريخ الانتهاء" type="date" hide-details="auto" />
     </v-col>
-    <v-col cols="4">
+    <v-col cols="6" sm='6' md="4" lg="2">
       <v-text-field v-model="stock.loc" label="الموقع" hide-details="auto" />
     </v-col>
   </v-row>
-  <v-btn v-if="modelValue.length > 1" class="mt-2" icon="ri-delete-bin-line" color="error" size="small" @click="removeStock(sIndex)"></v-btn>
+  <v-btn v-if="modelValue.length > 1" class="mt-2" icon="ri-delete-bin-line" color="error" size="small"
+    @click="removeStock(sIndex)"></v-btn>
 </template>
 
 <script setup>

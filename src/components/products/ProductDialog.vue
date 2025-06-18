@@ -315,54 +315,48 @@ function closeDialog() {
 </script>
 
 <template>
-  <v-dialog v-model="dialog" max-width="800px">
+  <v-dialog v-model="dialog" max-width="900px">
     <v-card>
-      <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line" @click="closeDialog"></v-btn>
+      <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line"
+        @click="closeDialog"></v-btn>
       <v-card-title class="ma-3 text-center">
         <h2>{{ isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد' }}</h2>
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="pa-0">
         <v-form ref="productForm" v-model="productFormValid">
-          <ProductGeneralInfoForm
-            :modelValue="localProduct"
-            :categories="categories"
-            :brands="brands"
-            :productRules="productRules"
-            @update:modelValue="value => (localProduct = value)"
-          />
+          <ProductGeneralInfoForm :modelValue="localProduct" :categories="categories" :brands="brands"
+            :productRules="productRules" @update:modelValue="value => (localProduct = value)" />
 
-          <v-card class="py-2 px-4 ma-2">
+          <v-card class="pa-2 ma-1" outlined>
             <v-card-title class="ma-2"> خيارات المنتج </v-card-title>
-            <v-row class="bg-grey-lighten-4 pa-2" v-for="(variant, vIndex) in localProduct.variants" :key="vIndex">
-              <ProductVariantForm
-                :variant="variant"
-                :variantIndex="vIndex"
-                :attributes="attributes"
-                :warehouses="warehouses"
-                :statusOptions="statusOptions"
-                :productRules="productRules"
-                @remove-variant="removeVariant"
-              />
+            <v-row class="bg-grey-lighten-1 pa-2" v-for="(variant, vIndex) in localProduct.variants" :key="vIndex">
+              <ProductVariantForm :variant="variant" :variantIndex="vIndex" :attributes="attributes"
+                :warehouses="warehouses" :statusOptions="statusOptions" :productRules="productRules"
+                @remove-variant="removeVariant" />
             </v-row>
           </v-card>
 
           <v-row>
             <v-col cols="12">
-              <v-btn class="my-3" color="primary" @click="addVariant">+ اضافة خيار جديد </v-btn>
+              <v-btn class="ma-3" color="primary" @click="addVariant">+ اضافة خيار جديد </v-btn>
             </v-col>
           </v-row>
 
-          <v-divider class="my-4"></v-divider>
-          <v-row>
-            <v-col cols="6">
-              <v-btn prepend-icon="ri-close-line" color="error" @click="closeDialog"> إلغاء </v-btn>
-            </v-col>
-            <v-col cols="6" class="text-end">
-              <v-btn prepend-icon="ri-save-line" color="success" :disabled="!productFormValid" @click="saveProduct">
+
+          <v-sheet class="position-sticky bottom-0 bg-grey-lighten-2" elevation="1">
+            <v-divider class="my-2"></v-divider>
+            <v-card-actions class="justify-center bg-grey-lighten-3 pa-2 ma-2 gap-8">
+              <v-btn prepend-icon="ri-save-line" color="success" variant="outlined" :disabled="!productFormValid"
+                @click="saveProduct" class="text-capitalize">
                 {{ isEditMode ? 'حفظ التعديلات' : 'إضافة المنتج' }}
               </v-btn>
-            </v-col>
-          </v-row>
+              <v-btn prepend-icon="ri-close-line" color="error" variant="outlined" @click="closeDialog"
+                class="text-capitalize">
+                إلغاء
+              </v-btn>
+
+            </v-card-actions>
+          </v-sheet>
         </v-form>
       </v-card-text>
     </v-card>

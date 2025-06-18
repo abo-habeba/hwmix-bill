@@ -8,16 +8,17 @@
       <v-card-text>
         <v-row>
           <v-col cols="12">
-            <v-chip color="primary" class="pa-3 text-h6">
-              <v-icon left>ri-calculator-line</v-icon>
+            <v-sheet color="primary" class=" text-h6">
               إجمالي الفاتورة: {{ formatCurrency(form.total_amount) }}
-            </v-chip>
+            </v-sheet>
           </v-col>
           <v-col cols="12">
-            <v-text-field v-model="downPayment" label="المقدم المدفوع" type="number" @input="calculateInstallment" outlined dense />
+            <v-text-field v-model="downPayment" label="المقدم المدفوع" type="number" @input="calculateInstallment"
+              outlined dense />
           </v-col>
           <v-col cols="12">
-            <v-text-field v-model="months" label="عدد الشهور" type="number" @input="calculateInstallment" outlined dense />
+            <v-text-field v-model="months" label="عدد الشهور" type="number" @input="calculateInstallment" outlined
+              dense />
           </v-col>
           <v-col cols="12">
             <v-text-field v-model="startDate" label="تاريخ البدء" type="date" outlined dense />

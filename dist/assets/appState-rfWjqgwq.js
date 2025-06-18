@@ -1,1 +1,0 @@
-import{bf as e}from"./index-mQ83zii2.js";const r=e("appState",{state:()=>({isLoader:!1,errorServer:!1,loadingApi:!1,errorMessag:null,dialogDelete:!1})});export{r as u};

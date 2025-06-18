@@ -6,66 +6,53 @@
       </v-card-title>
 
       <v-card-text>
-        <v-row>
-          <!-- <v-col cols="12" class="pa-1">
-            <v-chip color="primary" class="pa-3 text-h6">
-              <v-icon left>ri-calculator-line</v-icon>
-              إجمالي الفاتورة: {{ formatCurrency(form.total_amount) }}
-            </v-chip>
-          </v-col> -->
-          <v-col class="pa-1" cols="6" sm="6" md="4">
-            <v-card class="d-flex align-center justify-center pa-1 rounded-xl elevation-6" dark>
-              <div class="d-flex align-center mb-0">
-                <v-icon class="ma-0 pa-0" size="default">ri-calculator-line</v-icon>
-                <span class="text-center pa-2"> اجمالي الفاتورة </span>
-              </div>
-              <div class="text-h5 align-center font-weight-bold">
-                <span class="text-subtitle-1 font-weight-bold">{{ formatCurrency(form.total_amount) }}</span>
-              </div>
-            </v-card>
+        <v-row dense class="my-2">
+          <v-col cols="8">
+            <div class="d-flex align-center flex-column justify-center" dark>
+              <span class="text-center"> اجمالي الفاتورة </span>
+              <span class="text-subtitle-1 font-weight-bold">{{ formatCurrency(form.total_amount) }}</span>
+            </div>
           </v-col>
-          <v-col class="pa-1" cols="6" sm="6" md="4">
-            <v-card class="d-flex align-center justify-center pa-1 rounded-xl elevation-6" dark>
-              <v-text-field hide-details="auto" v-model="form.round_step" label="نسبة التقريب" type="number" @input="calculateInstallment" outlined />
-            </v-card>
+          <v-col cols="4">
+            <v-text-field hide-details="auto" v-model="form.round_step" label="نسبة التقريب" type="number"
+              @input="calculateInstallment" outlined />
+          </v-col>
+        </v-row>
+        <v-row dense class="my-2">
+          <v-col cols="12" class="pa-1">
+            <v-text-field hide-details="auto" v-model="downPayment" label="المقدم المدفوع" type="number"
+              @input="calculateInstallment" outlined dense />
           </v-col>
           <v-col cols="12" class="pa-1">
-            <v-text-field
-              hide-details="auto"
-              v-model="downPayment"
-              label="المقدم المدفوع"
-              type="number"
-              @input="calculateInstallment"
-              outlined
-              dense
-            />
-          </v-col>
-          <v-col cols="12" class="pa-1">
-            <v-text-field hide-details="auto" v-model="months" label="عدد الشهور" type="number" @input="calculateInstallment" outlined dense />
+            <v-text-field hide-details="auto" v-model="months" label="عدد الشهور" type="number"
+              @input="calculateInstallment" outlined dense />
           </v-col>
           <v-col cols="12" class="pa-1">
             <v-text-field hide-details="auto" v-model="startDate" label="تاريخ البدء" type="date" outlined dense />
           </v-col>
+          <!-- <v-col cols="12" class="pa-1">
+            <v-date-picker v-model="formattedStartDate" show-adjacent-months></v-date-picker>
+          </v-col> -->
 
-          <v-row dense class="mt-0">
-            <v-col v-for="(item, index) in previewPlan" :key="index" class="pa-1" cols="6" sm="6" md="4">
-              <v-card :color="item.color" class="d-flex align-center flex-column justify-center pa-1 rounded-xl elevation-6" dark>
-                <div class="d-flex align-center mb-0">
-                  <v-icon class="ma-0 pa-0" size="default">{{ item.icon }}</v-icon>
-                  <span class="text-subtitle-1 font-weight-medium">{{ item.label }}</span>
-                </div>
-                <div class="text-h5 align-center font-weight-bold">
-                  <span class="text-center">
-                    {{ item.format === 'currency' ? formatCurrency(item.value) : item.value }}
-                  </span>
-                </div>
-              </v-card>
-            </v-col>
-          </v-row>
+        </v-row>
+        <v-row dense class="my-2">
+          <v-col cols="6" sm="6" md="4" v-for="(item, index) in previewPlan" :key="index">
+            <v-card :color="item.color" class="d-flex align-center flex-column justify-center elevation-6" dark>
+              <div class="d-flex align-center mb-0">
+                <v-icon class="ma-0 pa-0" size="default">{{ item.icon }}</v-icon>
+                <span class="text-subtitle-1 font-weight-medium">{{ item.label }}</span>
+              </div>
+              <div class="text-h5 align-center font-weight-bold">
+                <span class="text-center">
+                  {{ item.format === 'currency' ? formatCurrency(item.value) : item.value }}
+                </span>
+              </div>
+            </v-card>
+          </v-col>
         </v-row>
       </v-card-text>
 
-      <v-card-actions class="d-flex justify-end">
+      <v-card-actions class="d-flex justify-start ma-5">
         <v-btn color="primary" @click="saveInstallment" elevation="2" rounded>
           <v-icon left>ri-save-line</v-icon>
           حفظ
@@ -90,6 +77,14 @@ const props = defineProps({
   visible: Boolean,
 });
 const emit = defineEmits(['installment-saved', 'update:visible']);
+const formattedStartDate = computed({
+  get: () => {
+    return startDate.value ? new Date(startDate.value) : null
+  },
+  set: (val) => {
+    startDate.value = val
+  }
+})
 
 // == Reactive refs ==
 const downPayment = ref(0);
