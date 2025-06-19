@@ -30,23 +30,19 @@
           <v-col cols="12" class="pa-1">
             <v-text-field hide-details="auto" v-model="startDate" label="تاريخ البدء" type="date" outlined dense />
           </v-col>
-          <!-- <v-col cols="12" class="pa-1">
-            <v-date-picker v-model="formattedStartDate" show-adjacent-months></v-date-picker>
-          </v-col> -->
-
         </v-row>
         <v-row dense class="my-2">
           <v-col cols="6" sm="6" md="4" v-for="(item, index) in previewPlan" :key="index">
             <v-card :color="item.color" class="d-flex align-center flex-column justify-center elevation-6" dark>
-              <div class="d-flex align-center mb-0">
-                <v-icon class="ma-0 pa-0" size="default">{{ item.icon }}</v-icon>
+              <v-sheet class="d-flex align-center mb-0">
+                <v-icon class="mx-2" size="default">{{ item.icon }}</v-icon>
                 <span class="text-subtitle-1 font-weight-medium">{{ item.label }}</span>
-              </div>
-              <div class="text-h5 align-center font-weight-bold">
+              </v-sheet>
+              <v-sheet class="text-h5 align-center font-weight-bold">
                 <span class="text-center">
                   {{ item.format === 'currency' ? formatCurrency(item.value) : item.value }}
                 </span>
-              </div>
+              </v-sheet>
             </v-card>
           </v-col>
         </v-row>
@@ -214,6 +210,7 @@ function saveInstallment() {
       total_amount: totalAfterInstallment.value,
       start_date: startDate.value,
       due_date: dueDate.value,
+      round_step: form.round_step,
     },
   };
   emit('installment-saved', data);
