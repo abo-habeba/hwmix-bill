@@ -1,13 +1,16 @@
 <template>
   <v-row>
-    <v-col cols="12" sm="4" class="my-0 py-1">
+    <v-col cols="12" sm="6" class="my-0 py-1">
       <v-text-field v-model="variant.retail_price" label="سعر البيع قطاعي" type="number" hide-details="auto" />
     </v-col>
-    <v-col cols="12" sm="4" class="my-0 py-1">
+    <v-col cols="12" sm="6" class="my-0 py-1">
       <v-text-field v-model="variant.wholesale_price" label="سعر البيع بالجملة" type="number" hide-details="auto" />
     </v-col>
-    <v-col cols="12" sm="4" class="my-0 py-1">
+    <v-col cols="12" sm="6" class="my-0 py-1">
       <v-select v-model="variant.status" :items="statusOptions" item-value="value" item-title="text" label="الحالة" hide-details="auto" />
+    </v-col>
+    <v-col cols="12" sm="6" class="my-0 py-1">
+      <v-text-field v-model="variant.min_quantity" label=" حد التحزير " hide-details="auto" />
     </v-col>
     <v-col cols="12" class="my-0 py-1">
       <v-card class="mb-1 pa-2" outlined>

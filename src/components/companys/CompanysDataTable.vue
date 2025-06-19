@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { getAll, saveItem } from '@/services/api';
+import { getAll } from '@/services/api';
 import { useappState } from '@/stores/appState';
 import { onMounted, ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';

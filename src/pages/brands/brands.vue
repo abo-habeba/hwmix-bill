@@ -98,7 +98,7 @@ function saveBrand() {
     .then(() => {
       getBrands();
       dialog.value = false;
-      toast.success(isEdit ? 'تم تعديل العلامة التجارية بنجاح' : 'تم حفظ العلامة التجارية بنجاح');
+      // toast.success(isEdit ? 'تم تعديل العلامة التجارية بنجاح' : 'تم حفظ العلامة التجارية بنجاح');
       brand.value = { name: '' };
     })
     .catch(e => {
@@ -117,7 +117,7 @@ function deleteBrand(id) {
     .then(() => {
       getBrands();
       deleteDialog.value = false;
-      toast.success('تم حذف العلامة التجارية بنجاح');
+      // toast.success('تم حذف العلامة التجارية بنجاح');
     })
     .catch(msg => {
       toast.error(msg);

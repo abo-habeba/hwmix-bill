@@ -48,15 +48,16 @@ const defaultProduct = {
       image: null,
       weight: 0,
       dimensions: '',
+      min_quantity: '',
       tax: 0,
       discount: 0,
       status: 'active',
       attributes: [], // مصفوفة فارغة للخصائص
       stocks: [
         {
-          qty: 0,
+          quantity: 0,
           reserved: 0,
-          min_qty: 0,
+          min_quantity: 0,
           cost: 0,
           batch: '',
           expiry: null,
@@ -91,6 +92,7 @@ function mapProductDataForEdit(apiProduct) {
       image: variant.image || null,
       weight: parseFloat(variant.weight) || 0,
       dimensions: variant.dimensions || '',
+      min_quantity: variant.min_quantity || '',
       tax: parseFloat(variant.tax) || 0,
       discount: parseFloat(variant.discount) || 0,
       status: variant.status || 'active',
@@ -100,9 +102,9 @@ function mapProductDataForEdit(apiProduct) {
       })),
       stocks: (variant.stocks || []).map(stock => ({
         id: stock.id,
-        qty: stock.qty || 0,
+        quantity: stock.quantity || 0,
         reserved: stock.reserved || 0,
-        min_qty: stock.min_qty || 0,
+        min_quantity: stock.min_quantity || 0,
         cost: parseFloat(stock.cost) || 0,
         batch: stock.batch || '',
         expiry: stock.expiry ? new Date(stock.expiry).toISOString().substr(0, 10) : null,
@@ -123,7 +125,7 @@ const productRules = {
   tax: [isNumber, isPositiveOrZero],
   discount: [isNumber, isPositiveOrZero],
   weight: [isNumber, isPositiveOrZero],
-  qty: [isRequiredNumber, isPositiveOrZero],
+  quantity: [isRequiredNumber, isPositiveOrZero],
   cost: [isNumber, isPositiveOrZero],
 };
 
@@ -221,15 +223,16 @@ function addVariant() {
     image: null,
     weight: 0,
     dimensions: '',
+    min_quantity: 0,
     tax: 0,
     discount: 0,
     status: 'active',
     attributes: [{ attribute_id: null, attribute_value_id: null }],
     stocks: [
       {
-        qty: 0,
+        quantity: 0,
         reserved: 0,
-        min_qty: 0,
+        min_quantity: 0,
         cost: 0,
         batch: '',
         expiry: null,
@@ -317,22 +320,32 @@ function closeDialog() {
 <template>
   <v-dialog v-model="dialog" max-width="900px">
     <v-card>
-      <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line"
-        @click="closeDialog"></v-btn>
+      <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line" @click="closeDialog"></v-btn>
       <v-card-title class="ma-3 text-center">
         <h2>{{ isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد' }}</h2>
       </v-card-title>
       <v-card-text class="pa-0">
         <v-form ref="productForm" v-model="productFormValid">
-          <ProductGeneralInfoForm :modelValue="localProduct" :categories="categories" :brands="brands"
-            :productRules="productRules" @update:modelValue="value => (localProduct = value)" />
+          <ProductGeneralInfoForm
+            :modelValue="localProduct"
+            :categories="categories"
+            :brands="brands"
+            :productRules="productRules"
+            @update:modelValue="value => (localProduct = value)"
+          />
 
           <v-card class="pa-2 ma-1" outlined>
             <v-card-title class="ma-2"> خيارات المنتج </v-card-title>
             <v-row class="bg-grey-lighten-1 pa-2" v-for="(variant, vIndex) in localProduct.variants" :key="vIndex">
-              <ProductVariantForm :variant="variant" :variantIndex="vIndex" :attributes="attributes"
-                :warehouses="warehouses" :statusOptions="statusOptions" :productRules="productRules"
-                @remove-variant="removeVariant" />
+              <ProductVariantForm
+                :variant="variant"
+                :variantIndex="vIndex"
+                :attributes="attributes"
+                :warehouses="warehouses"
+                :statusOptions="statusOptions"
+                :productRules="productRules"
+                @remove-variant="removeVariant"
+              />
             </v-row>
           </v-card>
 
@@ -342,19 +355,20 @@ function closeDialog() {
             </v-col>
           </v-row>
 
-
           <v-sheet class="position-sticky bottom-0 bg-grey-lighten-2" elevation="1">
             <v-divider class="my-2"></v-divider>
             <v-card-actions class="justify-center bg-grey-lighten-3 pa-2 ma-2 gap-8">
-              <v-btn prepend-icon="ri-save-line" color="success" variant="outlined" :disabled="!productFormValid"
-                @click="saveProduct" class="text-capitalize">
+              <v-btn
+                prepend-icon="ri-save-line"
+                color="success"
+                variant="outlined"
+                :disabled="!productFormValid"
+                @click="saveProduct"
+                class="text-capitalize"
+              >
                 {{ isEditMode ? 'حفظ التعديلات' : 'إضافة المنتج' }}
               </v-btn>
-              <v-btn prepend-icon="ri-close-line" color="error" variant="outlined" @click="closeDialog"
-                class="text-capitalize">
-                إلغاء
-              </v-btn>
-
+              <v-btn prepend-icon="ri-close-line" color="error" variant="outlined" @click="closeDialog" class="text-capitalize"> إلغاء </v-btn>
             </v-card-actions>
           </v-sheet>
         </v-form>

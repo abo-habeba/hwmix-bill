@@ -43,7 +43,7 @@ function changeTheme() {
       <VMenu activator="parent" width="230" location="bottom end" offset="14px">
         <VList>
           <!-- 👉 User Avatar & Name -->
-          <VListItem>
+          <VListItem to="/edit-profile">
             <template #prepend>
               <VListItemAction start>
                 <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success">

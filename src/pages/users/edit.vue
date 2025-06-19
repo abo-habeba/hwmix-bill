@@ -51,12 +51,9 @@ const tab = ref(route.params.tab || tabs[0].tab);
 const userFormValid = ref(false);
 
 const nicknameRules = [v => !!v || 'اسم الشهرة مطلوب'];
-const phoneRules = [
-  v => !!v || 'رقم الهاتف مطلوب',
-];
+const phoneRules = [v => !!v || 'رقم الهاتف مطلوب'];
 
 onMounted(() => {
-
   mergedCompanies();
   if (route.params.id) {
     loading.value = true;
@@ -121,14 +118,13 @@ function sendData() {
   user.value.company_ids = companyIds.value.length > 0 ? companyIds.value : null;
   user.value.companies = null;
 
-  saveItem('user', user.value, route.params.id)
-    .then(() => {
-      toast.success(route.params.id ? 'تم تعديل المستخدم بنجاح' : 'تم إضافة المستخدم بنجاح');
-     // تاخير الانتقال للصفحة السابقة
-      setTimeout(() => {
-        router.go(-1);
-      }, 1200);
-    });
+  saveItem('user', user.value, route.params.id).then(() => {
+    // toast.success(route.params.id ? 'تم تعديل المستخدم بنجاح' : 'تم إضافة المستخدم بنجاح');
+    // تاخير الانتقال للصفحة السابقة
+    setTimeout(() => {
+      router.go(-1);
+    }, 1200);
+  });
 }
 const userRole = ref({});
 function openRoleDetails(role) {
@@ -148,8 +144,7 @@ function openRoleDetails(role) {
       <v-tabs-window-item value="account">
         <VRow>
           <VCol cols="12">
-            <VCard elevation="0" :loading="loading" :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'"
-              class="ma-4">
+            <VCard elevation="0" :loading="loading" :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'" class="ma-4">
               <VDivider />
               <VCardText>
                 <!-- 👉 Form -->
@@ -167,8 +162,7 @@ function openRoleDetails(role) {
 
                     <!-- 👉 Email -->
                     <VCol cols="12" sm="6" md="4">
-                      <VTextField v-model="user.email" label="الايميل" placeholder="johndoe@gmail.com"
-                        type="email" />
+                      <VTextField v-model="user.email" label="الايميل" placeholder="johndoe@gmail.com" type="email" />
                     </VCol>
                     <!-- 👉 Phone -->
                     <VCol cols="12" sm="6" md="4">
@@ -176,7 +170,7 @@ function openRoleDetails(role) {
                         :label="'رقم الهاتف'"
                         :placeholder="'0123456789'"
                         :initialPhoneNumber="user.phone"
-                        @update:phoneNumber="val => user.phone = val"
+                        @update:phoneNumber="val => (user.phone = val)"
                         :rules="phoneRules"
                         required
                       />
@@ -188,10 +182,17 @@ function openRoleDetails(role) {
                     </VCol>
                     <!-- 👉 نوع المستخدم -->
                     <VCol cols="12" sm="6" md="4">
-                      <v-select v-model="user.customer_type" :items="[
-                        { value: 'retail', title: 'عميل قطاعي' },
-                        { value: 'wholesale', title: 'عميل جملة ' },
-                      ]" label="نوع العميل" item-title="title" item-value="value" clearable />
+                      <v-select
+                        v-model="user.customer_type"
+                        :items="[
+                          { value: 'retail', title: 'عميل قطاعي' },
+                          { value: 'wholesale', title: 'عميل جملة ' },
+                        ]"
+                        label="نوع العميل"
+                        item-title="title"
+                        item-value="value"
+                        clearable
+                      />
                     </VCol>
 
                     <VCol cols="12">
@@ -217,8 +218,7 @@ function openRoleDetails(role) {
                     </VCol>
                     <!-- 👉 Form Actions -->
                     <VCol cols="12" class="d-flex flex-wrap gap-4">
-                      <VBtn :disabled="!userFormValid" :class="{ 'forbidden-cursor': !userFormValid }" @click="sendData">
-                        حفظ </VBtn>
+                      <VBtn :disabled="!userFormValid" :class="{ 'forbidden-cursor': !userFormValid }" @click="sendData"> حفظ </VBtn>
                       <!-- reset Form -->
                       <!-- <VBtn color="secondary" variant="outlined" type="reset" @click.prevent="resetForm"> Reset </VBtn> -->
                     </VCol>

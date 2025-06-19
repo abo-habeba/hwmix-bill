@@ -1,24 +1,26 @@
 <template>
   <div>
-    <h2>الفواتير</h2>
-    <div class="d-flex justify-space-evenly flex-wrap justify-center align-center mb-2 w-100">
-      <v-btn class="px-1" color="primary" prepend-icon="ri-file-list-3-line"
-        @click="handleAdd({ code: 'sale', context: 'sales' })">
-        فاتورة بيع </v-btn>
-      <v-btn class="px-1" color="primary" prepend-icon="ri-shopping-cart-line"
-        @click="handleAdd({ code: 'purchase', context: 'purchases' })">
-        فاتورة شراء
-      </v-btn>
-      <v-btn class="px-1" color="primary" prepend-icon="ri-money-dollar-circle-line"
-        @click="handleAdd({ code: 'installment_sale', context: 'sales' })">
-        فاتورة تقسيط
-      </v-btn>
-    </div>
-    <!-- أزرار إضافة فواتير بأنواع مختلفة -->
+    <v-card class="pa-3">
+      <h2>الفواتير</h2>
+      <div class="d-flex justify-space-evenly flex-wrap justify-center align-center mb-2 w-100">
+        <v-btn class="px-1" color="primary" prepend-icon="ri-file-list-3-line"
+          @click="handleAdd({ code: 'sale', context: 'sales' })">
+          فاتورة بيع </v-btn>
+        <v-btn class="px-1" color="primary" prepend-icon="ri-shopping-cart-line"
+          @click="handleAdd({ code: 'purchase', context: 'purchases' })">
+          فاتورة شراء
+        </v-btn>
+        <v-btn class="px-1" color="primary" prepend-icon="ri-money-dollar-circle-line"
+          @click="handleAdd({ code: 'installment_sale', context: 'sales' })">
+          فاتورة تقسيط
+        </v-btn>
+      </div>
+      <!-- أزرار إضافة فواتير بأنواع مختلفة -->
 
-    <!-- جدول الفواتير -->
-    <InvoiceTable :model-value="invoice" @edit="handleEdit" @show="handleShow" />
+      <!-- جدول الفواتير -->
+      <InvoiceTable :model-value="invoice" @edit="handleEdit" @show="handleShow" />
 
+    </v-card>
     <!-- نموذج إضافة / تعديل الفاتورة -->
     <v-dialog v-model="showForm" max-width="900">
       <InvoiceForm v-if="showForm" :model-value="formModel" :invoiceContext="dialogContext" @saved="onFormSaved"

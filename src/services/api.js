@@ -109,6 +109,7 @@ export const saveItem = (apiEndpoint, data, id = false, loading = false, log = f
         .then(response => {
           log ? console.log(`saveItem:  => `, response.data) : '';
           loading ? (userStore.loadingApi = false) : '';
+          toast.success('تم التعديل بنجاح!');
           resolve(response.data);
         })
         .catch(error => {
@@ -131,6 +132,7 @@ export const saveItem = (apiEndpoint, data, id = false, loading = false, log = f
         .then(response => {
           log ? console.log(`saveItem:  => `, response.data) : '';
           loading ? (userStore.loadingApi = false) : '';
+          toast.success('تم الحفظ بنجاح!');
           resolve(response.data);
         })
         .catch(error => {
@@ -160,6 +162,7 @@ export const deleteOne = (apiEndpoint, id, loading = false, log = false) => {
       .then(response => {
         log ? console.log(`deleteOne:  => `, response.data) : '';
         loading ? (userStore.loadingApi = false) : '';
+        toast.success('تم الحذف بنجاح!');
         resolve(response.data.data);
       })
       .catch(error => {
@@ -180,6 +183,7 @@ export const updateItem = (apiEndpoint, loading = false, log = false) => {
       .then(response => {
         log ? console.log(`updateItem:  => `, response.data) : '';
         loading ? (userStore.loadingApi = false) : '';
+        toast.success('تم التعديل بنجاح!');
         resolve(response.data.data);
       })
       .catch(error => {
@@ -277,3 +281,42 @@ export const logOut = (apiEndpoint, loading = false, log = false) => {
       });
   });
 };
+
+export function deleteItem(resource, id) {
+  return axios
+    .delete(`${baseURL}/${resource}/${id}`)
+    .then(response => {
+      toast.success('تم الحذف بنجاح!');
+      return response;
+    })
+    .catch(error => {
+      toast.error('حدث خطأ أثناء الحذف!');
+      throw error;
+    });
+}
+
+export function archiveItem(resource, id) {
+  return axios
+    .post(`${baseURL}/${resource}/${id}/archive`)
+    .then(response => {
+      toast.success('تم الأرشفة بنجاح!');
+      return response;
+    })
+    .catch(error => {
+      toast.error('حدث خطأ أثناء الأرشفة!');
+      throw error;
+    });
+}
+
+export function restoreItem(resource, id) {
+  return axios
+    .post(`${baseURL}/${resource}/${id}/restore`)
+    .then(response => {
+      toast.success('تم الاستعادة بنجاح!');
+      return response;
+    })
+    .catch(error => {
+      toast.error('حدث خطأ أثناء الاستعادة!');
+      throw error;
+    });
+}

@@ -39,6 +39,7 @@ const variantHeaders = [
   { title: 'SKU', key: 'sku' },
   { title: 'الباركود', key: 'barcode' },
   { title: 'الكمية', key: 'quantity' },
+  { title: ' كمية التحزير ', key: 'min_quantity' },
   { title: 'سعر الشراء', key: 'cost' },
   { title: 'سعر الجملة', key: 'wholesale_price' },
   { title: 'سعر القطاعي', key: 'retail_price' },
@@ -210,21 +211,22 @@ function saveVariant(editedVariant) {
             </td>
           </tr>
           <tr v-if="expandedId === item.id">
-            <td colspan="5" class="pa-0 bg-variant-table">
+            <td colspan="5" class="pa-0">
               <v-data-table
                 :items="item.variants"
                 :headers="variantHeaders"
                 item-key="id"
                 density="compact"
-                class="text-start bg-variant-table"
+                class="text-start"
                 hide-default-footer
                 no-data-text="لا يوجد متغيرات لهذا المنتج"
               >
                 <template #item="{ item: variant }">
-                  <tr class="bg-variant-table">
+                  <tr :class="variant.quantity <= variant.min_quantity ? 'bg-variant-min-quantity' : 'bg-variant-normal'">
                     <td>{{ variant.sku }}</td>
                     <td>{{ variant.barcode }}</td>
                     <td>{{ variant.quantity }}</td>
+                    <td>{{ variant.min_quantity }}</td>
                     <td>{{ variant.cost }}</td>
                     <td>{{ variant.wholesale_price }}</td>
                     <td>{{ variant.retail_price }}</td>
@@ -288,8 +290,12 @@ function saveVariant(editedVariant) {
 .bg-product-expanded {
   background-color: #b3e0ff !important;
 }
-.bg-variant-table {
+
+.bg-variant-normal {
   background-color: #e6f6ff !important;
+}
+.bg-variant-min-quantity {
+  background-color: #fff9c4 !important;
 }
 
 .v-data-table {

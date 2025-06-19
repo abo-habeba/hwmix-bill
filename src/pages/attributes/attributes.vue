@@ -219,7 +219,6 @@ function saveAttribute(payload) {
     .then(() => {
       getAttributes();
       addDialog.value = false;
-      toast.success('تم حفظ الخاصية بنجاح');
     })
     .catch(() => toast.error('حدث خطأ أثناء حفظ الخاصية'));
 }
@@ -236,7 +235,6 @@ function deleteAttribute(id) {
     .then(() => {
       getAttributes();
       deleteDialog.value = false;
-      toast.success('تم حذف الخاصية بنجاح');
     })
     .catch(() => toast.error('حدث خطأ أثناء حذف الخاصية'));
 }

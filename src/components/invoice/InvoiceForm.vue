@@ -279,9 +279,7 @@ async function saveInvoice(payload) {
   try {
     isSaving.value = true;
     itemsError.value = null;
-    console.log('حفظ الفاتورة:', payload);
     const res = form.value.id ? await saveItem('invoice', payload, form.value.id, true, true) : await saveItem('invoice', payload, false, true, true);
-    console.log('تم حفظ الفاتورة بنجاح:', res);
     emit('saved', res.data);
     emit('close');
   } catch (e) {

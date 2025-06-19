@@ -103,10 +103,8 @@ async function saveValue() {
   try {
     const response = await saveItem('attribute-value', attributeValue.value, attributeValue.value.id, true);
     if (isEditMode.value && attributeValue.value.id) {
-      toast.success('تم تعديل القيمة بنجاح');
       emit('value-edited', response.data);
     } else {
-      toast.success('تم حفظ القيمة بنجاح');
       emit('value-added', response.data);
     }
     closeDialog();

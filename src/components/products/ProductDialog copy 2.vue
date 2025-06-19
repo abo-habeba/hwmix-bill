@@ -51,9 +51,9 @@ const defaultProduct = {
       attributes: [],
       stocks: [
         {
-          qty: 0,
+          quantity: 0,
           reserved: 0,
-          min_qty: 0,
+          min_quantity: 0,
           cost: 0, // تعيين قيمة افتراضية لـ cost
           batch: '',
           expiry: null,
@@ -98,9 +98,9 @@ function mapProductDataForEdit(apiProduct) {
       })),
       stocks: (variant.stocks || []).map(stock => ({
         id: stock.id,
-        qty: stock.qty || 0,
+        quantity: stock.quantity || 0,
         reserved: stock.reserved || 0,
-        min_qty: stock.min_qty || 0,
+        min_quantity: stock.min_quantity || 0,
         cost: parseFloat(stock.cost) || 0, // التأكد من التحويل لعدد
         batch: stock.batch || '',
         expiry: stock.expiry ? new Date(stock.expiry).toISOString().substr(0, 10) : null,
@@ -123,7 +123,7 @@ const productRules = {
   discount: [isNumber, isPositiveOrZero],
   weight: [isNumber, isPositiveOrZero],
   // قواعد لخصائص الـ stock
-  qty: [isRequiredNumber, isPositiveOrZero],
+  quantity: [isRequiredNumber, isPositiveOrZero],
   cost: [isNumber, isPositiveOrZero],
 };
 
@@ -250,9 +250,9 @@ function removeAttribute(variantIndex, attrIndex) {
 
 function addStock(variantIndex) {
   const newStock = {
-    qty: 0,
+    quantity: 0,
     reserved: 0,
-    min_qty: 0,
+    min_quantity: 0,
     cost: 0,
     batch: '',
     expiry: null,
@@ -288,9 +288,9 @@ function addVariant() {
     attributes: [{ attribute_id: null, attribute_value_id: null }],
     stocks: [
       {
-        qty: 0,
+        quantity: 0,
         reserved: 0,
-        min_qty: 0,
+        min_quantity: 0,
         cost: 0,
         batch: '',
         expiry: null,
@@ -385,7 +385,8 @@ const statusOptions = [
 <template>
   <v-dialog :fullscreen="xs" v-model="dialog">
     <v-card>
-      <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line" @click="closeDialog"></v-btn>
+      <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line"
+        @click="closeDialog"></v-btn>
       <v-card-title class="ma-5 text-center">
         <h2>{{ isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد' }}</h2>
       </v-card-title>
@@ -393,66 +394,45 @@ const statusOptions = [
         <v-form ref="productForm" v-model="productFormValid">
           <v-row class="my-3">
             <v-col cols="12" md="6">
-              <v-text-field v-model="localProduct.name" label="اسم المنتج" :rules="productRules.name" required hide-details="auto" />
+              <v-text-field v-model="localProduct.name" label="اسم المنتج" :rules="productRules.name" required
+                hide-details="auto" />
             </v-col>
             <v-col cols="12">
               <v-row>
                 <v-col>
-                  <v-switch v-model="localProduct.active" label="نشط" :color="localProduct.active ? 'primary' : 'grey'" hide-details="auto" />
+                  <v-switch v-model="localProduct.active" label="نشط" :color="localProduct.active ? 'primary' : 'grey'"
+                    hide-details="auto" />
                 </v-col>
                 <v-col>
-                  <v-switch v-model="localProduct.featured" label="مميز" :color="localProduct.featured ? 'primary' : 'grey'" hide-details="auto" />
+                  <v-switch v-model="localProduct.featured" label="مميز"
+                    :color="localProduct.featured ? 'primary' : 'grey'" hide-details="auto" />
                 </v-col>
                 <v-col>
-                  <v-switch
-                    v-model="localProduct.returnable"
-                    label="قابل للإرجاع"
-                    :color="localProduct.returnable ? 'primary' : 'grey'"
-                    hide-details="auto"
-                  />
+                  <v-switch v-model="localProduct.returnable" label="قابل للإرجاع"
+                    :color="localProduct.returnable ? 'primary' : 'grey'" hide-details="auto" />
                 </v-col>
               </v-row>
             </v-col>
             <v-col cols="12">
               <v-row>
                 <v-col>
-                  <v-combobox
-                    v-model="localProduct.category_id"
-                    item-value="id"
-                    item-title="name"
-                    :items="categories || []"
-                    label="الفئة"
-                    :rules="[v => !!v || 'الفئة مطلوبة']"
-                    required
-                    hide-details="auto"
-                    :return-object="false"
-                  />
+                  <v-combobox v-model="localProduct.category_id" item-value="id" item-title="name"
+                    :items="categories || []" label="الفئة" :rules="[v => !!v || 'الفئة مطلوبة']" required
+                    hide-details="auto" :return-object="false" />
                 </v-col>
                 <v-col class="px-0">
-                  <v-combobox
-                    v-model="localProduct.brand_id"
-                    item-value="id"
-                    item-title="name"
-                    :items="brands || []"
-                    label="العلامة التجارية"
-                    hide-details="auto"
-                    :return-object="false"
-                  />
+                  <v-combobox v-model="localProduct.brand_id" item-value="id" item-title="name" :items="brands || []"
+                    label="العلامة التجارية" hide-details="auto" :return-object="false" />
                 </v-col>
               </v-row>
             </v-col>
             <v-col cols="12">
-              <v-textarea rows="1" auto-grow v-model="localProduct.desc" label="الوصف القصير" :rules="productRules.description" hide-details="auto" />
+              <v-textarea rows="1" auto-grow v-model="localProduct.desc" label="الوصف القصير"
+                :rules="productRules.description" hide-details="auto" />
             </v-col>
             <v-col cols="12">
-              <v-textarea
-                rows="2"
-                auto-grow
-                v-model="localProduct.desc_long"
-                label="الوصف المفصل"
-                :rules="productRules.description_long"
-                hide-details="auto"
-              />
+              <v-textarea rows="2" auto-grow v-model="localProduct.desc_long" label="الوصف المفصل"
+                :rules="productRules.description_long" hide-details="auto" />
             </v-col>
           </v-row>
           <v-card class="bg-grey-lighten-4 pa-2">
@@ -461,40 +441,24 @@ const statusOptions = [
               <v-col cols="12">
                 <v-row>
                   <v-col cols="4">
-                    <v-text-field
-                      v-model.number="variant.retail_price"
-                      label="سعر القطاعي "
-                      type="number"
-                      :rules="productRules.retail_price"
-                      hide-details="auto"
-                    />
+                    <v-text-field v-model.number="variant.retail_price" label="سعر القطاعي " type="number"
+                      :rules="productRules.retail_price" hide-details="auto" />
                   </v-col>
                   <v-col cols="4">
-                    <v-text-field
-                      v-model.number="variant.wholesale_price"
-                      label="سعر الجملة"
-                      type="number"
-                      :rules="productRules.wholesale_price"
-                      hide-details="auto"
-                    />
+                    <v-text-field v-model.number="variant.wholesale_price" label="سعر الجملة" type="number"
+                      :rules="productRules.wholesale_price" hide-details="auto" />
                   </v-col>
                   <v-col cols="4">
-                    <v-select
-                      v-model="variant.status"
-                      :items="statusOptions"
-                      item-value="value"
-                      item-title="text"
-                      label="حالة المتغير"
-                      hide-details="auto"
-                      :rules="[v => !!v || 'حالة المتغير مطلوبة']"
-                      required
-                    />
+                    <v-select v-model="variant.status" :items="statusOptions" item-value="value" item-title="text"
+                      label="حالة المتغير" hide-details="auto" :rules="[v => !!v || 'حالة المتغير مطلوبة']" required />
                   </v-col>
                   <v-col cols="6">
-                    <v-text-field v-model.number="variant.tax" label="نسبة الضريبة" type="number" :rules="productRules.tax" hide-details="auto" />
+                    <v-text-field v-model.number="variant.tax" label="نسبة الضريبة" type="number"
+                      :rules="productRules.tax" hide-details="auto" />
                   </v-col>
                   <v-col cols="6">
-                    <v-text-field v-model.number="variant.discount" label="الخصم" type="number" :rules="productRules.discount" hide-details="auto" />
+                    <v-text-field v-model.number="variant.discount" label="الخصم" type="number"
+                      :rules="productRules.discount" hide-details="auto" />
                   </v-col>
                   <v-col cols="6">
                     <v-text-field v-model="variant.image" label="رابط الصورة" hide-details="auto" />
@@ -516,46 +480,26 @@ const statusOptions = [
                 <v-card class="mb-4 pa-3" outlined v-for="(stock, sIndex) in variant.stocks" :key="sIndex">
                   <v-row dense>
                     <v-col cols="4">
-                      <v-text-field v-model.number="stock.cost" label="سعر الشراء" type="number" :rules="productRules.cost" hide-details="auto" />
+                      <v-text-field v-model.number="stock.cost" label="سعر الشراء" type="number"
+                        :rules="productRules.cost" hide-details="auto" />
                     </v-col>
                     <v-col cols="4">
-                      <v-text-field v-model.number="stock.qty" label="الكمية" type="number" :rules="productRules.qty" hide-details="auto" />
+                      <v-text-field v-model.number="stock.quantity" label="الكمية" type="number"
+                        :rules="productRules.quantity" hide-details="auto" />
                     </v-col>
                     <v-col cols="4">
-                      <v-select
-                        v-if="warehouses.length"
-                        v-model="stock.warehouse_id"
-                        item-value="id"
-                        item-title="name"
-                        :items="warehouses || []"
-                        label="المخزن"
-                        :rules="[v => !!v || 'المخزن مطلوب']"
-                        required
-                        hide-details="auto"
-                        :return-object="false"
-                      />
-                      <v-select
-                        v-else
+                      <v-select v-if="warehouses.length" v-model="stock.warehouse_id" item-value="id" item-title="name"
+                        :items="warehouses || []" label="المخزن" :rules="[v => !!v || 'المخزن مطلوب']" required
+                        hide-details="auto" :return-object="false" />
+                      <v-select v-else
                         :items="[{ id: null, name: 'لا يوجد مخازن، يرجى إضافة مخزن أولاً', disabled: true }]"
-                        label="المخزن"
-                        item-title="name"
-                        :value="null"
-                        :rules="[v => !!v || 'المخزن مطلوب']"
-                        required
-                        hide-details="auto"
-                      />
+                        label="المخزن" item-title="name" :value="null" :rules="[v => !!v || 'المخزن مطلوب']" required
+                        hide-details="auto" />
                     </v-col>
                     <v-col cols="4">
-                      <v-select
-                        v-model="stock.status"
-                        :items="statusOptions"
-                        item-value="value"
-                        item-title="text"
-                        label="حالة المتغير"
-                        hide-details="auto"
-                        :rules="[v => !!v || 'حالة المتغير مطلوبة']"
-                        required
-                      />
+                      <v-select v-model="stock.status" :items="statusOptions" item-value="value" item-title="text"
+                        label="حالة المتغير" hide-details="auto" :rules="[v => !!v || 'حالة المتغير مطلوبة']"
+                        required />
                     </v-col>
                     <v-col cols="4">
                       <v-text-field v-model="stock.expiry" label="تاريخ الانتهاء" type="date" hide-details="auto" />
@@ -564,14 +508,8 @@ const statusOptions = [
                       <v-text-field v-model="stock.loc" label="الموقع" hide-details="auto" />
                     </v-col>
                   </v-row>
-                  <v-btn
-                    v-if="variant.stocks.length > 1"
-                    class="mt-2"
-                    icon="ri-delete-bin-line"
-                    color="error"
-                    size="small"
-                    @click="removeStock(vIndex, sIndex)"
-                  ></v-btn>
+                  <v-btn v-if="variant.stocks.length > 1" class="mt-2" icon="ri-delete-bin-line" color="error"
+                    size="small" @click="removeStock(vIndex, sIndex)"></v-btn>
                 </v-card>
                 <!-- <v-btn class="my-2" text color="primary" small @click="addStock(vIndex)">+ إضافة مخزون جديد لهذا الخيار</v-btn> -->
               </v-col>
@@ -580,72 +518,53 @@ const statusOptions = [
                 <v-card-subtitle>الخصائص (Attributes)</v-card-subtitle>
                 <v-row dense v-for="(attr, aIndex) in variant.attributes" :key="aIndex" class="d-flex align-center">
                   <v-col cols="5">
-                    <v-select
-                      v-model="attr.attribute_id"
-                      :items="attributes"
-                      item-title="name"
-                      item-value="id"
-                      label="اختر الخاصية"
-                      dense
-                      outlined
-                      hide-details="auto"
-                      @update:modelValue="() => (attr.attribute_value_id = null)"
-                    />
+                    <v-select v-model="attr.attribute_id" :items="attributes" item-title="name" item-value="id"
+                      label="اختر الخاصية" dense outlined hide-details="auto"
+                      @update:modelValue="() => (attr.attribute_value_id = null)" />
                   </v-col>
                   <v-col cols="5">
-                    <v-select
-                      v-model="attr.attribute_value_id"
-                      :items="getAttributeValues(attr.attribute_id)"
-                      item-title="name"
-                      item-value="id"
-                      label="اختر القيمة"
-                      dense
-                      outlined
-                      :disabled="!attr.attribute_id"
-                      :return-object="false"
-                      hide-details="auto"
-                      :style="
-                        (() => {
+                    <v-select v-model="attr.attribute_value_id" :items="getAttributeValues(attr.attribute_id)"
+                      item-title="name" item-value="id" label="اختر القيمة" dense outlined
+                      :disabled="!attr.attribute_id" :return-object="false" hide-details="auto" :style="(() => {
                           const selected = getAttributeValues(attr.attribute_id).find(v => v.id === attr.attribute_value_id);
                           return selected && selected.color
                             ? `background:${selected.color};color:${getContrastColor(selected.color)};border-radius:6px;`
                             : '';
                         })()
-                      "
-                    >
+                        ">
                       <template #item="{ item, props: itemProps }">
-                        <v-list-item
-                          v-bind="itemProps"
-                          :style="item.raw.color ? `background:${item.raw.color};color:${getContrastColor(item.raw.color)};border-radius:6px;` : ''"
-                        >
+                        <v-list-item v-bind="itemProps"
+                          :style="item.raw.color ? `background:${item.raw.color};color:${getContrastColor(item.raw.color)};border-radius:6px;` : ''">
                         </v-list-item>
                       </template>
                       <template #selection="{ item }">
-                        <span
-                          :style="
-                            item.raw.color
-                              ? `background:${item.raw.color};color:${getContrastColor(
-                                  item.raw.color
-                                )};padding:2px 8px;border-radius:6px;display:inline-block`
-                              : ''
-                          "
-                        >
+                        <span :style="item.raw.color
+                            ? `background:${item.raw.color};color:${getContrastColor(
+                              item.raw.color
+                            )};padding:2px 8px;border-radius:6px;display:inline-block`
+                            : ''
+                          ">
                           {{ item.raw.name }}
                         </span>
                       </template>
                     </v-select>
                   </v-col>
                   <v-col cols="2">
-                    <v-btn class="my-a" icon="ri-delete-bin-line" color="error" size="small" @click="removeAttribute(vIndex, aIndex)"> </v-btn>
+                    <v-btn class="my-a" icon="ri-delete-bin-line" color="error" size="small"
+                      @click="removeAttribute(vIndex, aIndex)">
+                    </v-btn>
                   </v-col>
                 </v-row>
 
                 <v-btn class="my-2" text color="primary" small @click="addAttribute(vIndex)">+ إضافة خاصية جديدة</v-btn>
               </v-col>
               <v-col cols="12">
-                <v-btn variant="text" color="error" append-icon="ri-delete-bin-line" @click="removeVariant(vIndex)">حذف هذا الخيار</v-btn>
+                <v-btn variant="text" color="error" append-icon="ri-delete-bin-line" @click="removeVariant(vIndex)">حذف
+                  هذا
+                  الخيار</v-btn>
               </v-col>
-              <v-col cols="12" v-if="vIndex < localProduct.variants.length - 1"> <v-divider class="my-4"></v-divider> </v-col>
+              <v-col cols="12" v-if="vIndex < localProduct.variants.length - 1"> <v-divider class="my-4"></v-divider>
+              </v-col>
             </v-row>
           </v-card>
           <v-row>

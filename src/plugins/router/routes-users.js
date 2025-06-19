@@ -30,4 +30,9 @@ export default [
       roles: ['roles', 'roles_all', 'roles_show', 'super_admin', 'company_owner'],
     },
   },
+  {
+    path: '/edit-profile',
+    name: 'EditProfile',
+    component: () => import('@/pages/users/EditProfile.vue'),
+  },
 ];

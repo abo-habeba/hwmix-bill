@@ -103,7 +103,7 @@ function saveWarehouse() {
     .then(() => {
       getWarehouses();
       dialog.value = false;
-      toast.success('تم حفظ المخزن بنجاح');
+      // toast.success('تم حفظ المخزن بنجاح');
       warehouse.value = {
         name: '',
         location: '',
@@ -127,7 +127,7 @@ function deleteWarehouse(id) {
     .then(() => {
       getWarehouses();
       deleteDialog.value = false;
-      toast.success('تم حذف المخزن بنجاح');
+      // toast.success('تم حذف المخزن بنجاح');
     })
     .catch(() => toast.error('حدث خطأ أثناء حذف المخزن'));
 }
