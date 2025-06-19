@@ -137,7 +137,7 @@ function saveCategory() {
     .then(() => {
       getCategories();
       closeAddDialog();
-      toast.success(isEdit ? 'تم تعديل الفئة بنجاح' : 'تم حفظ الفئة بنجاح');
+      // toast.success(isEdit ? 'تم تعديل الفئة بنجاح' : 'تم حفظ الفئة بنجاح');
     })
     .catch(() => toast.error(isEdit ? 'حدث خطأ أثناء تعديل الفئة' : 'حدث خطأ أثناء حفظ الفئة'));
 }

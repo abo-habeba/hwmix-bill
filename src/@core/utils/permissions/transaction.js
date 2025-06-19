@@ -1,0 +1,9 @@
+export default {
+  name: 'إدارة المعاملات',
+  permissions: [
+    { value: 'transaction', name: 'صفحة المعاملات' },
+    { value: 'transfer', name: 'تحويل رصيد لأي مستخدم' },
+    { value: 'deposit', name: 'إيداع رصيد لأي مستخدم' },
+    { value: 'withdraw', name: 'سحب رصيد من أي مستخدم' },
+  ],
+};

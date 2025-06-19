@@ -7,7 +7,7 @@ export default [
     meta: {
       title: ' الشركات ',
       description: 'ادارة الشركات',
-      roles: ['companys', 'companys_all', 'companys_show', 'super_admin', 'company_owner'],
+      roles: ['companys', 'companys_all', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'تعديل الشركة',
       description: 'تعديل بيانات الشركة',
-      roles: ['companys_update', 'super_admin', 'company_owner'],
+      roles: ['companys', 'companys_all', 'super_admin', 'company_owner'],
     },
   },
 ];

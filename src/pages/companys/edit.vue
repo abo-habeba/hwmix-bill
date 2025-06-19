@@ -14,8 +14,6 @@ const userStore = useUserStore();
 const image = ref(null);
 const imagePreview = ref(null);
 const generateImagePreview = () => {
-  console.log(image.value);
-
   if (image.value && image.value.type.startsWith('image/')) {
     const reader = new FileReader();
     reader.onload = e => {
@@ -46,13 +44,23 @@ onMounted(() => {
   }
 });
 function sendData() {
+  const payload = { ...company.value };
+
   if (image.value) {
-    company.value.logo = image.value;
+    payload.logo = image.value; // إرسال الصورة فقط إذا تم اختيار صورة جديدة
+  } else {
+    delete payload.logo; // حذف المفتاح إذا لم يتم اختيار صورة جديدة
   }
-  saveItem('company', company.value, route.params.id).then(res => {
-    userStore.fetchUser();
-    router.go(-1);
-  });
+
+  saveItem('company', payload, route.params.id)
+    .then(res => {
+      userStore.fetchUser();
+      router.go(-1);
+    })
+    .catch(error => {
+      console.error('Error saving company:', error);
+      toast.error('حدث خطأ أثناء حفظ الشركة');
+    });
 }
 function saveCompany() {
   if (!company.value.name) {
@@ -71,6 +79,25 @@ function deleteCompany(id) {
       toast.success('تم حذف الشركة بنجاح');
     })
     .catch(() => toast.error('حدث خطأ أثناء حذف الشركة'));
+}
+function validateImage() {
+  if (image.value) {
+    const fileSizeInMB = image.value.size / (1024 * 1024);
+    if (fileSizeInMB > 1) {
+      toast.error('حجم الصورة يجب ألا يتعدى 1 ميجا بايت');
+      image.value = null;
+      return;
+    }
+
+    const img = new Image();
+    img.src = URL.createObjectURL(image.value);
+    img.onload = () => {
+      if (img.width < 100 || img.height < 100) {
+        toast.error('يفضل أن تكون أبعاد الصورة أكبر من 100x100 لتناسب أي شعار');
+        image.value = null;
+      }
+    };
+  }
 }
 </script>
 

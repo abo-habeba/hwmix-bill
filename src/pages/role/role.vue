@@ -1,6 +1,5 @@
 <template>
   <div class="mx-auto mt-10 pa-10" style="max-width: 700px; background-color: white">
-    <!-- Header Section -->
     <v-row>
       <v-col cols="12" class="d-flex align-center">
         <div>
@@ -20,7 +19,6 @@
         </v-btn>
       </v-col>
     </v-row>
-    <!-- Roles Table -->
     <v-card elevation="2">
       <v-data-table
         :headers="headers"
@@ -34,15 +32,9 @@
       >
         <template v-slot:top>
           <v-toolbar color="transparent">
-            <v-text-field class="ma-10" v-model="search" prepend-icon="ri-search-line" label="بحث..." hide-details density="compact"></v-text-field>
+            <v-text-field class="ma-10" v-model="search" prepend-icon="ri-search-line" label="بحث..." hide-details></v-text-field>
           </v-toolbar>
         </template>
-
-        <!-- <template v-slot:item.status="{ item }">
-            <v-chip :color="item.status === 'active' ? 'success' : 'error'" size="small" class="text-uppercase">
-              {{ item.status === 'active' ? 'نشط' : 'غير نشط' }}
-            </v-chip>
-          </template> -->
 
         <template v-slot:item.actions="{ item }">
           <div class="d-flex gap-2">
@@ -53,11 +45,10 @@
       </v-data-table>
     </v-card>
 
-    <!-- Role Dialog -->
     <v-dialog :fullscreen="xs" v-model="dialog" max-width="700" persistent>
       <v-card style="position: relative">
-        <div @click="closeDialog" style="position: fixed; top: 5px; left: 5px">
-          <v-btn icon="ri-close-line"> </v-btn>
+        <div @click="closeDialog" style="position: fixed; top: 5px; left: 5px; z-index: 100">
+          <v-btn icon="ri-close-line" variant="text" color="grey-darken-1"> </v-btn>
         </div>
         <v-card-title class="text-h5">
           {{ editedItem.id ? 'تعديل دور' : 'إضافة دور جديد' }}
@@ -75,25 +66,36 @@
               required
               variant="outlined"
               density="comfortable"
+              class="mb-4"
             ></v-text-field>
             <v-divider class="my-4"></v-divider>
             <div class="text-subtitle-1 mb-3">الصلاحيات</div>
             <v-row class="mb-10" v-if="permissionGroups">
               <v-col class="pa-0" v-for="group in permissionGroups" :key="group.name" cols="12">
                 <v-card variant="outlined" class="mb-4">
-                  <v-card-title class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4">
-                    {{ group.name }}
+                  <v-card-title class="py-2 px-2 bg-grey-lighten-4 d-flex align-center">
+                    <v-checkbox
+                      :model-value="isGroupSelected(group)"
+                      @update:model-value="val => toggleGroupSelection(group, val)"
+                      hide-details
+                      color="primary"
+                      class="ma-0 pa-0"
+                    ></v-checkbox>
+                    <span class="text-subtitle-1 mr-2">{{ group.name }}</span>
+                    <v-spacer></v-spacer>
                   </v-card-title>
                   <v-card-text>
                     <v-row>
-                      <v-col class="pa-0" cols="12" xs="6" sm="6" md="4" lg="3" v-for="(permission, i) in group.permissions" :key="i">
+                      <v-col class="py-0 px-3" cols="12" xs="6" sm="6" md="4" lg="3" v-for="(permission, i) in group.permissions" :key="i">
                         <v-checkbox
                           v-model="editedItem.permissions"
                           :label="permission.name"
                           :value="permission.value"
                           density="comfortable"
                           color="primary"
-                          class="permission-checkbox"
+                          class="permission-checkbox py-0 px-3"
+                          hide-details
+                          @update:model-value="() => updateGroupSelection(group)"
                         ></v-checkbox>
                       </v-col>
                     </v-row>
@@ -104,19 +106,13 @@
           </v-form>
         </v-card-text>
         <v-divider></v-divider>
-        <v-card-actions style="position: fixed; bottom: 35px; left: 50%; transform: translate(-50%, 50%); min-width: 200px" class="pa-4 ma-auto">
-          <v-btn append-icon="ri-close-line" style="background-color: #dc3545; color: white !important" variant="text" @click="closeDialog">
-            إلغاء
-          </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn append-icon="ri-save-line" style="background-color: #007bff; color: white !important" :loading="saving" @click="saveRole">
-            حفظ
-          </v-btn>
+        <v-card-actions style="position: sticky; bottom: 0; background-color: white; z-index: 5" class="pa-4 d-flex justify-center">
+          <v-btn append-icon="ri-close-line" color="error" variant="text" @click="closeDialog" class="mx-2"> إلغاء </v-btn>
+          <v-btn append-icon="ri-save-line" color="primary" :loading="saving" @click="saveRole" class="mx-2"> حفظ </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <!-- Delete Confirmation -->
     <v-dialog v-model="deleteDialog" max-width="400">
       <v-card>
         <v-card-title class="text-h5 pa-4"> تأكيد الحذف </v-card-title>
@@ -134,11 +130,12 @@
 <script setup>
 import { getLocalPermissions } from '@/@core/utils/permissions';
 import { deleteOne, getAll, getOne, saveItem } from '@/services/api';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue'; // استورد computed
 import { useDisplay } from 'vuetify';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { toast } from 'vue3-toastify';
+
 const router = useRouter();
 const { xs } = useDisplay();
 const loading = ref(false);
@@ -149,16 +146,22 @@ const deleteDialog = ref(false);
 const search = ref('');
 const valid = ref(false);
 const form = ref(null);
-// const user = ref();
 const userPermission = ref({});
-const permissionGroups = ref({});
+const permissionGroups = ref([]);
+
 const userStore = useUserStore();
+
 watch(
   () => userStore.user,
-  () => {
-    console.log('rin watch');
-    userPermission.value = userStore.user.permissions || [];
-    permissionGroups.value = getLocalPermissions(userPermission.value);
+  newUser => {
+    // تأكد من وجود المستخدم والصلاحيات قبل المعالجة
+    if (newUser && newUser.permissions) {
+      userPermission.value = newUser.permissions;
+      // Get permissions for all local permissions, not just user's.
+      // This ensures all possible permissions are available to select from.
+      permissionGroups.value = getLocalPermissions(newUser.permissions); // تمرير null لجلب كل الصلاحيات المتاحة للتحديد
+      console.log('Permission Groups Initialized:', permissionGroups.value);
+    }
   },
   { immediate: true }
 );
@@ -172,8 +175,10 @@ onMounted(async () => {
     })
     .catch(e => {
       loading.value = false;
-      if (e.data.error === 'Unauthorized') {
+      if (e.data && e.data.error === 'Unauthorized') {
         // router.push({ name: 'unauthorized' });
+      } else {
+        toast.error('حدث خطأ أثناء جلب الأدوار');
       }
     });
 });
@@ -187,15 +192,42 @@ const headers = ref([
 const roles = ref([]);
 
 const editedItem = ref({
+  id: null,
   name: '',
-  permissions: [],
+  permissions: [], // مصفوفة لتخزين قيم الصلاحيات المحددة
 });
 
 const nameRules = [v => !!v || 'اسم الدور مطلوب', v => v.length >= 3 || 'يجب أن يكون الاسم 3 أحرف على الأقل'];
 
-// Methods
+const isGroupSelected = group => {
+  if (!group.permissions || group.permissions.length === 0) return false;
+  return group.permissions.every(permission => editedItem.value.permissions.includes(permission.value));
+};
+
+const toggleGroupSelection = (group, isChecked) => {
+  const currentPermissions = new Set(editedItem.value.permissions);
+
+  if (isChecked) {
+    group.permissions.forEach(permission => {
+      currentPermissions.add(permission.value);
+    });
+  } else {
+    group.permissions.forEach(permission => {
+      currentPermissions.delete(permission.value);
+    });
+  }
+  editedItem.value.permissions = Array.from(currentPermissions);
+};
+
+const updateGroupSelection = group => {
+  // Logic is handled by v-model. This function ensures reactivity for isGroupSelected.
+  // No explicit code needed here unless complex partial selection logic is required.
+};
+
+// Methods for Dialog and CRUD operations
 const openDialog = () => {
   editedItem.value = {
+    id: null,
     name: '',
     permissions: [],
   };
@@ -205,13 +237,16 @@ const openDialog = () => {
 const closeDialog = () => {
   dialog.value = false;
   editedItem.value = {
+    id: null,
     name: '',
     permissions: [],
   };
+  form.value?.resetValidation(); // إعادة تعيين صلاحية النموذج
 };
 
 const editRole = item => {
-  editedItem.value = { ...item };
+  // عند التعديل، تأكد من نسخ الصلاحيات لتجنب مشاكل الـ reactivity
+  editedItem.value = { ...item, permissions: [...item.permissions] };
   dialog.value = true;
 };
 
@@ -220,27 +255,32 @@ const confirmDelete = item => {
   deleteDialog.value = true;
 };
 
-const saveRole = () => {
+const saveRole = async () => {
   saving.value = true;
-  if (!form.value.validate()) {
+  const { valid: formValid } = await form.value.validate(); // استخدم await لضمان انتهاء التحقق
+
+  if (!formValid) {
     toast.error('يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح');
     saving.value = false;
     return;
   }
+
   try {
-    saveItem('role', editedItem.value, editedItem.value.id)
-      .then(data => {
-        if (editedItem.value.id) {
-          let role = roles.value.find(role => role.id === data.id);
-          Object.assign(role, editedItem.value);
-          toast.success('تم تعديل الدور بنجاح');
-        } else {
-          roles.value.push(data);
-          toast.success('تم إضافة الدور بنجاح');
-        }
-        dialog.value = false;
-      })
-      .catch(() => toast.error('حدث خطأ أثناء حفظ الدور'));
+    const data = await saveItem('role', editedItem.value, editedItem.value.id);
+    if (editedItem.value.id) {
+      let index = roles.value.findIndex(role => role.id === data.id);
+      if (index !== -1) {
+        Object.assign(roles.value[index], data); // تحديث العنصر في المصفوفة مباشرة بالبيانات الجديدة
+      }
+      // toast.success('تم تعديل الدور بنجاح');
+    } else {
+      roles.value.push(data);
+      // toast.success('تم إضافة الدور بنجاح');
+    }
+    closeDialog(); // إغلاق الديالوج بعد الحفظ بنجاح
+  } catch (error) {
+    console.error('Error saving role:', error);
+    toast.error('حدث خطأ أثناء حفظ الدور');
   } finally {
     saving.value = false;
   }
@@ -249,17 +289,27 @@ const saveRole = () => {
 const deleteRole = async () => {
   deleting.value = true;
   try {
-    deleteOne('role', editedItem.value.id)
-      .then(() => {
-        roles.value = roles.value.filter(role => role.id !== editedItem.value.id);
-        toast.success('تم حذف الدور بنجاح');
-      })
-      .catch(() => toast.error('حدث خطأ أثناء حذف الدور'));
+    await deleteOne('role', editedItem.value.id);
+    roles.value = roles.value.filter(role => role.id !== editedItem.value.id);
+    // toast.success('تم حذف الدور بنجاح');
+  } catch (error) {
+    console.error('Error deleting role:', error);
+    // toast.error('حدث خطأ أثناء حذف الدور');
   } finally {
     deleteDialog.value = false;
     deleting.value = false;
   }
 };
-
-// Lifecycle
 </script>
+
+<style scoped>
+.d-flex.gap-2 > .v-btn {
+  margin-right: 8px; /* For `gap-2` equivalent in Vuetify */
+}
+
+.v-card-actions {
+  background-color: rgb(255, 255, 255); /* Ensure background is white */
+  z-index: 5; /* Ensure it stays above content */
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); /* Optional: subtle shadow for fixed footer */
+}
+</style>

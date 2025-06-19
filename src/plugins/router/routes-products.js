@@ -7,6 +7,7 @@ export default [
     meta: {
       title: 'المنتجات',
       description: 'إدارة وتعديل المنتجات',
+      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -16,6 +17,7 @@ export default [
     meta: {
       title: 'نسخ المنتجات',
       description: 'إدارة نسخ المنتجات',
+      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -25,6 +27,7 @@ export default [
     meta: {
       title: 'خصائص نسخ المنتجات',
       description: 'إدارة خصائص نسخ المنتجات',
+      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -34,6 +37,7 @@ export default [
     meta: {
       title: 'الخصائص',
       description: 'إدارة وتعديل الخصائص',
+      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -43,6 +47,7 @@ export default [
     meta: {
       title: 'قيم الخصائص',
       description: 'إدارة وتعديل قيم الخصائص',
+      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -52,6 +57,7 @@ export default [
     meta: {
       title: 'قيم الخصائص',
       description: 'إدارة وتعديل قيم الخصائص',
+      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -61,6 +67,7 @@ export default [
     meta: {
       title: 'الاقسام',
       description: 'إدارة وتعديل الاقسام',
+      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
     },
   },
 ];

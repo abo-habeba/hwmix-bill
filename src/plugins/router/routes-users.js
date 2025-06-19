@@ -7,7 +7,7 @@ export default [
     meta: {
       title: ' المستخدمين ',
       description: ' ادارة و تعديل المستخدمين ',
-      roles: ['users', 'users_all', 'users_show', 'super_admin', 'company_owner'],
+      roles: ['users', 'users_all', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -34,5 +34,8 @@ export default [
     path: '/edit-profile',
     name: 'EditProfile',
     component: () => import('@/pages/users/EditProfile.vue'),
+    meta: {
+      roles: ['users', 'users_all', 'super_admin', 'company_owner'],
+    },
   },
 ];

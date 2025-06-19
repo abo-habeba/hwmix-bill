@@ -7,7 +7,7 @@ export default [
     meta: {
       title: 'الفواتير',
       description: 'إدارة الفواتير',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['invoices', 'invoices_all'],
     },
   },
   {
@@ -15,9 +15,9 @@ export default [
     component: () => import('@/pages/invoices/index.vue'),
     name: 'invoice-create',
     meta: {
-      title: 'الفواتير',
-      description: 'إدارة الفواتير',
-      roles: ['super_admin', 'company_owner'],
+      title: 'إنشاء فاتورة',
+      description: 'إضافة فاتورة جديدة',
+      roles: ['invoices_create'],
     },
   },
   {
@@ -27,7 +27,7 @@ export default [
     meta: {
       title: 'أنواع الفواتير',
       description: 'إدارة أنواع الفواتير',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['invoices'],
     },
   },
   {
@@ -37,7 +37,7 @@ export default [
     meta: {
       title: 'فواتير البيع والشراء',
       invoiceType: 'sales',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['invoices'],
     },
   },
   {
@@ -47,7 +47,7 @@ export default [
     meta: {
       title: 'عروض الأسعار',
       invoiceType: 'quotation',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['invoices'],
     },
   },
   {
@@ -57,7 +57,7 @@ export default [
     meta: {
       title: 'طلبات الشراء',
       invoiceType: 'purchase_order',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['invoices'],
     },
   },
   {
@@ -67,7 +67,7 @@ export default [
     meta: {
       title: 'طلبات البيع',
       invoiceType: 'sales_order',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['invoices'],
     },
   },
   {
@@ -77,7 +77,7 @@ export default [
     meta: {
       title: 'فواتير الخصم',
       invoiceType: 'discount_invoice',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['invoices'],
     },
   },
   {
@@ -87,7 +87,7 @@ export default [
     meta: {
       title: 'فواتير الخدمة',
       description: 'قائمة فواتير الخدمة',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['invoices'],
     },
   },
 ];

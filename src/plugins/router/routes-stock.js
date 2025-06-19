@@ -7,6 +7,7 @@ export default [
     meta: {
       title: 'المخازن',
       description: 'إدارة المخازن',
+      roles: ['warehouses', 'warehouses_all', 'super_admin', 'company_owner'],
     },
   },
   {
@@ -16,6 +17,7 @@ export default [
     meta: {
       title: 'المخزون',
       description: 'إدارة المخزون',
+      roles: ['warehouses', 'warehouses_all', 'super_admin', 'company_owner'],
     },
   },
   {

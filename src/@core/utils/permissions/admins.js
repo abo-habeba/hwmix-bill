@@ -1,0 +1,7 @@
+export default {
+  name: 'إدار الادمن',
+  permissions: [
+    { value: 'super_admin', name: 'صلاحيات السيستم كاملة' },
+    { value: 'company_owner', name: ' جميع صلاحيات الشركة التابع لها ' },
+  ],
+};

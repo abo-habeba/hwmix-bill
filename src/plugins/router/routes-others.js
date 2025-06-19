@@ -7,7 +7,7 @@ export default [
     meta: {
       title: ' سجل النظام ',
       description: 'متابعة حركات النظام',
-      roles: 'logs',
+      roles: ['logs', 'super_admin', 'company_owner'],
     },
   },
   {

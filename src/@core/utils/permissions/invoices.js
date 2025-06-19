@@ -1,0 +1,10 @@
+export default {
+  name: 'إدارة الفواتير',
+  permissions: [
+    { value: 'invoices', name: 'صفحة الفواتير' },
+    { value: 'invoices_all', name: 'عرض جميع الفواتير' },
+    { value: 'invoices_create', name: 'إنشاء فاتورة' },
+    { value: 'invoices_update', name: 'تعديل فاتورة' },
+    { value: 'invoices_delete', name: 'حذف فاتورة' },
+  ],
+};

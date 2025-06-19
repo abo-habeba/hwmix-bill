@@ -1,0 +1,10 @@
+export default {
+  name: 'إدارة المنتجات',
+  permissions: [
+    { value: 'products', name: 'صفحة المنتجات' },
+    { value: 'products_all', name: 'عرض جميع المنتجات' },
+    { value: 'products_create', name: 'إنشاء منتج' },
+    { value: 'products_update', name: 'تعديل منتج' },
+    { value: 'products_delete', name: 'حذف منتج' },
+  ],
+};
