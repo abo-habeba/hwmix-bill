@@ -128,7 +128,7 @@
 </template>
 
 <script setup>
-import { getLocalPermissions } from '@/@core/utils/permissions';
+import { getLocalPermissions } from '@/services/api';
 import { deleteOne, getAll, getOne, saveItem } from '@/services/api';
 import { ref, onMounted, watch, computed } from 'vue'; // استورد computed
 import { useDisplay } from 'vuetify';
@@ -153,13 +153,10 @@ const userStore = useUserStore();
 
 watch(
   () => userStore.user,
-  newUser => {
-    // تأكد من وجود المستخدم والصلاحيات قبل المعالجة
+  async newUser => {
     if (newUser && newUser.permissions) {
       userPermission.value = newUser.permissions;
-      // Get permissions for all local permissions, not just user's.
-      // This ensures all possible permissions are available to select from.
-      permissionGroups.value = getLocalPermissions(newUser.permissions); // تمرير null لجلب كل الصلاحيات المتاحة للتحديد
+      permissionGroups.value = await getLocalPermissions(newUser.permissions);
       console.log('Permission Groups Initialized:', permissionGroups.value);
     }
   },

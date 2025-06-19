@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { getLocalPermissions } from '@/@core/utils/permissions';
+import { getLocalPermissions } from '@/services/api';
 import { defineProps, ref, defineExpose, onMounted } from 'vue';
 
 const props = defineProps({
@@ -44,10 +44,10 @@ function openDialog() {
 
 watch(
   () => props.userRole,
-  newRole => {
+  async newRole => {
     if (newRole && newRole.permissions) {
       rolePermissions.value = newRole.permissions;
-      userGroupPermissions.value = getLocalPermissions(rolePermissions.value);
+      userGroupPermissions.value = await getLocalPermissions(rolePermissions.value);
     }
   },
   { immediate: true } // حتى يعمل عند التهيئة
