@@ -7,19 +7,9 @@ export default [
     meta: {
       title: ' الاقساط ',
       description: ' ادارة و تعديل الاقساط ',
-      roles: ['installments', 'installments_all', 'super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'installments.page'],
     },
   },
-  // {
-  //   path: 'installments/edit/:id?',
-  //   component: () => import('@/pages/installments/edit.vue'),
-  //   name: 'edit-user',
-  //   meta: {
-  //     title: '',
-  //     description: '  ',
-  //     roles: ['installments_update', 'installments_create'],
-  //   },
-  // },
   {
     path: 'installment-plans',
     component: () => import('@/pages/installments/InstallmentPlansTable.vue'),
@@ -27,7 +17,7 @@ export default [
     meta: {
       title: 'خطط الأقساط',
       description: 'إدارة خطط الأقساط',
-      roles: ['installments', 'installments_all', 'super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'installment_plans.page'],
     },
   },
 ];

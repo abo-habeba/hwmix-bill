@@ -80,6 +80,8 @@ export const useUserStore = defineStore('user', {
     },
 
     can(permission) {
+      // console.log('Checking permission:', permission);
+
       if (!this.permissionsList) {
         console.warn('Permissions not calculated yet. Returning false.');
         return false;

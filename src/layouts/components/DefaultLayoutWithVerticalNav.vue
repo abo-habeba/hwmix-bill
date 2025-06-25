@@ -16,6 +16,7 @@ const companiesDialog = ref(false);
 const router = useRouter();
 const companyId = ref(null);
 const errorResponse = ref(companiesDialog.value);
+
 function setCompanies(id) {
   companyId.value = id;
   console.log(id);
@@ -31,8 +32,7 @@ function setCompanies(id) {
     });
 }
 function openCompaniesDialog() {
-  if (userStore.value.user.companies.length >= 1) {
-    console.log('if');
+  if (userStore.value.user.companies.length > 1) {
     companiesDialog.value = true;
   } else {
     console.log('else');
@@ -44,15 +44,11 @@ function openCompaniesDialog() {
 <template>
   <v-dialog v-model="companiesDialog" max-width="500">
     <VCard class="pa-5">
-      <v-alert v-if="errorResponse" border="top" type="warning" variant="outlined" prominent> {{ errorResponse }} </v-alert>
-      <v-list-item
-        v-for="companie in userStore.user.companies"
-        :key="companie.id"
-        :prepend-avatar="companie.logo"
-        :subtitle="companie.field"
-        :title="companie.name"
-        @click="userStore.user.companies.length > 1 ? setCompanies(companie.id) : ''"
-      ></v-list-item>
+      <v-alert v-if="errorResponse" border="top" type="warning" variant="outlined" prominent> {{ errorResponse }}
+      </v-alert>
+      <v-list-item v-for="companie in userStore.user.companies" :key="companie.id" :prepend-avatar="companie.logo"
+        :subtitle="companie.field" :title="companie.name"
+        @click="userStore.user.companies.length ? setCompanies(companie.id) : ''"></v-list-item>
     </VCard>
   </v-dialog>
   <VerticalNavLayout>
@@ -148,6 +144,7 @@ function openCompaniesDialog() {
   width: 100% !important;
   height: 100% !important;
   overflow: hidden;
+
   .responsive-image {
     max-width: 100%;
     max-height: 100%;
@@ -161,6 +158,7 @@ function openCompaniesDialog() {
   * {
     cursor: pointer;
   }
+
   display: flex;
   align-items: center;
   // background-color: transparent;

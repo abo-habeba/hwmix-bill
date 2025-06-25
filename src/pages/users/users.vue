@@ -3,10 +3,10 @@ import DataTable from '@/components/users/UsersDataTable.vue';
 import UsersAddUser from '../../components/users/UsersAddUser.vue';
 import { useUserStore } from '@/stores/user';
 const userStore = useUserStore();
-console.log(userStore.can(['users_create', 'super_admin', 'company_owner']));
+console.log(userStore.can(['users.create', 'admin.super', 'company.owner']));
 </script>
 <template>
-  <UsersAddUser class="ma-3" v-if="userStore.can(['users_create', 'super_admin', 'company_owner'])" />
+  <UsersAddUser class="ma-3" v-if="userStore.can(['users.create', 'admin.super', 'company.owner'])" />
   <VCard class="pa-0" title="المستخدمين">
     <UsersDataTable />
   </VCard>

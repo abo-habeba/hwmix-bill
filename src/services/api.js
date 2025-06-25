@@ -322,15 +322,111 @@ export function restoreItem(resource, id) {
 }
 
 export async function getLocalPermissions(remotePermissions) {
-  const permissionsLocal = await getAll('permissions-json');
+  let permissionGroups = allPermissionsConfig => {
+    if (!allPermissionsConfig) return [];
+
+    const groups = [];
+    for (const entityKey in allPermissionsConfig) {
+      if (allPermissionsConfig.hasOwnProperty(entityKey)) {
+        const entityData = allPermissionsConfig[entityKey];
+        const groupName =
+          entityData.name && entityData.name.label
+            ? entityData.name.label
+            : entityKey
+                .replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+
+        const permissionsInGroup = [];
+        for (const actionKey in entityData) {
+          if (entityData.hasOwnProperty(actionKey)) {
+            permissionsInGroup.push({
+              label: entityData[actionKey].label, // التسمية المعربة للصلاحية
+              value: entityData[actionKey].key, // المفتاح الفعلي للصلاحية (الـ key)
+            });
+          }
+        }
+        groups.push({
+          name: groupName,
+          permissions: permissionsInGroup,
+        });
+      }
+    }
+    return groups;
+  };
+
+  const permissionsApi = await getAll('permissions');
   if (!Array.isArray(remotePermissions)) {
     console.error('Invalid remotePermissions data:', remotePermissions);
     return [];
   }
+  console.log('permissionsApi:', permissionsApi);
+
+  let permissionsLocal = permissionGroups(permissionsApi);
   return permissionsLocal
     .map(group => ({
       ...group,
       permissions: group.permissions.filter(permission => remotePermissions.includes(permission.value)),
     }))
     .filter(group => group.permissions.length > 0);
+}
+
+function permKey(permissionKey) {
+  // تقسيم المفتاح المدخل إلى كيان (entity) وفعل (action)
+  const parts = permissionKey.split('.', 2);
+  const [entity, action] = parts;
+  // التحقق مما إذا كان الكيان والفعل موجودين في كائن الصلاحيات
+  if (permissionsApi[entity] && permissionsApi[entity][action] && permissionsApi[entity][action].key) {
+    return permissionsApi[entity][action].key;
+  }
+}
+
+function getPermissionKeys(permissionKeysArray) {
+  const resolvedKeys = [];
+  for (const key of permissionKeysArray) {
+    try {
+      const resolved = permKey(key);
+      resolvedKeys.push(resolved);
+    } catch (error) {
+      console.warn(`تحذير: تم تجاهل مفتاح صلاحية غير صالح: ${key}. الخطأ: ${error.message}`);
+    }
+  }
+  return resolvedKeys;
+}
+
+function resolvePermissionKeys(input) {
+  // دالة مساعدة داخلية لاسترجاع مفتاح صلاحية واحد
+  // (مماثلة لـ permKey الأصلية، ولكنها لا تُرمي خطأ هنا للتعامل المرن مع المصفوفات)
+  const _getSinglePermissionKey = permissionKey => {
+    const parts = permissionKey.split('.', 2);
+    if (parts.length !== 2) {
+      throw new Error(`Permission key '${permissionKey}' is not in the correct 'entity.action' format.`);
+    }
+    const [entity, action] = parts;
+    if (permissionsApi[entity] && permissionsApi[entity][action] && permissionsApi[entity][action].key) {
+      return permissionsApi[entity][action].key;
+    }
+    throw new Error(`Permission key '${permissionKey}' not found in permissions registry.`);
+  };
+
+  // التحقق مما إذا كان المدخل مصفوفة
+  if (Array.isArray(input)) {
+    const resolvedKeys = [];
+    for (const key of input) {
+      try {
+        const resolved = _getSinglePermissionKey(key);
+        resolvedKeys.push(resolved);
+      } catch (error) {
+        console.warn(`تحذير: تم تجاهل مفتاح صلاحية غير صالح في المصفوفة: ${key}. الخطأ: ${error.message}`);
+      }
+    }
+    return resolvedKeys;
+  } else if (typeof input === 'string') {
+    // إذا كان المدخل سلسلة نصية واحدة، استخدم الدالة المساعدة مباشرة
+    return _getSinglePermissionKey(input);
+  } else {
+    // إذا كان المدخل ليس سلسلة ولا مصفوفة، ارمِ خطأ
+    throw new Error('Invalid input: Expected a string or an array of strings for permission keys.');
+  }
 }

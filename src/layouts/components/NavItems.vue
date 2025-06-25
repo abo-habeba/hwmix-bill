@@ -14,11 +14,12 @@ watch(activeItem, newValue => {
     localStorage.removeItem('activeNavItem');
   }
 });
-
+{
+}
 const navItems = [
   {
     type: 'group',
-    permission: ['super_admin', 'company_owner'],
+    permission: ['invoices.page', 'admin.super', 'company.owner'],
     item: {
       title: 'الفواتير',
       icon: 'ri-file-list-3-line',
@@ -47,7 +48,7 @@ const navItems = [
   },
   {
     type: 'group',
-    permission: ['super_admin', 'company_owner'],
+    permission: ['installments.page', 'admin.super', 'company.owner'],
     item: {
       title: 'إدارة الأقساط',
       icon: 'ri-file-list-line',
@@ -65,7 +66,7 @@ const navItems = [
   },
   {
     type: 'group',
-    permission: ['products', 'super_admin', 'company_owner'],
+    permission: ['products.page', 'admin.super', 'company.owner'],
     item: {
       title: 'المنتجات',
       icon: 'ri-shopping-bag-3-line',
@@ -86,7 +87,7 @@ const navItems = [
   },
   {
     type: 'group',
-    permission: ['super_admin', 'company_owner'],
+    permission: ['warehouses.page', 'admin.super', 'company.owner'],
     item: {
       title: 'المخزون',
       icon: 'ri-archive-line',
@@ -105,7 +106,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['cashbox', 'super_admin', 'company_owner'],
+    permission: ['cash_boxes.page', 'admin.super', 'company.owner'],
     item: {
       title: 'الخزن',
       to: { name: 'cashboxs' },
@@ -115,7 +116,7 @@ const navItems = [
   },
   {
     type: 'group',
-    permission: ['super_admin', 'company_owner'],
+    permission: ['notifications.page', 'admin.super', 'company.owner'],
     item: {
       title: 'الإشعارات',
       icon: 'ri-notification-3-line',
@@ -128,7 +129,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['users', 'super_admin', 'company_owner'],
+    permission: ['users.page', 'admin.super', 'company.owner'],
     item: {
       title: 'المستخدمين',
       to: { name: 'users' },
@@ -138,7 +139,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['roles', 'super_admin', 'company_owner'],
+    permission: ['roles.page', 'admin.super', 'company.owner'],
     item: {
       title: 'الصلاحيات والادوار',
       to: { name: 'roles' },
@@ -148,7 +149,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['companys', 'super_admin', 'company_owner'],
+    permission: ['companies.page', 'admin.super', 'company.owner'],
     item: {
       title: 'الشركات',
       to: { name: 'companys' },
@@ -158,7 +159,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['logs', 'super_admin', 'company_owner'],
+    permission: ['activity_logs.page', 'admin.super', 'company.owner'],
     item: {
       title: 'سجل النظام',
       to: { name: 'logs' },
@@ -173,29 +174,16 @@ const navItems = [
   <div>
     <template v-for="(navItem, index) in navItems" :key="index">
       <!-- روابط فردية -->
-      <VerticalNavLink
-        v-if="navItem.type === 'link' && userStore.user && userStore.can(navItem.permission)"
-        :item="navItem.item"
-        :title="navItem.item.tooltip"
-        :active-item="activeItem"
-        @update:activeItem="activeItem = $event"
-      />
+      <VerticalNavLink v-if="navItem.type === 'link' && userStore.user && userStore.can(navItem.permission)"
+        :item="navItem.item" :title="navItem.item.tooltip" :active-item="activeItem"
+        @update:activeItem="activeItem = $event" />
 
       <!-- للمجموعة -->
-      <VerticalNavGroup
-        v-if="navItem.type === 'group'"
-        :item="navItem.item"
-        :title="navItem.item.tooltip"
-        :active-item="activeItem"
-        @update:activeItem="activeItem = $event"
-      >
-        <VerticalNavLink
-          v-for="(child, childIndex) in navItem.item.children"
-          :key="childIndex"
-          :item="child"
-          :title="child.tooltip"
-          :active-item="activeItem"
-        />
+      <VerticalNavGroup v-if="navItem.type === 'group' && userStore.user && userStore.can(navItem.permission)"
+        :item="navItem.item" :title="navItem.item.tooltip" :active-item="activeItem"
+        @update:activeItem="activeItem = $event">
+        <VerticalNavLink v-for="(child, childIndex) in navItem.item.children" :key="childIndex" :item="child"
+          :title="child.tooltip" :active-item="activeItem" />
       </VerticalNavGroup>
     </template>
   </div>

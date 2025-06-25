@@ -7,7 +7,7 @@ export default [
     meta: {
       title: 'الخزن',
       description: 'إدارة وتعديل الخزن',
-      roles: ['cashbox', 'cashbox_all', 'super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'cash_boxes.page'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'تعديل الخزن',
       description: 'تعديل بيانات الخزن',
-      roles: ['cashbox_update', 'cashbox_create'],
+      roles: ['admin.super', 'company.owner', 'cash_boxes.create', 'cash_boxes.update_any'],
     },
   },
   {
@@ -27,7 +27,7 @@ export default [
     meta: {
       title: 'سندات القبض',
       description: 'قائمة سندات القبض',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'payments.page'],
     },
   },
   {
@@ -37,7 +37,7 @@ export default [
     meta: {
       title: 'سندات الصرف',
       description: 'قائمة سندات الصرف',
-      roles: ['super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'payments.page'],
     },
   },
 ];

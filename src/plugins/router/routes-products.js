@@ -7,7 +7,7 @@ export default [
     meta: {
       title: 'المنتجات',
       description: 'إدارة وتعديل المنتجات',
-      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'products.page'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'نسخ المنتجات',
       description: 'إدارة نسخ المنتجات',
-      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'product_variants.page'],
     },
   },
   {
@@ -27,7 +27,7 @@ export default [
     meta: {
       title: 'خصائص نسخ المنتجات',
       description: 'إدارة خصائص نسخ المنتجات',
-      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'product_variant_attributes.page'],
     },
   },
   {
@@ -37,7 +37,7 @@ export default [
     meta: {
       title: 'الخصائص',
       description: 'إدارة وتعديل الخصائص',
-      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'attributes.page'],
     },
   },
   {
@@ -47,7 +47,7 @@ export default [
     meta: {
       title: 'قيم الخصائص',
       description: 'إدارة وتعديل قيم الخصائص',
-      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'attribute_values.page'],
     },
   },
   {
@@ -55,9 +55,9 @@ export default [
     component: () => import('@/pages/brands/brands.vue'),
     name: 'brands',
     meta: {
-      title: 'قيم الخصائص',
-      description: 'إدارة وتعديل قيم الخصائص',
-      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
+      title: 'العلامات التجارية',
+      description: 'إدارة وتعديل العلامات التجارية',
+      roles: ['admin.super', 'company.owner', 'brands.page'],
     },
   },
   {
@@ -67,7 +67,7 @@ export default [
     meta: {
       title: 'الاقسام',
       description: 'إدارة وتعديل الاقسام',
-      roles: ['products', 'products_all', 'super_admin', 'company_owner'],
+      roles: ['admin.super', 'company.owner', 'categories.page'],
     },
   },
 ];

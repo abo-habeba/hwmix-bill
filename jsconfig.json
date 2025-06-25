@@ -12,29 +12,24 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "node",
+    "baseUrl": ".",
     "jsx": "preserve",
     "paths": {
       "@/*": [
-        "./src/*"
+        "src/*"
       ],
       "@layouts/*": [
-        "./src/@layouts/*"
-      ],
-      "@layouts": [
-        "./src/@layouts"
+        "src/@layouts/*"
       ],
       "@core/*": [
-        "./src/@core/*"
-      ],
-      "@core": [
-        "./src/@core"
+        "src/@core/*"
       ],
       "@images/*": [
-        "./src/assets/images/*"
+        "src/assets/images/*"
       ],
       "@styles/*": [
-        "./src/styles/*"
+        "src/styles/*"
       ]
     },
     "types": [

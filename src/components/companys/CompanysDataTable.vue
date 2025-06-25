@@ -95,8 +95,21 @@ watch(
   async newUser => {
     if (!newUser) return;
 
-    const canUpdate = await userStore.can(['company_update_self', 'company_update_own', 'company_update', 'super_admin', 'company_owner']);
-    const canDelete = await userStore.can(['company_delete_self', 'company_delete_own', 'company_delete', 'super_admin', 'company_owner']);
+    const canUpdate = await userStore.can([
+      'companies.update_any',
+      'companies.update_children',
+      'companies.update_self',
+      'companies.create',
+      'admin.super',
+      'company.owner',
+    ]);
+    const canDelete = await userStore.can([
+      'companies.delete_any',
+      'companies.delete_children',
+      'companies.delete_self',
+      'admin.super',
+      'company.owner',
+    ]);
     availableActions.value = [
       canUpdate
         ? {

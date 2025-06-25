@@ -83,7 +83,7 @@ onMounted(() => {
 function mergedCompanies() {
   const allComp = [
     ...user.value.companies.map(company => ({ ...company, disabled: false })),
-    ...userStore.user.companies.map(company => ({ ...company, disabled: true })),
+    ...userStore.user?.companies.map(company => ({ ...company, disabled: true })),
   ];
   const uniqueCompanies = Array.from(new Map(allComp.map(company => [company.id, company])).values());
   allCompanies.value = uniqueCompanies;
@@ -144,7 +144,8 @@ function openRoleDetails(role) {
       <v-tabs-window-item value="account">
         <VRow>
           <VCol cols="12">
-            <VCard elevation="0" :loading="loading" :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'" class="ma-4">
+            <VCard elevation="0" :loading="loading" :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'"
+              class="ma-4">
               <VDivider />
               <VCardText>
                 <!-- 👉 Form -->
@@ -166,14 +167,9 @@ function openRoleDetails(role) {
                     </VCol>
                     <!-- 👉 Phone -->
                     <VCol cols="12" sm="6" md="4">
-                      <PhoneNumberInput
-                        :label="'رقم الهاتف'"
-                        :placeholder="'0123456789'"
-                        :initialPhoneNumber="user.phone"
-                        @update:phoneNumber="val => (user.phone = val)"
-                        :rules="phoneRules"
-                        required
-                      />
+                      <PhoneNumberInput :label="'رقم الهاتف'" :placeholder="'0123456789'"
+                        :initialPhoneNumber="user.phone" @update:phoneNumber="val => (user.phone = val)"
+                        :rules="phoneRules" required />
                     </VCol>
 
                     <!-- 👉 username -->
@@ -182,33 +178,16 @@ function openRoleDetails(role) {
                     </VCol>
                     <!-- 👉 نوع المستخدم -->
                     <VCol cols="12" sm="6" md="4">
-                      <v-select
-                        v-model="user.customer_type"
-                        :items="[
-                          { value: 'retail', title: 'عميل قطاعي' },
-                          { value: 'wholesale', title: 'عميل جملة ' },
-                        ]"
-                        label="نوع العميل"
-                        item-title="title"
-                        item-value="value"
-                        clearable
-                      />
+                      <v-select v-model="user.customer_type" :items="[
+                        { value: 'retail', title: 'عميل قطاعي' },
+                        { value: 'wholesale', title: 'عميل جملة ' },
+                      ]" label="نوع العميل" item-title="title" item-value="value" clearable />
                     </VCol>
 
                     <VCol cols="12">
-                      <v-select
-                        v-model="selectedCompanies"
-                        :items="allCompanies"
-                        label="حدد الشركة"
-                        item-title="name"
-                        item-value="id"
-                        item-color="red"
-                        chips
-                        closable-chips
-                        multiple
-                        :item-props="itemProps"
-                        return-object
-                      ></v-select>
+                      <v-select v-model="selectedCompanies" :items="allCompanies" label="حدد الشركة" item-title="name"
+                        item-value="id" item-color="red" chips closable-chips multiple :item-props="itemProps"
+                        return-object></v-select>
                     </VCol>
 
                     <v-divider style="width: 50%" :thickness="2" class="border-opacity-100" color="warning"></v-divider>
@@ -218,7 +197,8 @@ function openRoleDetails(role) {
                     </VCol>
                     <!-- 👉 Form Actions -->
                     <VCol cols="12" class="d-flex flex-wrap gap-4">
-                      <VBtn :disabled="!userFormValid" :class="{ 'forbidden-cursor': !userFormValid }" @click="sendData"> حفظ </VBtn>
+                      <VBtn :disabled="!userFormValid" :class="{ 'forbidden-cursor': !userFormValid }"
+                        @click="sendData"> حفظ </VBtn>
                       <!-- reset Form -->
                       <!-- <VBtn color="secondary" variant="outlined" type="reset" @click.prevent="resetForm"> Reset </VBtn> -->
                     </VCol>

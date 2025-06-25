@@ -7,39 +7,27 @@
           <p class="text-subtitle-1 text-medium-emphasis mt-1">قم بإدارة أدوار المستخدمين وصلاحياتهم في النظام</p>
         </div>
         <v-spacer />
-        <v-btn
-          v-if="userStore.can(['roles_create', 'super_admin', 'company_owner'])"
-          color="primary"
-          prepend-icon="ri-add-line"
-          @click="openDialog()"
-          elevation="2"
-          size="large"
-        >
+        <v-btn v-if="userStore.can(['roles.create', 'admin.super', 'company.owner'])" color="primary"
+          prepend-icon="ri-add-line" @click="openDialog()" elevation="2" size="large">
           دور جديد
         </v-btn>
       </v-col>
     </v-row>
     <v-card elevation="2">
-      <v-data-table
-        :headers="headers"
-        :items="roles"
-        :loading="loading"
-        :search="search"
-        hover
-        loading-text=" جاري تحمل البيانات "
-        no-data-text=" لا توجد بيانات "
-        items-per-page-text="عدد الصفوف في الصفحة"
-      >
+      <v-data-table :headers="headers" :items="roles" :loading="loading" :search="search" hover
+        loading-text=" جاري تحمل البيانات " no-data-text=" لا توجد بيانات " items-per-page-text="عدد الصفوف في الصفحة">
         <template v-slot:top>
           <v-toolbar color="transparent">
-            <v-text-field class="ma-10" v-model="search" prepend-icon="ri-search-line" label="بحث..." hide-details></v-text-field>
+            <v-text-field class="ma-10" v-model="search" prepend-icon="ri-search-line" label="بحث..."
+              hide-details></v-text-field>
           </v-toolbar>
         </template>
 
         <template v-slot:item.actions="{ item }">
           <div class="d-flex gap-2">
             <v-btn icon="ri-pencil-line" color="primary" size="small" variant="text" @click="editRole(item)"> </v-btn>
-            <v-btn icon="ri-delete-bin-line" color="error" size="small" variant="text" @click="confirmDelete(item)"> </v-btn>
+            <v-btn icon="ri-delete-bin-line" color="error" size="small" variant="text" @click="confirmDelete(item)">
+            </v-btn>
           </div>
         </template>
       </v-data-table>
@@ -59,44 +47,29 @@
 
         <v-card-text>
           <v-form ref="form" v-model="valid">
-            <v-text-field
-              v-model="editedItem.name"
-              label="اسم الدور"
-              :rules="nameRules"
-              required
-              variant="outlined"
-              density="comfortable"
-              class="mb-4"
-            ></v-text-field>
+            <v-text-field v-model="editedItem.name" label="اسم الدور" :rules="nameRules" required variant="outlined"
+              density="comfortable" class="mb-4"></v-text-field>
+
             <v-divider class="my-4"></v-divider>
+
             <div class="text-subtitle-1 mb-3">الصلاحيات</div>
+
             <v-row class="mb-10" v-if="permissionGroups">
               <v-col class="pa-0" v-for="group in permissionGroups" :key="group.name" cols="12">
                 <v-card variant="outlined" class="mb-4">
                   <v-card-title class="py-2 px-2 bg-grey-lighten-4 d-flex align-center">
-                    <v-checkbox
-                      :model-value="isGroupSelected(group)"
-                      @update:model-value="val => toggleGroupSelection(group, val)"
-                      hide-details
-                      color="primary"
-                      class="ma-0 pa-0"
-                    ></v-checkbox>
-                    <span class="text-subtitle-1 mr-2">{{ group.name }}</span>
+                    <v-checkbox :model-value="isGroupSelected(group)" :label="group.name"
+                      @update:model-value="val => toggleGroupSelection(group, val)" hide-details color="primary"
+                      class="ma-0 pa-0"></v-checkbox>
                     <v-spacer></v-spacer>
                   </v-card-title>
                   <v-card-text>
                     <v-row>
-                      <v-col class="py-0 px-3" cols="12" xs="6" sm="6" md="4" lg="3" v-for="(permission, i) in group.permissions" :key="i">
-                        <v-checkbox
-                          v-model="editedItem.permissions"
-                          :label="permission.name"
-                          :value="permission.value"
-                          density="comfortable"
-                          color="primary"
-                          class="permission-checkbox py-0 px-3"
-                          hide-details
-                          @update:model-value="() => updateGroupSelection(group)"
-                        ></v-checkbox>
+                      <v-col class="py-0 px-3" cols="12" xs="6" sm="6" md="4" lg="3"
+                        v-for="(permission, i) in group.permissions" :key="i">
+                        <v-checkbox v-model="editedItem.permissions" :label="permission.label" :value="permission.value"
+                          density="comfortable" color="primary" class="permission-checkbox py-0 px-3" hide-details
+                          @update:model-value="() => updateGroupSelection(group)"></v-checkbox>
                       </v-col>
                     </v-row>
                   </v-card-text>
@@ -106,9 +79,12 @@
           </v-form>
         </v-card-text>
         <v-divider></v-divider>
-        <v-card-actions style="position: sticky; bottom: 0; background-color: white; z-index: 5" class="pa-4 d-flex justify-center">
-          <v-btn append-icon="ri-close-line" color="error" variant="text" @click="closeDialog" class="mx-2"> إلغاء </v-btn>
-          <v-btn append-icon="ri-save-line" color="primary" :loading="saving" @click="saveRole" class="mx-2"> حفظ </v-btn>
+        <v-card-actions style="position: sticky; bottom: 0; background-color: white; z-index: 5"
+          class="pa-4 d-flex justify-center">
+          <v-btn append-icon="ri-close-line" color="error" variant="text" @click="closeDialog" class="mx-2"> إلغاء
+          </v-btn>
+          <v-btn append-icon="ri-save-line" color="primary" :loading="saving" @click="saveRole" class="mx-2"> حفظ
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -157,7 +133,7 @@ watch(
     if (newUser && newUser.permissions) {
       userPermission.value = newUser.permissions;
       permissionGroups.value = await getLocalPermissions(newUser.permissions);
-      console.log('Permission Groups Initialized:', permissionGroups.value);
+      // console.log('Permission Groups Initialized:', JSON.stringify(permissionGroups.value, null, 2));
     }
   },
   { immediate: true }
@@ -300,13 +276,17 @@ const deleteRole = async () => {
 </script>
 
 <style scoped>
-.d-flex.gap-2 > .v-btn {
-  margin-right: 8px; /* For `gap-2` equivalent in Vuetify */
+.d-flex.gap-2>.v-btn {
+  margin-right: 8px;
+  /* For `gap-2` equivalent in Vuetify */
 }
 
 .v-card-actions {
-  background-color: rgb(255, 255, 255); /* Ensure background is white */
-  z-index: 5; /* Ensure it stays above content */
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); /* Optional: subtle shadow for fixed footer */
+  background-color: rgb(255, 255, 255);
+  /* Ensure background is white */
+  z-index: 5;
+  /* Ensure it stays above content */
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  /* Optional: subtle shadow for fixed footer */
 }
 </style>
