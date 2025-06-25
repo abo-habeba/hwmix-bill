@@ -7,7 +7,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    2: typeof import('./src/components/products/ProductDialog copy 2.vue')['default']
     AddAttribute: typeof import('./src/components/attributes/AddAttribute.vue')['default']
     AddAttributeValues: typeof import('./src/components/attributes/addAttributeValues.vue')['default']
     AddCompany: typeof import('./src/components/companys/addCompany.vue')['default']
@@ -29,7 +28,6 @@ declare module 'vue' {
     CompanysDataTable: typeof import('./src/components/companys/CompanysDataTable.vue')['default']
     CompanysEditUserRolse: typeof import('./src/components/companys/CompanysEditUserRolse.vue')['default']
     ContextMenu: typeof import('./src/components/ContextMenu.vue')['default']
-    copy: typeof import('./src/components/products/ProductDialog copy.vue')['default']
     DataTable: typeof import('./src/components/logs/DataTable.vue')['default']
     DatePicker: typeof import('./src/components/datePicker.vue')['default']
     DefaultAutocomplete: typeof import('./src/@core/components/DefaultAutocomplete.vue')['default']
@@ -86,6 +84,7 @@ declare module 'vue' {
     UserSearchInput: typeof import('./src/components/users/UserSearchInput.vue')['default']
     UsersEditUserRolse: typeof import('./src/components/Installments/UsersEditUserRolse.vue')['default']
     VariantEditDialog: typeof import('./src/components/products/VariantEditDialog.vue')['default']
+    VueApexCharts: typeof import('vue3-apexcharts')['default']
     Warehouses: typeof import('./src/components/warehouses/warehouses.vue')['default']
   }
 }
