@@ -340,7 +340,9 @@ export async function getLocalPermissions(remotePermissions) {
 
         const permissionsInGroup = [];
         for (const actionKey in entityData) {
-          if (entityData.hasOwnProperty(actionKey)) {
+          if (entityData.hasOwnProperty(actionKey) && actionKey !== 'name') {
+            // console.log(`actionKey permission: ${actionKey}`);
+
             permissionsInGroup.push({
               label: entityData[actionKey].label, // التسمية المعربة للصلاحية
               value: entityData[actionKey].key, // المفتاح الفعلي للصلاحية (الـ key)

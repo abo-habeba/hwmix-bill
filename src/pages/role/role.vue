@@ -43,38 +43,57 @@
           <v-spacer></v-spacer>
         </v-card-title>
 
-        <v-divider></v-divider>
+        <v-divider class="my-4" />
+
 
         <v-card-text>
           <v-form ref="form" v-model="valid">
-            <v-text-field v-model="editedItem.name" label="اسم الدور" :rules="nameRules" required variant="outlined"
-              density="comfortable" class="mb-4"></v-text-field>
-
-            <v-divider class="my-4"></v-divider>
-
-            <div class="text-subtitle-1 mb-3">الصلاحيات</div>
-
-            <v-row class="mb-10" v-if="permissionGroups">
-              <v-col class="pa-0" v-for="group in permissionGroups" :key="group.name" cols="12">
-                <v-card variant="outlined" class="mb-4">
-                  <v-card-title class="py-2 px-2 bg-grey-lighten-4 d-flex align-center">
-                    <v-checkbox :model-value="isGroupSelected(group)" :label="group.name"
-                      @update:model-value="val => toggleGroupSelection(group, val)" hide-details color="primary"
-                      class="ma-0 pa-0"></v-checkbox>
-                    <v-spacer></v-spacer>
-                  </v-card-title>
-                  <v-card-text>
-                    <v-row>
-                      <v-col class="py-0 px-3" cols="12" xs="6" sm="6" md="4" lg="3"
-                        v-for="(permission, i) in group.permissions" :key="i">
-                        <v-checkbox v-model="editedItem.permissions" :label="permission.label" :value="permission.value"
-                          density="comfortable" color="primary" class="permission-checkbox py-0 px-3" hide-details
-                          @update:model-value="() => updateGroupSelection(group)"></v-checkbox>
-                      </v-col>
-                    </v-row>
-                  </v-card-text>
-                </v-card>
+            <v-row dense>
+              <v-col cols="12" xs="6">
+                <v-text-field v-model="editedItem.name" label="اسم الدور" :rules="nameRules" required variant="outlined"
+                  hide-details>
+                </v-text-field>
               </v-col>
+            </v-row>
+
+            <v-divider class="my-4" />
+            <v-row class="mb-10" v-if="permissionGroups">
+              <v-col cols="4">
+                <div class="text-subtitle-1 mb-3">الصلاحيات</div>
+              </v-col>
+              <v-col cols="8">
+                <v-text-field v-model="search" prepend-icon="ri-search-line" label="بحث..." hide-details>
+                </v-text-field>
+              </v-col>
+              <v-expansion-panels v-model="openPanels" class="my-4" variant="popout" multiple>
+                <v-expansion-panel class="pa-0" v-for="group in filteredPermissionGroups" :key="group.name">
+                  <v-expansion-panel-title style="background-color: #f0f4f8;" class="text-subtitle">
+                    {{ group.name }}
+                  </v-expansion-panel-title>
+                  <v-expansion-panel-text>
+                    <v-card class="mt-3" variant="outlined">
+                      <v-card-title class="py-2 px-2 bg-grey-lighten-4 d-flex align-center">
+                        <v-checkbox :model-value="isGroupSelected(group)"
+                          :label="isGroupSelected(group) ? 'إلغاء تحديد الكل' : 'تحديد الكل'"
+                          @update:model-value="val => toggleGroupSelection(group, val)" hide-details color="primary"
+                          class="ma-0 pa-0"></v-checkbox>
+                        <v-spacer></v-spacer>
+                      </v-card-title>
+                      <v-card-text>
+                        <v-row>
+                          <v-col class="py-0 px-3" cols="12" xs="6" sm="6" md="4" lg="3"
+                            v-for="(permission, i) in group.permissions" :key="i">
+                            <v-checkbox v-model="editedItem.permissions" :label="permission.label"
+                              :value="permission.value" density="comfortable" color="primary"
+                              class="permission-checkbox py-0 px-3" hide-details
+                              @update:model-value="() => updateGroupSelection(group)"></v-checkbox>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                    </v-card>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
             </v-row>
           </v-form>
         </v-card-text>
@@ -102,11 +121,10 @@
     </v-dialog>
   </div>
 </template>
-
 <script setup>
 import { getLocalPermissions } from '@/services/api';
 import { deleteOne, getAll, getOne, saveItem } from '@/services/api';
-import { ref, onMounted, watch, computed } from 'vue'; // استورد computed
+import { ref, onMounted, watch, computed } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
@@ -122,39 +140,21 @@ const deleteDialog = ref(false);
 const search = ref('');
 const valid = ref(false);
 const form = ref(null);
-const userPermission = ref({});
 const permissionGroups = ref([]);
-
+const openPanels = ref([]);
 const userStore = useUserStore();
+const roles = ref([]);
 
-watch(
-  () => userStore.user,
-  async newUser => {
-    if (newUser && newUser.permissions) {
-      userPermission.value = newUser.permissions;
-      permissionGroups.value = await getLocalPermissions(newUser.permissions);
-      // console.log('Permission Groups Initialized:', JSON.stringify(permissionGroups.value, null, 2));
-    }
-  },
-  { immediate: true }
-);
-
-onMounted(async () => {
-  loading.value = true;
-  getAll('roles')
-    .then(data => {
-      roles.value = data.data;
-      loading.value = false;
-    })
-    .catch(e => {
-      loading.value = false;
-      if (e.data && e.data.error === 'Unauthorized') {
-        // router.push({ name: 'unauthorized' });
-      } else {
-        toast.error('حدث خطأ أثناء جلب الأدوار');
-      }
-    });
+const editedItem = ref({
+  id: null,
+  name: '',
+  permissions: [],
 });
+
+const nameRules = [
+  v => !!v || 'اسم الدور مطلوب',
+  v => v.length >= 3 || 'يجب أن يكون الاسم 3 أحرف على الأقل'
+];
 
 const headers = ref([
   { title: 'اسم الدور', key: 'name', align: 'start' },
@@ -162,42 +162,74 @@ const headers = ref([
   { title: 'الإجراءات', key: 'actions', align: 'center', sortable: false },
 ]);
 
-const roles = ref([]);
-
-const editedItem = ref({
-  id: null,
-  name: '',
-  permissions: [], // مصفوفة لتخزين قيم الصلاحيات المحددة
-});
-
-const nameRules = [v => !!v || 'اسم الدور مطلوب', v => v.length >= 3 || 'يجب أن يكون الاسم 3 أحرف على الأقل'];
-
 const isGroupSelected = group => {
-  if (!group.permissions || group.permissions.length === 0) return false;
   return group.permissions.every(permission => editedItem.value.permissions.includes(permission.value));
 };
 
 const toggleGroupSelection = (group, isChecked) => {
   const currentPermissions = new Set(editedItem.value.permissions);
-
   if (isChecked) {
-    group.permissions.forEach(permission => {
-      currentPermissions.add(permission.value);
-    });
+    group.permissions.forEach(permission => currentPermissions.add(permission.value));
   } else {
-    group.permissions.forEach(permission => {
-      currentPermissions.delete(permission.value);
-    });
+    group.permissions.forEach(permission => currentPermissions.delete(permission.value));
   }
   editedItem.value.permissions = Array.from(currentPermissions);
 };
 
-const updateGroupSelection = group => {
-  // Logic is handled by v-model. This function ensures reactivity for isGroupSelected.
-  // No explicit code needed here unless complex partial selection logic is required.
-};
+const updateGroupSelection = () => { };
 
-// Methods for Dialog and CRUD operations
+const filteredPermissionGroups = computed(() => {
+  if (!search.value) return permissionGroups.value;
+  const lowerCaseSearch = search.value.toLowerCase();
+  return permissionGroups.value.filter(group => {
+    const groupNameMatches = group.name.toLowerCase().includes(lowerCaseSearch);
+    const permissionMatches = group.permissions.some(
+      permission =>
+        permission.label.toLowerCase().includes(lowerCaseSearch) ||
+        permission.value.toLowerCase().includes(lowerCaseSearch)
+    );
+    return groupNameMatches || permissionMatches;
+  });
+});
+
+watch(
+  [() => editedItem.value.permissions, () => filteredPermissionGroups.value],
+  () => {
+    openPanels.value = filteredPermissionGroups.value
+      .map((group, index) => {
+        return group.permissions.some(p => editedItem.value.permissions.includes(p.value)) ? index : null;
+      })
+      .filter(index => index !== null);
+  },
+  { immediate: true, deep: true }
+);
+
+watch(
+  () => userStore.user,
+  async newUser => {
+    if (newUser && newUser.permissions) {
+      permissionGroups.value = await getLocalPermissions(newUser.permissions);
+    }
+  },
+  { immediate: true }
+);
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    const data = await getAll('roles');
+    roles.value = data.data;
+  } catch (e) {
+    if (e.data?.error === 'Unauthorized') {
+      // router.push({ name: 'unauthorized' });
+    } else {
+      toast.error('حدث خطأ أثناء جلب الأدوار');
+    }
+  } finally {
+    loading.value = false;
+  }
+});
+
 const openDialog = () => {
   editedItem.value = {
     id: null,
@@ -214,11 +246,10 @@ const closeDialog = () => {
     name: '',
     permissions: [],
   };
-  form.value?.resetValidation(); // إعادة تعيين صلاحية النموذج
+  form.value?.resetValidation();
 };
 
 const editRole = item => {
-  // عند التعديل، تأكد من نسخ الصلاحيات لتجنب مشاكل الـ reactivity
   editedItem.value = { ...item, permissions: [...item.permissions] };
   dialog.value = true;
 };
@@ -230,7 +261,7 @@ const confirmDelete = item => {
 
 const saveRole = async () => {
   saving.value = true;
-  const { valid: formValid } = await form.value.validate(); // استخدم await لضمان انتهاء التحقق
+  const { valid: formValid } = await form.value.validate();
 
   if (!formValid) {
     toast.error('يرجى تعبئة جميع الحقول المطلوبة بشكل صحيح');
@@ -240,17 +271,15 @@ const saveRole = async () => {
 
   try {
     const data = await saveItem('role', editedItem.value, editedItem.value.id);
-    if (editedItem.value.id) {
-      let index = roles.value.findIndex(role => role.id === data.id);
-      if (index !== -1) {
-        Object.assign(roles.value[index], data); // تحديث العنصر في المصفوفة مباشرة بالبيانات الجديدة
-      }
-      // toast.success('تم تعديل الدور بنجاح');
-    } else {
-      roles.value.push(data);
-      // toast.success('تم إضافة الدور بنجاح');
-    }
-    closeDialog(); // إغلاق الديالوج بعد الحفظ بنجاح
+    // if (editedItem.value.id) {
+    //   const index = roles.value.findIndex(role => role.id === data.id);
+    //   if (index !== -1) Object.assign(roles.value[index], data);
+    // } else {
+    //   roles.value.push(data);
+    // }
+    const dataRes = await getAll('roles');
+    roles.value = dataRes.data;
+    closeDialog();
   } catch (error) {
     console.error('Error saving role:', error);
     toast.error('حدث خطأ أثناء حفظ الدور');
@@ -264,17 +293,14 @@ const deleteRole = async () => {
   try {
     await deleteOne('role', editedItem.value.id);
     roles.value = roles.value.filter(role => role.id !== editedItem.value.id);
-    // toast.success('تم حذف الدور بنجاح');
   } catch (error) {
     console.error('Error deleting role:', error);
-    // toast.error('حدث خطأ أثناء حذف الدور');
   } finally {
     deleteDialog.value = false;
     deleting.value = false;
   }
 };
 </script>
-
 <style scoped>
 .d-flex.gap-2>.v-btn {
   margin-right: 8px;
