@@ -7,7 +7,7 @@ export default [
     meta: {
       title: 'إشعارات دائنة',
       description: 'قائمة الإشعارات الدائنة',
-      roles: ['admin.super', 'company.owner', 'credit_notes.page'],
+      roles: ['admin.super', 'admin.company', 'credit_notes.page'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'إشعارات مدينة',
       description: 'قائمة الإشعارات المدينة',
-      roles: ['admin.super', 'company.owner', 'debit_notes.page'],
+      roles: ['admin.super', 'admin.company', 'debit_notes.page'],
     },
   },
 ];

@@ -32,7 +32,7 @@ function setCompanies(id) {
     });
 }
 function openCompaniesDialog() {
-  if (userStore.value.user.companies.length > 1) {
+  if (userStore.value.user.companies.length > 1 && userStore.value.can('companies.change_active_company')) {
     companiesDialog.value = true;
   } else {
     console.log('else');
@@ -48,7 +48,7 @@ function openCompaniesDialog() {
       </v-alert>
       <v-list-item v-for="companie in userStore.user.companies" :key="companie.id" :prepend-avatar="companie.logo"
         :subtitle="companie.field" :title="companie.name"
-        @click="userStore.user.companies.length ? setCompanies(companie.id) : ''"></v-list-item>
+        @click="userStore.user.companies.length && userStore.can('companies.change_active_company') ? setCompanies(companie.id) : ''"></v-list-item>
     </VCard>
   </v-dialog>
   <VerticalNavLayout>

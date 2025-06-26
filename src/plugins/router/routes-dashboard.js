@@ -7,7 +7,7 @@ export default [
     meta: {
       title: 'لوحة التحكم',
       description: 'عرض الإحصائيات والبيانات الرئيسية',
-      roles: ['admin.super', 'company.owner'],
+      roles: ['admin.super', 'admin.company', 'dashboard.page'],
     },
   },
 ];

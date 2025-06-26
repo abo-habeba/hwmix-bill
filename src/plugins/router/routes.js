@@ -7,6 +7,7 @@ import stockRoutes from './routes-stock';
 import cashboxRoutes from './routes-cashbox';
 import notificationsRoutes from './routes-notifications';
 import othersRoutes from './routes-others';
+import installmentsRoutes from './routes-installments';
 
 export const routes = [
   {
@@ -36,6 +37,7 @@ export const routes = [
       ...cashboxRoutes,
       ...notificationsRoutes,
       ...othersRoutes,
+      ...installmentsRoutes,
     ],
   },
   {

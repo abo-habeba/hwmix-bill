@@ -34,6 +34,7 @@ export const useUserStore = defineStore('user', {
 
         const userRes = await getOne('user', userId);
         this.user = userRes;
+        console.log('User initialized permissions :', JSON.stringify(this.user.permissions));
         this.isAuth = true;
         this.permissionsList = this.calculatePermissions(this.user);
       } catch (error) {

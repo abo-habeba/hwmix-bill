@@ -7,7 +7,7 @@ export default [
     meta: {
       title: ' سجل النظام ',
       description: 'متابعة حركات النظام',
-      roles: ['admin.super', 'company.owner', 'activity_logs.page'],
+      roles: ['admin.super', 'admin.company', 'activity_logs.page'],
     },
   },
   {
@@ -17,6 +17,7 @@ export default [
     meta: {
       title: 'إعدادات الحساب',
       description: 'تعديل معلومات الحساب الشخصية',
+      roles: ['admin.super', 'admin.company', 'users.update_self'],
     },
   },
   {
@@ -26,6 +27,7 @@ export default [
     meta: {
       title: 'إعدادات الحساب',
       description: 'تعديل معلومات الحساب الشخصية',
+      roles: ['admin.super', 'admin.company', 'users.update_self'],
     },
   },
   {
@@ -35,6 +37,7 @@ export default [
     meta: {
       title: '',
       description: '',
+      roles: ['admin.super', 'admin.company'],
     },
   },
   {
@@ -44,6 +47,7 @@ export default [
     meta: {
       title: 'الطباعة',
       description: 'عرض عناصر الطباعة والتنسيقات',
+      roles: ['admin.super', 'admin.company'],
     },
   },
   {
@@ -53,6 +57,7 @@ export default [
     meta: {
       title: 'الأيقونات',
       description: 'عرض الأيقونات المتاحة',
+      roles: ['admin.super', 'admin.company'],
     },
   },
   {
@@ -61,7 +66,8 @@ export default [
     name: 'cards',
     meta: {
       title: 'البطاقات',
-      description: 'عرض أشكال وتصميمات البطاقات',
+      description: 'عرض البطاقات',
+      roles: ['admin.super', 'admin.company'],
     },
   },
   {
@@ -71,6 +77,7 @@ export default [
     meta: {
       title: 'الجداول',
       description: 'عرض الجداول وتصميماتها',
+      roles: ['admin.super', 'admin.company'],
     },
   },
   {
@@ -80,6 +87,7 @@ export default [
     meta: {
       title: 'تصميم النماذج',
       description: 'عرض تنسيقات مختلفة للنماذج',
+      roles: ['admin.super', 'admin.company'],
     },
   },
 ];

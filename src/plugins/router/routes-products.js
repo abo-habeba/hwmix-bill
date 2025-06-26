@@ -7,7 +7,7 @@ export default [
     meta: {
       title: 'المنتجات',
       description: 'إدارة وتعديل المنتجات',
-      roles: ['admin.super', 'company.owner', 'products.page'],
+      roles: ['admin.super', 'admin.company', 'products.page'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'نسخ المنتجات',
       description: 'إدارة نسخ المنتجات',
-      roles: ['admin.super', 'company.owner', 'product_variants.page'],
+      roles: ['admin.super', 'admin.company', 'product_variants.page'],
     },
   },
   {
@@ -27,7 +27,7 @@ export default [
     meta: {
       title: 'خصائص نسخ المنتجات',
       description: 'إدارة خصائص نسخ المنتجات',
-      roles: ['admin.super', 'company.owner', 'product_variant_attributes.page'],
+      roles: ['admin.super', 'admin.company', 'product_variant_attributes.page'],
     },
   },
   {
@@ -37,7 +37,7 @@ export default [
     meta: {
       title: 'الخصائص',
       description: 'إدارة وتعديل الخصائص',
-      roles: ['admin.super', 'company.owner', 'attributes.page'],
+      roles: ['admin.super', 'admin.company', 'attributes.page'],
     },
   },
   {
@@ -47,7 +47,7 @@ export default [
     meta: {
       title: 'قيم الخصائص',
       description: 'إدارة وتعديل قيم الخصائص',
-      roles: ['admin.super', 'company.owner', 'attribute_values.page'],
+      roles: ['admin.super', 'admin.company', 'attribute_values.page'],
     },
   },
   {
@@ -57,7 +57,7 @@ export default [
     meta: {
       title: 'العلامات التجارية',
       description: 'إدارة وتعديل العلامات التجارية',
-      roles: ['admin.super', 'company.owner', 'brands.page'],
+      roles: ['admin.super', 'admin.company', 'brands.page'],
     },
   },
   {
@@ -67,7 +67,7 @@ export default [
     meta: {
       title: 'الاقسام',
       description: 'إدارة وتعديل الاقسام',
-      roles: ['admin.super', 'company.owner', 'categories.page'],
+      roles: ['admin.super', 'admin.company', 'categories.page'],
     },
   },
 ];

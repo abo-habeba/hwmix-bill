@@ -7,7 +7,7 @@
           <p class="text-subtitle-1 text-medium-emphasis mt-1">قم بإدارة أدوار المستخدمين وصلاحياتهم في النظام</p>
         </div>
         <v-spacer />
-        <v-btn v-if="userStore.can(['roles.create', 'admin.super', 'company.owner'])" color="primary"
+        <v-btn v-if="userStore.can(['roles.create', 'admin.super', 'admin.company'])" color="primary"
           prepend-icon="ri-add-line" @click="openDialog()" elevation="2" size="large">
           دور جديد
         </v-btn>

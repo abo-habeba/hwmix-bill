@@ -7,7 +7,7 @@ export default [
     meta: {
       title: ' الاقساط ',
       description: ' ادارة و تعديل الاقساط ',
-      roles: ['admin.super', 'company.owner', 'installments.page'],
+      roles: ['admin.super', 'admin.company', 'installments.page'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'خطط الأقساط',
       description: 'إدارة خطط الأقساط',
-      roles: ['admin.super', 'company.owner', 'installment_plans.page'],
+      roles: ['admin.super', 'admin.company', 'installment_plans.page'],
     },
   },
 ];

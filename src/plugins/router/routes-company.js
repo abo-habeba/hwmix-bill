@@ -7,7 +7,15 @@ export default [
     meta: {
       title: ' الشركات ',
       description: 'ادارة الشركات',
-      roles: ['admin.super', 'company.owner', 'companies.page'],
+      roles: [
+        'admin.super',
+        'admin.company',
+        'companies.page',
+        'companies.view_all',
+        'companies.view_children',
+        'companies.view_self',
+        'companies.view',
+      ],
     },
   },
   {
@@ -17,7 +25,14 @@ export default [
     meta: {
       title: 'تعديل الشركة',
       description: 'تعديل بيانات الشركة',
-      roles: ['admin.super', 'company.owner', 'companies.create', 'companies.update_any', 'companies.update_children', 'companies.update_self'],
+      roles: [
+        'admin.super',
+        'admin.company',
+        'companies.create',
+        'companies.update_any',
+        'companies.update_children',
+        'companies.update_self',
+      ],
     },
   },
 ];

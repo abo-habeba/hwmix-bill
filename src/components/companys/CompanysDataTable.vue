@@ -1,25 +1,13 @@
 <template>
   <!-- Data Table Server -->
-  <DeletedItem @update-items="removeDeletedItems" api="company/delete" :dataDelete="{ items: deletedCompanys, key: 'name' }" />
+  <DeletedItem @update-items="removeDeletedItems" api="company/delete"
+    :dataDelete="{ items: deletedCompanys, key: 'name' }" />
   <div id="dataTable" style="position: relative !important; white-space: nowrap">
-    <v-data-table-server
-      item-value="id"
-      v-model:items-per-page="itemsPerPage"
-      v-model:options="options"
-      :headers="headers"
-      :items="companys"
-      :items-length="total"
-      :loading="loading"
-      hover
-      show-current-page
-      :row-props="getRowProps"
-      loading-text=" جاري تحمل البيانات "
-      no-data-text=" لا توجد بيانات "
-      items-per-page-text="عدد الصفوف في الصفحة"
-      @update:options="fetchCompanys"
-      @contextmenu:row="showContextMenu"
-      @click="colsContextMenu"
-    >
+    <v-data-table-server item-value="id" v-model:items-per-page="itemsPerPage" v-model:options="options"
+      :headers="headers" :items="companys" :items-length="total" :loading="loading" hover show-current-page
+      :row-props="getRowProps" loading-text=" جاري تحمل البيانات " no-data-text=" لا توجد بيانات "
+      items-per-page-text="عدد الصفوف في الصفحة" @update:options="fetchCompanys" @contextmenu:row="showContextMenu"
+      @click="colsContextMenu">
       <template #item.imageLogo="{ item }">
         <!-- <v-avatar> -->
         <img class="mt-2" width="100" height="50" :src="item.logo" alt="Avatar" />
@@ -101,31 +89,31 @@ watch(
       'companies.update_self',
       'companies.create',
       'admin.super',
-      'company.owner',
+      'admin.company',
     ]);
     const canDelete = await userStore.can([
       'companies.delete_any',
       'companies.delete_children',
       'companies.delete_self',
       'admin.super',
-      'company.owner',
+      'admin.company',
     ]);
     availableActions.value = [
       canUpdate
         ? {
-            title: 'تعديل',
-            color: '#007bff',
-            icon: 'ri-pencil-line',
-            callback: editcompany.value,
-          }
+          title: 'تعديل',
+          color: '#007bff',
+          icon: 'ri-pencil-line',
+          callback: editcompany.value,
+        }
         : null,
       canDelete
         ? {
-            title: 'حذف',
-            color: '#dc3545',
-            icon: 'ri-delete-bin-line',
-            callback: deletecompany.value,
-          }
+          title: 'حذف',
+          color: '#dc3545',
+          icon: 'ri-delete-bin-line',
+          callback: deletecompany.value,
+        }
         : null,
     ].filter(Boolean);
   },
@@ -139,7 +127,7 @@ watchEffect(() => {
         title: 'لا تملك إجراءات',
         color: '#6c757d',
         icon: 'ri-spam-3-line',
-        callback: () => {},
+        callback: () => { },
       },
     ];
   } else {

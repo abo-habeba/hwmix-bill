@@ -7,7 +7,7 @@ export default [
     meta: {
       title: ' المستخدمين ',
       description: ' ادارة و تعديل المستخدمين ',
-      roles: ['admin.super', 'company.owner', 'users.page'],
+      roles: ['admin.super', 'admin.company', 'users.page'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'تعديل المستخدم',
       description: 'تعديل بيانات المستخدم',
-      roles: ['admin.super', 'company.owner', 'users.create', 'users.update_any', 'users.update_children', 'users.update_self'],
+      roles: ['admin.super', 'admin.company', 'users.update_any', 'users.update_children', 'users.update_self'],
     },
   },
   {
@@ -29,8 +29,8 @@ export default [
       description: 'تعديل الادوار والصلاحيات',
       roles: [
         'admin.super',
-        'company.owner',
-        // أضف هنا الصلاحية المناسبة لمسار الأدوار إذا كان هناك صلاحية محددة مثل roles.page أو roles.view_any
+        'admin.company',
+        'roles.page',
       ],
     },
   },
@@ -41,8 +41,8 @@ export default [
     meta: {
       roles: [
         'admin.super',
-        'company.owner',
-        // أضف هنا الصلاحية المناسبة لمسار تعديل البروفايل إذا كان هناك صلاحية محددة مثل users.update_self
+        'admin.company',
+        'users.update_self',
       ],
     },
   },

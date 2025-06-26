@@ -7,7 +7,7 @@ export default [
     meta: {
       title: 'الفواتير',
       description: 'إدارة الفواتير',
-      roles: ['admin.super', 'company.owner', 'invoices.page'],
+      roles: ['admin.super', 'admin.company', 'invoices.page', 'invoices.view_any', 'invoices.view_children', 'invoices.view_self', 'invoices.view'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'إنشاء فاتورة',
       description: 'إضافة فاتورة جديدة',
-      roles: ['admin.super', 'company.owner', 'invoices.create'],
+      roles: ['admin.super', 'admin.company', 'invoices.create'],
     },
   },
   {
@@ -27,7 +27,7 @@ export default [
     meta: {
       title: 'أنواع الفواتير',
       description: 'إدارة أنواع الفواتير',
-      roles: ['admin.super', 'company.owner', 'invoice_types.page'],
+      roles: ['admin.super', 'admin.company', 'invoice_types.page'],
     },
   },
   {
@@ -37,7 +37,7 @@ export default [
     meta: {
       title: 'فواتير البيع والشراء',
       invoiceType: 'sales',
-      roles: ['admin.super', 'company.owner', 'invoices.view'],
+      roles: ['admin.super', 'admin.company', 'invoices.view'],
     },
   },
   {
@@ -47,7 +47,7 @@ export default [
     meta: {
       title: 'عروض الأسعار',
       invoiceType: 'quotation',
-      roles: ['admin.super', 'company.owner', 'invoices.view'],
+      roles: ['admin.super', 'admin.company', 'invoices.view'],
     },
   },
   {
@@ -57,7 +57,7 @@ export default [
     meta: {
       title: 'طلبات الشراء',
       invoiceType: 'purchase_order',
-      roles: ['admin.super', 'company.owner', 'invoices.view'],
+      roles: ['admin.super', 'admin.company', 'invoices.view'],
     },
   },
   {
@@ -67,7 +67,7 @@ export default [
     meta: {
       title: 'طلبات البيع',
       invoiceType: 'sales_order',
-      roles: ['admin.super', 'company.owner', 'invoices.view'],
+      roles: ['admin.super', 'admin.company', 'invoices.view'],
     },
   },
   {
@@ -77,7 +77,7 @@ export default [
     meta: {
       title: 'فواتير الخصم',
       invoiceType: 'discount_invoice',
-      roles: ['admin.super', 'company.owner', 'invoices.view'],
+      roles: ['admin.super', 'admin.company', 'invoices.view'],
     },
   },
   {
@@ -87,7 +87,7 @@ export default [
     meta: {
       title: 'فواتير الخدمة',
       description: 'قائمة فواتير الخدمة',
-      roles: ['admin.super', 'company.owner', 'invoices.view'],
+      roles: ['admin.super', 'admin.company', 'invoices.view'],
     },
   },
 ];

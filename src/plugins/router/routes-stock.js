@@ -7,7 +7,7 @@ export default [
     meta: {
       title: 'المخازن',
       description: 'إدارة المخازن',
-      roles: ['admin.super', 'company.owner', 'warehouses.page'],
+      roles: ['admin.super', 'admin.company', 'warehouses.page'],
     },
   },
   {
@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'المخزون',
       description: 'إدارة المخزون',
-      roles: ['admin.super', 'company.owner', 'stocks.page'],
+      roles: ['admin.super', 'admin.company', 'stocks.page'],
     },
   },
   {
@@ -27,7 +27,7 @@ export default [
     meta: {
       title: 'تحويلات المخزون',
       description: 'قائمة تحويلات المخزون',
-      roles: ['admin.super', 'company.owner', 'stocks.page'],
+      roles: ['admin.super', 'admin.company', 'stocks.transfers'],
     },
   },
   {
@@ -37,7 +37,7 @@ export default [
     meta: {
       title: 'تسويات المخزون',
       description: 'قائمة تسويات المخزون',
-      roles: ['admin.super', 'company.owner', 'stocks.page'],
+      roles: ['admin.super', 'admin.company', 'stocks.adjustments'],
     },
   },
 ];

@@ -19,7 +19,11 @@ watch(activeItem, newValue => {
 const navItems = [
   {
     type: 'group',
-    permission: ['invoices.page', 'admin.super', 'company.owner'],
+    permission: [
+      'admin.super',
+      'admin.company',
+      'invoices.page',
+    ],
     item: {
       title: 'الفواتير',
       icon: 'ri-file-list-3-line',
@@ -31,24 +35,88 @@ const navItems = [
           createRoute: 'invoice-create',
           icon: 'ri-file-copy-line',
           tooltip: 'عرض وإنشاء فواتير بيع أو شراء',
+          permission: [
+            'admin.super',
+            'admin.company',
+            'invoices.page',
+            'invoices.view_any',
+            'invoices.view_children',
+            'invoices.view_self',
+            'invoices.view',
+          ],
         },
-        { title: 'فواتير الخدمة', to: { name: 'service-invoices' }, icon: 'ri-service-line', tooltip: 'فواتير للخدمات غير المرتبطة بمنتجات' },
-        { title: 'عروض الأسعار', to: { name: 'invoices-quotation' }, icon: 'ri-price-tag-3-line', tooltip: 'إصدار أو مراجعة عروض الأسعار' },
+        {
+          title: 'فواتير الخدمة',
+          to: { name: 'service-invoices' },
+          icon: 'ri-service-line',
+          tooltip: 'فواتير للخدمات غير المرتبطة بمنتجات',
+          permission: [
+            'admin.super',
+            'admin.company',
+            'invoices.view',
+          ],
+        },
+        {
+          title: 'عروض الأسعار',
+          to: { name: 'invoices-quotation' },
+          icon: 'ri-price-tag-3-line',
+          tooltip: 'إصدار أو مراجعة عروض الأسعار',
+          permission: [
+            'admin.super',
+            'admin.company',
+            'invoices.view',
+          ],
+        },
         {
           title: 'طلبات الشراء',
           to: { name: 'invoices-purchase-order' },
           icon: 'ri-shopping-cart-2-line',
           tooltip: 'متابعة طلبات الشراء من الموردين',
+          permission: [
+            'admin.super',
+            'admin.company',
+            'invoices.view',
+          ],
         },
-        { title: 'طلبات البيع', to: { name: 'invoices-sales-order' }, icon: 'ri-truck-line', tooltip: 'متابعة طلبات البيع للعملاء' },
-        { title: 'فواتير الخصم', to: { name: 'invoices-discount' }, icon: 'ri-discount-percent-line', tooltip: 'تسجيل فواتير الخصومات والعروض' },
-        { title: 'أنواع الفواتير', to: { name: 'invoiceType' }, icon: 'ri-settings-5-line', tooltip: 'إدارة أنواع الفواتير المختلفة' },
+        {
+          title: 'طلبات البيع',
+          to: { name: 'invoices-sales-order' },
+          icon: 'ri-truck-line',
+          tooltip: 'متابعة طلبات البيع للعملاء',
+          permission: [
+            'admin.super',
+            'admin.company',
+            'invoices.view',
+          ],
+        },
+        {
+          title: 'فواتير الخصم',
+          to: { name: 'invoices-discount' },
+          icon: 'ri-discount-percent-line',
+          tooltip: 'تسجيل فواتير الخصومات والعروض',
+          permission: [
+            'admin.super',
+            'admin.company',
+            'invoices.view',
+          ],
+        },
+        {
+          title: 'أنواع الفواتير',
+          to: { name: 'invoiceType' },
+          icon: 'ri-settings-5-line',
+          tooltip: 'إدارة أنواع الفواتير المختلفة',
+          permission: [
+            'admin.super',
+            'admin.company',
+            'invoice_types.page',
+          ],
+        },
       ],
     },
   },
   {
     type: 'group',
-    permission: ['installments.page', 'admin.super', 'company.owner'],
+    permission: ['installments.page', 'admin.super', 'admin.company'],
     item: {
       title: 'إدارة الأقساط',
       icon: 'ri-file-list-line',
@@ -66,7 +134,7 @@ const navItems = [
   },
   {
     type: 'group',
-    permission: ['products.page', 'admin.super', 'company.owner'],
+    permission: ['products.page', 'admin.super', 'admin.company'],
     item: {
       title: 'المنتجات',
       icon: 'ri-shopping-bag-3-line',
@@ -87,7 +155,7 @@ const navItems = [
   },
   {
     type: 'group',
-    permission: ['warehouses.page', 'admin.super', 'company.owner'],
+    permission: ['warehouses.page', 'admin.super', 'admin.company'],
     item: {
       title: 'المخزون',
       icon: 'ri-archive-line',
@@ -106,7 +174,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['cash_boxes.page', 'admin.super', 'company.owner'],
+    permission: ['cash_boxes.page', 'admin.super', 'admin.company'],
     item: {
       title: 'الخزن',
       to: { name: 'cashboxs' },
@@ -116,7 +184,7 @@ const navItems = [
   },
   {
     type: 'group',
-    permission: ['notifications.page', 'admin.super', 'company.owner'],
+    permission: ['notifications.page', 'admin.super', 'admin.company'],
     item: {
       title: 'الإشعارات',
       icon: 'ri-notification-3-line',
@@ -129,7 +197,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['users.page', 'admin.super', 'company.owner'],
+    permission: ['users.page', 'admin.super', 'admin.company'],
     item: {
       title: 'المستخدمين',
       to: { name: 'users' },
@@ -139,7 +207,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['roles.page', 'admin.super', 'company.owner'],
+    permission: ['roles.page', 'admin.super', 'admin.company'],
     item: {
       title: 'الصلاحيات والادوار',
       to: { name: 'roles' },
@@ -149,7 +217,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['companies.page', 'admin.super', 'company.owner'],
+    permission: ['companies.page', 'admin.super', 'admin.company'],
     item: {
       title: 'الشركات',
       to: { name: 'companys' },
@@ -159,7 +227,7 @@ const navItems = [
   },
   {
     type: 'link',
-    permission: ['activity_logs.page', 'admin.super', 'company.owner'],
+    permission: ['activity_logs.page', 'admin.super', 'admin.company'],
     item: {
       title: 'سجل النظام',
       to: { name: 'logs' },
