@@ -130,86 +130,77 @@ function deleteCashbox(id) {
 </script>
 <template>
   <VCol cols="12">
-    <VCard v-if="userStore.user.cashBoxes">
-      <v-tabs v-model="tab" align-tabs="center">
-        <v-tab v-for="box in userStore.user.cashBoxes" :key="box.id" :value="box.id">
-          {{ box.name }}
-        </v-tab>
-      </v-tabs>
-      <v-tabs-window v-model="tab">
-        <v-tabs-window-item class="ma-2 pa-2" v-for="box in userStore.user.cashBoxes" :key="box.id" :value="box.id">
-          <v-card class="text-center mx-auto ma-2 pa-2" max-width="368">
-            <v-card-text>
-              <v-row>
-                <v-col cols="12" v-if="box.is_default == '0'">
-                  <v-btn
-                    variant="text"
-                    class="ma-0 py-0"
-                    :style="{ opacity: box.is_default == '1' ? '0.3' : '1', padding: '0px 5px' }"
-                    :disabled="box.is_default == '1'"
-                    @click="setDefaultCashBox(box.id)"
-                    >تعين ك افتراضي</v-btn
-                  >
-                </v-col>
-                <v-col cols="12">
-                  <span style="font-size: 30px">{{ box.balance }}</span>
-                  <span style="font-size: 30px"> ج </span>
-                </v-col>
-              </v-row>
-            </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-              <v-btn class="ma-1" :text="!expand ? 'تحويل نقود' : 'X'" @click="expand = !expand"></v-btn>
-              <v-spacer></v-spacer>
-              <CashBoxSwitcher v-if="userStore.user.cashBoxes.length > 1" :box="box" @operation-success="reloadTransactions" />
-            </v-card-actions>
-            <v-expand-transition class="pa-2">
-              <div v-if="expand">
-                <!-- search by phone or id -->
-                <v-col cols="12">
-                  <v-text-field
-                    prepend-inner-icon="ri-search-line"
-                    class="mx-auto"
-                    density="comfortable"
-                    placeholder="ادخل رقم الهاتف او كود"
-                    variant="solo"
-                    rounded
-                    @focus="hideShowMenu"
-                    v-model="searchText"
-                    @input="onInputChange"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <!-- Dropdown menu with users and loading state -->
-                  <div style="border-radius: 36px" v-if="showMenu">
-                    <v-progress-linear v-if="loading" color="primary" indeterminate></v-progress-linear>
-                    <v-list class="ma-0 pa-0" v-else>
-                      <div v-if="users.length">
-                        <v-list-item
-                          style="border-bottom: 1px solid #c3c4c8"
-                          v-for="user in users"
-                          :key="user.id"
-                          @click="selectItem(user, box)"
-                          class="cursor-pointer"
-                        >
-                          <v-list-item-title>{{ user.nickname }}</v-list-item-title>
+    <VCard class="pa-2">
+      <VCard v-if="userStore.user.cashBoxes" class="pa-2">
+        <v-tabs v-model="tab" align-tabs="center">
+          <v-tab v-for="box in userStore.user.cashBoxes" :key="box.id" :value="box.id">
+            {{ box.name }}
+          </v-tab>
+        </v-tabs>
+        <v-tabs-window v-model="tab">
+          <v-tabs-window-item class="ma-2 pa-2" v-for="box in userStore.user.cashBoxes" :key="box.id" :value="box.id">
+            <v-card class="text-center mx-auto ma-2 pa-2" max-width="368">
+              <v-card-text>
+                <v-row>
+                  <v-col cols="12" v-if="box.is_default == '0'">
+                    <v-btn variant="text" class="ma-0 py-0"
+                      :style="{ opacity: box.is_default == '1' ? '0.3' : '1', padding: '0px 5px' }"
+                      :disabled="box.is_default == '1'" @click="setDefaultCashBox(box.id)">تعين ك افتراضي</v-btn>
+                  </v-col>
+                  <v-col cols="12">
+                    <span style="font-size: 30px">{{ box.balance }}</span>
+                    <span style="font-size: 30px"> ج </span>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+              <v-divider></v-divider>
+              <v-card-actions>
+                <v-btn class="ma-1" :text="!expand ? 'تحويل نقود' : 'X'" @click="expand = !expand"></v-btn>
+                <v-spacer></v-spacer>
+                <CashBoxSwitcher v-if="userStore.user.cashBoxes.length > 1" :box="box"
+                  @operation-success="reloadTransactions" />
+              </v-card-actions>
+              <v-expand-transition class="pa-2">
+                <div v-if="expand">
+                  <!-- search by phone or id -->
+                  <v-col cols="12">
+                    <v-text-field prepend-inner-icon="ri-search-line" class="mx-auto" density="comfortable"
+                      placeholder="ادخل رقم الهاتف او كود" variant="solo" rounded @focus="hideShowMenu"
+                      v-model="searchText" @input="onInputChange"></v-text-field>
+                  </v-col>
+                  <v-col cols="12">
+                    <!-- Dropdown menu with users and loading state -->
+                    <div style="border-radius: 36px" v-if="showMenu">
+                      <v-progress-linear v-if="loading" color="primary" indeterminate></v-progress-linear>
+                      <v-list class="ma-0 pa-0" v-else>
+                        <div v-if="users.length">
+                          <v-list-item style="border-bottom: 1px solid #c3c4c8" v-for="user in users" :key="user.id"
+                            @click="selectItem(user, box)" class="cursor-pointer">
+                            <v-list-item-title>{{ user.nickname }}</v-list-item-title>
+                          </v-list-item>
+                        </div>
+                        <v-list-item v-else class="cursor-pointer">
+                          <v-list-item-title>{{ showData }}</v-list-item-title>
                         </v-list-item>
-                      </div>
-                      <v-list-item v-else class="cursor-pointer">
-                        <v-list-item-title>{{ showData }}</v-list-item-title>
-                      </v-list-item>
-                    </v-list>
-                  </div>
-                </v-col>
-              </div>
-            </v-expand-transition>
-          </v-card>
-        </v-tabs-window-item>
-      </v-tabs-window>
+                      </v-list>
+                    </div>
+                  </v-col>
+                </div>
+              </v-expand-transition>
+            </v-card>
+          </v-tabs-window-item>
+        </v-tabs-window>
+
+      </VCard>
+      <VCard v-else="userStore.user.cashBoxes">
+        <v-card-text class="text-center">
+          <v-icon color="primary" size="100">ri-cash-line</v-icon>
+          <div class="mt-2">لا توجد خزائن نقود متاحة</div>
+        </v-card-text>
+      </VCard>
       <DataTable ref="dataTable" />
     </VCard>
   </VCol>
-
   <v-dialog v-model="operationDialog" max-width="500px">
     <v-card v-if="operationDialog" class="pa-5">
       <v-row>
@@ -230,28 +221,24 @@ function deleteCashbox(id) {
                 </v-col>
                 <!-- select BoxCash To-->
                 <v-col cols="12">
-                  <v-select
-                    v-if="selectedUser && selectedUser.cashBoxes"
-                    rounded
-                    label="الخزنة المحول إليها"
-                    v-model="to_cashBox"
-                    :items="selectedUser.cashBoxes"
-                    @update:modelValue="updatedSelecteCash"
-                    item-value="id"
-                    item-title="name"
-                  />
+                  <v-select v-if="selectedUser && selectedUser.cashBoxes" rounded label="الخزنة المحول إليها"
+                    v-model="to_cashBox" :items="selectedUser.cashBoxes" @update:modelValue="updatedSelecteCash"
+                    item-value="id" item-title="name" />
                 </v-col>
                 <!-- alert amount -->
                 <v-col cols="12" class="ma-0 pa-0" v-if="selectedUser">
-                  <v-alert class="py-1 my-3" v-if="Number(selectedCashBox.balance) < Number(amount)" border="start" type="error" variant="outlined">
+                  <v-alert class="py-1 my-3" v-if="Number(selectedCashBox.balance) < Number(amount)" border="start"
+                    type="error" variant="outlined">
                     الرصيد الحالي لا يكفي
                   </v-alert>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="amount" type="Number" label="المبلغ" rounded placeholder="ادخل المبلغ المراد تحويله"></v-text-field>
+                  <v-text-field v-model="amount" type="Number" label="المبلغ" rounded
+                    placeholder="ادخل المبلغ المراد تحويله"></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="description" label="الوصف" rounded placeholder="ادخل ملاحظة او وصف او سبب للتحويل اختياري"></v-text-field>
+                  <v-text-field v-model="description" label="الوصف" rounded
+                    placeholder="ادخل ملاحظة او وصف او سبب للتحويل اختياري"></v-text-field>
                 </v-col>
               </v-window-item>
               <v-window-item :value="2">
@@ -271,7 +258,8 @@ function deleteCashbox(id) {
             <v-card-actions>
               <v-btn class="mx-10" v-if="step > 1" variant="text" @click="step--"> السابق </v-btn>
               <v-spacer></v-spacer>
-              <v-btn class="mx-10" v-if="step < 2" :disabled="isDisabled" variant="text" color="primary" @click="handleNext"> التالي </v-btn>
+              <v-btn class="mx-10" v-if="step < 2" :disabled="isDisabled" variant="text" color="primary"
+                @click="handleNext"> التالي </v-btn>
             </v-card-actions>
           </v-card>
         </v-col>

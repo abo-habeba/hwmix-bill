@@ -43,11 +43,18 @@ apiClient.interceptors.request.use(config => {
 apiClient.interceptors.response.use(
   response => response,
   error => {
-    // إذا كان الخطأ 401 أو رسالة Unauthenticated
+    // إذا كان الخطأ 401 أو رسالة Unauthenticated (انتهاء الجلسة أو التوكن غير صالح)
     if (error?.response?.status === 401 || error?.response?.data?.message === 'Unauthenticated.') {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       window.location.href = '/login';
+      return Promise.reject(error);
+    }
+    // إذا كان الخطأ 403 أو Forbidden أو Unauthorized (لا يملك صلاحية فقط)
+    if (error?.response?.status === 403 || error?.response?.data?.message === 'Forbidden' || error?.response?.data?.message === 'Unauthorized') {
+      // يمكنك هنا استخدام toast أو alert حسب مكتبتك
+      alert('ليس لديك صلاحية للوصول إلى هذا المورد.');
+      // أو استخدم toast('ليس لديك صلاحية ...')
       return Promise.reject(error);
     }
     return Promise.reject(error);

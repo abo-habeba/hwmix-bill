@@ -1,14 +1,7 @@
 <template>
   <!-- جدول خطط التقسيط -->
-  <v-data-table
-    :headers="headers"
-    :items="installmentPlans"
-    item-value="id"
-    class="elevation-1"
-    density="compact"
-    :row-props="getRowProps"
-    hide-default-footer
-  >
+  <v-data-table :headers="headers" :items="installmentPlans" item-value="id" class="elevation-1" density="compact"
+    :row-props="getRowProps" hide-default-footer>
     <template #item.actions="{ item }">
       <v-btn color="primary" density="compact" @click.stop="openInstallmentsDialog(item)">عرض الأقساط</v-btn>
     </template>
@@ -38,37 +31,19 @@
         </v-row>
 
         <!-- جدول الأقساط بدون ترقيم صفحات -->
-        <v-data-table
-          :headers="installmentsHeaders"
-          :items="currentInstallments"
-          item-value="id"
-          class="elevation-1 mt-4"
-          density="compact"
-          :items-per-page="-1"
-          hide-default-footer
-        >
+        <v-data-table :headers="installmentsHeaders" :items="currentInstallments" item-value="id"
+          class="elevation-1 mt-4" density="compact" :items-per-page="-1" hide-default-footer>
           <template #item.status="{ item }">
             <v-chip :color="item.status === 'تم الدفع' ? 'success' : 'error'" dark>{{ item.status }}</v-chip>
           </template>
 
           <template #item.actions="{ item }">
-            <v-btn
-              v-if="item.status !== 'تم الدفع'"
-              :color="item.status === 'تم الدفع' ? 'grey' : 'success'"
-              :disabled="item.status === 'تم الدفع'"
-              density="compact"
-              class="me-1"
-              @click.stop="openPayDialog(item, true)"
-              >دفع القسط</v-btn
-            >
-            <v-btn
-              v-if="item.status !== 'تم الدفع'"
-              :color="item.status === 'تم الدفع' ? 'grey' : 'warning'"
-              :disabled="item.status === 'تم الدفع'"
-              density="compact"
-              @click.stop="openPayDialog(item, false)"
-              >مبلغ مختلف</v-btn
-            >
+            <v-btn v-if="item.status !== 'تم الدفع'" :color="item.status === 'تم الدفع' ? 'grey' : 'success'"
+              :disabled="item.status === 'تم الدفع'" density="compact" class="me-1"
+              @click.stop="openPayDialog(item, true)">دفع القسط</v-btn>
+            <v-btn v-if="item.status !== 'تم الدفع'" :color="item.status === 'تم الدفع' ? 'grey' : 'warning'"
+              :disabled="item.status === 'تم الدفع'" density="compact" @click.stop="openPayDialog(item, false)">مبلغ
+              مختلف</v-btn>
           </template>
 
           <template #no-data>
@@ -87,7 +62,8 @@
   </v-dialog>
 
   <!-- Dialog الدفع -->
-  <PayInstallmentDialog v-model="payDialog" :installment="selectedInstallment" :direct-pay="directPay" @update:installment="updateInstallments" />
+  <PayInstallmentDialog v-model="payDialog" :installment="selectedInstallment" :direct-pay="directPay"
+    @update:installment="updateInstallments" />
 </template>
 
 <script setup>
