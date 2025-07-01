@@ -59,53 +59,55 @@
         <InvoiceItemsTable :items="form.items" @update-item="updateItemQuantity" @remove-item="removeInvoiceItem" />
 
         <!-- المجموع الكلي -->
-        <v-row justify="end" class="ma-3">
-          <v-col cols="12" sm="4" md="3" class="py-1 px-2">
+        <v-row>
+          <v-col cols="6">
             <v-text-field v-model.number="form.discount" label="خصم عام على الفاتورة" type="number" min="0"
-              :max="form.total_amount" density="comfortable" color="warning"
-              prepend-inner-icon="ri-discount-percent-line" hide-details
+              :max="form.total_amount" color="warning" prepend-inner-icon="ri-discount-percent-line" hide-details
               @input="e => { if (form.discount < 0) form.discount = 0; if (form.discount > form.total_amount) form.discount = form.total_amount; }" />
           </v-col>
-          <v-col cols="12" sm="4" md="3" class="py-1 px-2 d-flex align-center">
+          <v-col cols="6">
             <v-chip color="primary" class="pa-3 text-h6 w-100">
               <v-icon left>ri-calculator-line</v-icon>
               المجموع بعد الخصم: {{ formatCurrency(Math.max(form.total_amount - form.discount, 0)) }}
             </v-chip>
           </v-col>
-        </v-row>
-        <!-- حقل إدخال المدفوع والمتبقي -->
-        <v-row justify="end" class="ma-3 align-center">
-          <v-col cols="12" sm="4" md="3" class="py-1 px-2">
+
+          <!-- طريقة الدفع -->
+
+          <v-col cols="6">
+            <v-select v-model="form.payment_type" :items="paymentTypes" item-title="name" item-value="id"
+              label="طريقة الدفع" prepend-inner-icon="ri-bank-card-line" color="primary" hide-details
+              :menu-props="{ maxHeight: '300px' }" />
+          </v-col>
+          <v-col cols="6">
+            <v-select v-model="form.cash_box_id" :items="userStore.user.cashBoxes" item-title="name" item-value="id"
+              label="المحفظة" prepend-inner-icon="ri-bank-card-line" color="primary" hide-details
+              :menu-props="{ maxHeight: '300px' }" />
+          </v-col>
+
+          <v-col cols="6">
             <v-text-field v-model.number="form.paid_amount" label="المبلغ المدفوع من العميل" type="number" min="0"
-              :max="Math.max(form.total_amount - form.discount, 0)" density="comfortable" color="success"
-              prepend-inner-icon="ri-cash-line" hide-details
+              :max="Math.max(form.total_amount - form.discount, 0)" color="success" prepend-inner-icon="ri-cash-line"
+              hide-details
               @input="e => { if (form.paid_amount < 0) form.paid_amount = 0; if (form.paid_amount > Math.max(form.total_amount - form.discount, 0)) form.paid_amount = Math.max(form.total_amount - form.discount, 0); }" />
           </v-col>
-          <v-col cols="12" sm="4" md="3" class="py-1 px-2 d-flex align-center">
+          <v-col cols="6" class="py-1 px-2 d-flex align-center">
             <v-chip color="info" class="pa-3 text-h6 w-100">
               <v-icon left>ri-wallet-3-line</v-icon>
               المتبقي: {{ formatCurrency(form.remaining_amount) }}
             </v-chip>
           </v-col>
-        </v-row>
-        <!-- طريقة الدفع -->
-        <v-row class="ma-3">
-          <v-col cols="12" sm="6" md="4" class="py-1 px-2">
-            <v-select v-model="form.payment_type" :items="paymentTypes" item-title="name" item-value="id"
-              label="طريقة الدفع" prepend-inner-icon="ri-bank-card-line" density="comfortable" color="primary"
-              hide-details :menu-props="{ maxHeight: '300px' }" />
-          </v-col>
-        </v-row>
-        <!-- ملاحظات الفاتورة -->
-        <v-row class="ma-3">
-          <v-col cols="12" sm="8" md="6" class="py-1 px-2">
+
+
+
+          <!-- ملاحظات الفاتورة -->
+
+          <v-col cols="6">
             <v-textarea v-model="form.notes" label="ملاحظات الفاتورة (اختياري)" auto-grow rows="2"
-              prepend-inner-icon="ri-sticky-note-line" color="info" density="comfortable" hide-details />
+              prepend-inner-icon="ri-sticky-note-line" color="info" hide-details />
           </v-col>
-        </v-row>
-        <!-- اسم البائع -->
-        <v-row class="ma-3">
-          <v-col cols="12" sm="6" md="4" class="py-1 px-2 d-flex align-center">
+          <!-- اسم البائع -->
+          <v-col cols="6" class="py-1 px-2 d-flex align-center">
             <v-chip color="secondary" class="pa-3 text-h6 w-100">
               <v-icon left>ri-user-3-line</v-icon>
               اسم البائع: {{ sellerName }}

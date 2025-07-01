@@ -63,7 +63,7 @@ apiClient.interceptors.response.use(
 
 export default apiClient;
 
-export const getAll = (apiEndpoint, params = null, loading = false, log = false) => {
+export const getAll = (apiEndpoint, params = null, loading = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
@@ -83,7 +83,7 @@ export const getAll = (apiEndpoint, params = null, loading = false, log = false)
   });
 };
 
-export const getOne = (apiEndpoint, id, loading = false, log = false) => {
+export const getOne = (apiEndpoint, id, loading = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
@@ -103,7 +103,7 @@ export const getOne = (apiEndpoint, id, loading = false, log = false) => {
   });
 };
 
-export const saveItem = (apiEndpoint, data, id = false, loading = false, log = false) => {
+export const saveItem = (apiEndpoint, data, id = false, loading = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
@@ -160,7 +160,7 @@ export const saveItem = (apiEndpoint, data, id = false, loading = false, log = f
   });
 };
 
-export const deleteOne = (apiEndpoint, id, loading = false, log = false) => {
+export const deleteOne = (apiEndpoint, id, loading = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
@@ -181,7 +181,7 @@ export const deleteOne = (apiEndpoint, id, loading = false, log = false) => {
   });
 };
 
-export const updateItem = (apiEndpoint, loading = false, log = false) => {
+export const updateItem = (apiEndpoint, loading = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
@@ -202,7 +202,7 @@ export const updateItem = (apiEndpoint, loading = false, log = false) => {
   });
 };
 
-export const deleteAll = (apiEndpoint, ids, loading = false, log = false) => {
+export const deleteAll = (apiEndpoint, ids, loading = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
@@ -222,7 +222,7 @@ export const deleteAll = (apiEndpoint, ids, loading = false, log = false) => {
   });
 };
 
-export const register = (apiEndpoint, id, loading = false, log = false) => {
+export const register = (apiEndpoint, id, loading = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
@@ -241,7 +241,7 @@ export const register = (apiEndpoint, id, loading = false, log = false) => {
       });
   });
 };
-export const login = (apiEndpoint, data, loading = false, log = false) => {
+export const login = (apiEndpoint, data, loading = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {
@@ -264,7 +264,7 @@ export const login = (apiEndpoint, data, loading = false, log = false) => {
   });
 };
 
-export const logOut = (apiEndpoint, loading = false, log = false) => {
+export const logOut = (apiEndpoint, loading = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   return new Promise((resolve, reject) => {

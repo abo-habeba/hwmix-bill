@@ -80,7 +80,6 @@ declare module 'vue' {
     TransactionDialog: typeof import('./src/components/cashboxs/transfer/TransactionDialog.vue')['default']
     TransferDataTable: typeof import('./src/components/cashboxs/transfer/TransferDataTable.vue')['default']
     UpgradeToPro: typeof import('./src/components/UpgradeToPro.vue')['default']
-    UserDataTable: typeof import('./src/components/users/UserDataTable.vue')['default']
     UsersAddUser: typeof import('./src/components/users/UsersAddUser.vue')['default']
     UsersDataTable: typeof import('./src/components/users/UsersDataTable.vue')['default']
     UserSearchInput: typeof import('./src/components/users/UserSearchInput.vue')['default']
