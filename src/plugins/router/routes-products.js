@@ -22,7 +22,7 @@ export default [
   },
   {
     path: 'product-variant-attributes',
-    component: () => import('@/pages/productVariantAttributes/productVariantAttributes.vue'),
+    component: () => import('@/pages/productVariantAttributes/ProductVariantAttributesPage.vue'),
     name: 'product-variant-attributes',
     meta: {
       title: 'خصائص نسخ المنتجات',

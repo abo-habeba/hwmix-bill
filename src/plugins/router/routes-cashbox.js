@@ -7,13 +7,7 @@ export default [
     meta: {
       title: 'الخزن',
       description: 'إدارة وتعديل الخزن',
-      roles: [
-        'admin.super',
-        'admin.company',
-        'cash_boxes.page',
-        'cash_boxes.view_any',
-        'cash_boxes.view',
-      ],
+      roles: ['admin.super', 'admin.company', 'cash_boxes.page', 'cash_boxes.view_any', 'cash_boxes.view'],
     },
   },
   {
@@ -23,12 +17,7 @@ export default [
     meta: {
       title: 'تعديل الخزن',
       description: 'تعديل بيانات الخزن',
-      roles: [
-        'admin.super',
-        'admin.company',
-        'cash_boxes.create',
-        'cash_boxes.update_any',
-      ],
+      roles: ['admin.super', 'admin.company', 'cash_boxes.create', 'cash_boxes.update_all'],
     },
   },
   {
@@ -38,13 +27,7 @@ export default [
     meta: {
       title: 'سندات القبض',
       description: 'قائمة سندات القبض',
-      roles: [
-        'admin.super',
-        'admin.company',
-        'payments.page',
-        'payments.view_any',
-        'payments.view',
-      ],
+      roles: ['admin.super', 'admin.company', 'payments.page', 'payments.view_any', 'payments.view'],
     },
   },
   {
@@ -54,13 +37,7 @@ export default [
     meta: {
       title: 'سندات الصرف',
       description: 'قائمة سندات الصرف',
-      roles: [
-        'admin.super',
-        'admin.company',
-        'payments.page',
-        'payments.view_any',
-        'payments.view',
-      ],
+      roles: ['admin.super', 'admin.company', 'payments.page', 'payments.view_any', 'payments.view'],
     },
   },
 ];

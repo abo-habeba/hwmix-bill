@@ -9,12 +9,8 @@
 
       <template v-slot:item.data-table-expand="{ internalItem, isExpanded, toggleExpand }">
         <td>
-          <v-btn
-            :icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-            size="small"
-            variant="plain"
-            @click="toggleExpand(internalItem)"
-          ></v-btn>
+          <v-btn :icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="small" variant="plain"
+            @click="toggleExpand(internalItem)"></v-btn>
         </td>
       </template>
 
@@ -23,23 +19,23 @@
           <td :colspan="columns.length">
             <v-data-table :headers="variantHeaders" :items="item.variants" hide-default-header hide-default-footer>
               <template v-slot:item="{ item }">
-                <tr>
-                  <td>{{ item.barcode }}</td>
-                  <td>{{ item.sku }}</td>
-                  <td>{{ item.purchase_price }}</td>
-                  <td>{{ item.wholesale_price }}</td>
-                  <td>{{ item.retail_price }}</td>
-                  <td>{{ item.discount }}%</td>
-                  <td>{{ item.attributes.find(attr => attr.name === 'اللون')?.value.name }}</td>
-                  <td>{{ item.attributes.find(attr => attr.name === 'هشام')?.value.name }}</td>
-                </tr>
-              </template>
-            </v-data-table>
-          </td>
+        <tr>
+          <td>{{ item.barcode }}</td>
+          <td>{{ item.sku }}</td>
+          <td>{{ item.purchase_price }}</td>
+          <td>{{ item.wholesale_price }}</td>
+          <td>{{ item.retail_price }}</td>
+          <td>{{ item.discount }}%</td>
+          <td>{{item.attributes.find(attr => attr.name === 'اللون')?.value.name}}</td>
+          <td>{{item.attributes.find(attr => attr.name === 'هشام')?.value.name}}</td>
         </tr>
       </template>
     </v-data-table>
-  </div>
+    </td>
+    </tr>
+</template>
+</v-data-table>
+</div>
 </template>
 
 <script setup>

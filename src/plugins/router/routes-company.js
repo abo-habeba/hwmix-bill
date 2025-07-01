@@ -25,14 +25,7 @@ export default [
     meta: {
       title: 'تعديل الشركة',
       description: 'تعديل بيانات الشركة',
-      roles: [
-        'admin.super',
-        'admin.company',
-        'companies.create',
-        'companies.update_any',
-        'companies.update_children',
-        'companies.update_self',
-      ],
+      roles: ['admin.super', 'admin.company', 'companies.create', 'companies.update_all', 'companies.update_children', 'companies.update_self'],
     },
   },
 ];

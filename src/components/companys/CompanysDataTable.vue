@@ -84,7 +84,7 @@ watch(
     if (!newUser) return;
 
     const canUpdate = await userStore.can([
-      'companies.update_any',
+      'companies.update_all',
       'companies.update_children',
       'companies.update_self',
       'companies.create',
@@ -92,7 +92,7 @@ watch(
       'admin.company',
     ]);
     const canDelete = await userStore.can([
-      'companies.delete_any',
+      'companies.delete_all',
       'companies.delete_children',
       'companies.delete_self',
       'admin.super',

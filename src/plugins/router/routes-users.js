@@ -17,7 +17,7 @@ export default [
     meta: {
       title: 'تعديل المستخدم',
       description: 'تعديل بيانات المستخدم',
-      roles: ['admin.super', 'admin.company', 'users.update_any', 'users.update_children', 'users.update_self'],
+      roles: ['admin.super', 'admin.company', 'users.update_all', 'users.update_children', 'users.update_self'],
     },
   },
   {
@@ -27,11 +27,7 @@ export default [
     meta: {
       title: ' الادوار والصلاحيات',
       description: 'تعديل الادوار والصلاحيات',
-      roles: [
-        'admin.super',
-        'admin.company',
-        'roles.page',
-      ],
+      roles: ['admin.super', 'admin.company', 'roles.page'],
     },
   },
   {
@@ -39,11 +35,7 @@ export default [
     name: 'EditProfile',
     component: () => import('@/pages/users/EditProfile.vue'),
     meta: {
-      roles: [
-        'admin.super',
-        'admin.company',
-        'users.update_self',
-      ],
+      roles: ['admin.super', 'admin.company', 'users.update_self'],
     },
   },
 ];
