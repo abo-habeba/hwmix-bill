@@ -169,7 +169,7 @@ function openStickerDialog(variant) {
         setTimeout(() => {
           app.unmount();
           document.body.removeChild(container);
-        }, 500);
+        }, 5000);
       });
     },
   });
