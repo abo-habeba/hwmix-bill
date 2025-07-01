@@ -2,7 +2,8 @@
 import ProductDialog from '@/components/products/ProductDialog.vue';
 import VariantEditDialog from '@/components/products/VariantEditDialog.vue';
 import AttributesDisplay from '@/components/products/AttributesDisplay.vue';
-import { ref, onMounted } from 'vue';
+import ProductSticker from '@/pages/invoices/print/ProductSticker.vue';
+import { createApp, ref, onMounted, h, nextTick } from 'vue';
 import { deleteOne, getAll } from '@/services/api';
 import { toast } from 'vue3-toastify';
 
@@ -26,6 +27,7 @@ const search = ref('');
 const variantDialog = ref(false);
 const variantToEdit = ref(null);
 const attributes = ref([]);
+const stickerComponentRef = ref(null);
 
 const headers = [
   { title: 'الاسم', key: 'name' },
@@ -149,6 +151,30 @@ function saveVariant(editedVariant) {
   }
   variantDialog.value = false;
 }
+
+function openStickerDialog(variant) {
+  // نافذة طباعة مباشرة بدون دايالوج
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const app = createApp({
+    render() {
+      return h(ProductSticker, {
+        product: variant,
+        ref: 'stickerRef',
+      });
+    },
+    mounted() {
+      nextTick(() => {
+        this.$refs.stickerRef.printSticker();
+        setTimeout(() => {
+          app.unmount();
+          document.body.removeChild(container);
+        }, 500);
+      });
+    },
+  });
+  app.mount(container);
+}
 </script>
 
 <template>
@@ -160,48 +186,25 @@ function saveVariant(editedVariant) {
         <h3 class="text-h6 font-weight-bold mb-0">قائمة المنتجات</h3>
         <v-btn color="primary" @click="openAddDialog" size="small">+ إضافة منتج</v-btn>
         <div class="d-flex align-center gap-2">
-          <v-text-field
-            v-model="search"
-            placeholder="بحث عن منتج..."
-            hide-details
-            rounded
-            style="max-width: 180px; min-width: 120px; font-size: 13px"
-            @keydown.enter="fetchProducts"
-            @blur="fetchProducts"
-            clearable
-            @click:clear="
+          <v-text-field v-model="search" placeholder="بحث عن منتج..." hide-details rounded
+            style="max-width: 180px; min-width: 120px; font-size: 13px" @keydown.enter="fetchProducts"
+            @blur="fetchProducts" clearable @click:clear="
               () => {
                 search = '';
                 fetchProducts();
               }
-            "
-            prepend-inner-icon="ri-search-line"
-            @click:prepend-inner="fetchProducts"
-          />
+            " prepend-inner-icon="ri-search-line" @click:prepend-inner="fetchProducts" />
         </div>
       </div>
 
-      <v-data-table
-        :items="products"
-        :headers="headers"
-        item-key="id"
-        class="text-start"
-        density="compact"
-        style="direction: rtl"
-        :loading="loading"
-        :options.sync="options"
-        :server-items-length="total"
-        :items-per-page="options.itemsPerPage"
-        :page.sync="options.page"
-        :sort-by.sync="options.sortBy"
-        no-data-text="لا توجد بيانات"
-        loading-text="جاري تحميل البيانات..."
-        items-per-page-text="عدد العناصر في الصفحة"
-        page-text="{0}-{1} من {2}"
-        @update:options="fetchProducts"
-      >
+      <v-data-table :items="products" :headers="headers" item-key="id" class="text-start" density="compact"
+        style="direction: rtl" :loading="loading" :options.sync="options" :server-items-length="total"
+        :items-per-page="options.itemsPerPage" :page.sync="options.page" :sort-by.sync="options.sortBy"
+        no-data-text="لا توجد بيانات" loading-text="جاري تحميل البيانات..." items-per-page-text="عدد العناصر في الصفحة"
+        page-text="{0}-{1} من {2}" @update:options="fetchProducts">
         <template #item="{ item }">
-          <tr :class="{ 'bg-product-expanded': expandedId === item.id }" @click="toggleExpand(item.id)" style="cursor: pointer">
+          <tr :class="{ 'bg-product-expanded': expandedId === item.id }" @click="toggleExpand(item.id)"
+            style="cursor: pointer">
             <td>{{ item.name }}</td>
             <td>{{ item.category?.name ?? '-' }}</td>
             <td>{{ item.brand?.name ?? '-' }}</td>
@@ -212,58 +215,51 @@ function saveVariant(editedVariant) {
           </tr>
           <tr v-if="expandedId === item.id">
             <td colspan="5" class="pa-0">
-              <v-data-table
-                :items="item.variants"
-                :headers="variantHeaders"
-                item-key="id"
-                density="compact"
-                class="text-start"
-                hide-default-footer
-                no-data-text="لا يوجد متغيرات لهذا المنتج"
-              >
+              <v-data-table :items="item.variants" :headers="variantHeaders" item-key="id" density="compact"
+                class="text-start" hide-default-footer no-data-text="لا يوجد متغيرات لهذا المنتج">
                 <template #item="{ item: variant }">
-                  <tr :class="variant.quantity <= variant.min_quantity ? 'bg-variant-min-quantity' : 'bg-variant-normal'">
-                    <td>{{ variant.sku }}</td>
-                    <td>{{ variant.barcode }}</td>
-                    <td>{{ variant.quantity }}</td>
-                    <td>{{ variant.min_quantity }}</td>
-                    <td>{{ variant.cost }}</td>
-                    <td>{{ variant.wholesale_price }}</td>
-                    <td>{{ variant.retail_price }}</td>
-                    <td>{{ variant.discount }}</td>
-                    <td>
-                      <!-- استبدل هذا الجزء بمكون عرض الاتربيوت -->
-                      <AttributesDisplay :attributes="variant.attributes" font-size="10px" />
-                    </td>
-                    <td>
-                      <div>
-                        <v-btn size="x-small" icon color="blue" title="تعديل" @click.stop="openVariantEditDialog(variant, item.id)"
-                          ><v-icon size="16">ri-edit-line</v-icon></v-btn
-                        >
-                        <v-btn size="x-small" icon color="red" title="حذف"><v-icon size="16">ri-delete-bin-line</v-icon></v-btn>
-                        <v-btn size="x-small" icon color="success" title="طباعة"><v-icon size="16">ri-printer-line</v-icon></v-btn>
-                      </div>
-                    </td>
-                  </tr>
-                </template>
-              </v-data-table>
+          <tr :class="variant.quantity <= variant.min_quantity ? 'bg-variant-min-quantity' : 'bg-variant-normal'">
+            <td>{{ variant.sku }}</td>
+            <td>{{ variant.barcode }}</td>
+            <td>{{ variant.quantity }}</td>
+            <td>{{ variant.min_quantity }}</td>
+            <td>{{ variant.cost }}</td>
+            <td>{{ variant.wholesale_price }}</td>
+            <td>{{ variant.retail_price }}</td>
+            <td>{{ variant.discount }}</td>
+            <td>
+              <!-- استبدل هذا الجزء بمكون عرض الاتربيوت -->
+              <AttributesDisplay :attributes="variant.attributes" font-size="10px" />
+            </td>
+            <td>
+              <div>
+                <v-btn size="x-small" icon color="blue" title="تعديل"
+                  @click.stop="openVariantEditDialog(variant, item.id)"><v-icon size="16">ri-edit-line</v-icon></v-btn>
+                <v-btn size="x-small" icon color="red" title="حذف"><v-icon size="16">ri-delete-bin-line</v-icon></v-btn>
+                <v-btn size="x-small" icon color="success" title="طباعة استيكر"
+                  @click.stop="openStickerDialog(variant)"><v-icon size="16">ri-printer-line</v-icon></v-btn>
+              </div>
             </td>
           </tr>
         </template>
       </v-data-table>
-    </v-card>
+      </td>
+      </tr>
+</template>
+</v-data-table>
+</v-card>
 
-    <v-dialog v-model="confirmDelete" max-width="340">
-      <v-card>
-        <v-card-title>تأكيد الحذف</v-card-title>
-        <v-card-text>هل أنت متأكد أنك تريد حذف هذا المنتج؟</v-card-text>
-        <v-card-actions>
-          <v-btn color="error" @click="removeProduct" size="small">تأكيد</v-btn>
-          <v-btn @click="confirmDelete = false" size="small">إلغاء</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-container>
+<v-dialog v-model="confirmDelete" max-width="340">
+  <v-card>
+    <v-card-title>تأكيد الحذف</v-card-title>
+    <v-card-text>هل أنت متأكد أنك تريد حذف هذا المنتج؟</v-card-text>
+    <v-card-actions>
+      <v-btn color="error" @click="removeProduct" size="small">تأكيد</v-btn>
+      <v-btn @click="confirmDelete = false" size="small">إلغاء</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+</v-container>
 </template>
 
 <style scoped>
@@ -294,6 +290,7 @@ function saveVariant(editedVariant) {
 .bg-variant-normal {
   background-color: #e6f6ff !important;
 }
+
 .bg-variant-min-quantity {
   background-color: #fff9c4 !important;
 }

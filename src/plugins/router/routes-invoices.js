@@ -32,7 +32,7 @@ export default [
   },
   {
     path: 'invoices/sales',
-    component: () => import('@/pages/invoices.vue'),
+    component: () => import('@/pages/invoices/index.vue'),
     name: 'invoices-sales',
     meta: {
       title: 'فواتير البيع والشراء',
@@ -42,7 +42,7 @@ export default [
   },
   {
     path: 'invoices/quotation',
-    component: () => import('@/pages/invoices.vue'),
+    component: () => import('@/pages/invoices/index.vue'),
     name: 'invoices-quotation',
     meta: {
       title: 'عروض الأسعار',
@@ -52,7 +52,7 @@ export default [
   },
   {
     path: 'invoices/purchase-order',
-    component: () => import('@/pages/invoices.vue'),
+    component: () => import('@/pages/invoices/index.vue'),
     name: 'invoices-purchase-order',
     meta: {
       title: 'طلبات الشراء',
@@ -62,7 +62,7 @@ export default [
   },
   {
     path: 'invoices/sales-order',
-    component: () => import('@/pages/invoices.vue'),
+    component: () => import('@/pages/invoices/index.vue'),
     name: 'invoices-sales-order',
     meta: {
       title: 'طلبات البيع',
@@ -72,7 +72,7 @@ export default [
   },
   {
     path: 'invoices/discount',
-    component: () => import('@/pages/invoices.vue'),
+    component: () => import('@/pages/invoices/index.vue'),
     name: 'invoices-discount',
     meta: {
       title: 'فواتير الخصم',
@@ -88,6 +88,16 @@ export default [
       title: 'فواتير الخدمة',
       description: 'قائمة فواتير الخدمة',
       roles: ['admin.super', 'admin.company', 'invoices.view'],
+    },
+  },
+  {
+    path: '/invoices/print/:id',
+    name: 'InvoicePrint',
+    component: () => import('@/pages/invoices/print/[id].vue'),
+    meta: {
+      title: 'طباعة الفاتورة',
+      description: 'معاينة وطباعة الفاتورة الحرارية أو ستيكر المنتج',
+      layout: 'blank',
     },
   },
 ];

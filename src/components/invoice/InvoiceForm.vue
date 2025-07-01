@@ -14,13 +14,9 @@
       </v-chip>
 
       <!-- رصيد العميل -->
-      <v-chip
-        v-if="selectedUser && typeof selectedUser.balance !== 'undefined'"
-        class="ms-2 px-4 py-2 text-h6 font-weight-bold"
-        color="info"
-        prepend-icon="ri-wallet-3-line"
-        style="font-size: 1.1rem; min-width: 160px; direction: ltr"
-      >
+      <v-chip v-if="selectedUser && typeof selectedUser.balance !== 'undefined'"
+        class="ms-2 px-4 py-2 text-h6 font-weight-bold" color="info" prepend-icon="ri-wallet-3-line"
+        style="font-size: 1.1rem; min-width: 160px; direction: ltr">
         <span class="me-1">رصيد العميل:</span>
         <span :class="{ 'text-error': selectedUser.balance < 0, 'text-success': selectedUser.balance >= 0 }">
           {{ formatCurrency(selectedUser.balance) }}
@@ -35,20 +31,25 @@
       <v-form ref="formRef" v-model="formValid" @submit.prevent="checkInvoiceTypeBeforeSave">
         <v-row class="ma-0">
           <!-- اختيار العميل -->
-          <v-col cols="12" sm="6" class="py-1 px-0"><UserSearchInput v-model="selectedUser" /></v-col>
+          <v-col cols="12" sm="6" class="py-1 px-0">
+            <UserSearchInput v-model="selectedUser" />
+          </v-col>
 
           <!-- نوع الفاتورة -->
           <v-col cols="12" sm="6" class="py-1 px-0">
-            <InvoiceTypeSelect v-model="invoiceType" :invoiceContext="invoiceContext" @update:model-value="handleInvoiceTypeUpdate" />
+            <InvoiceTypeSelect v-model="invoiceType" :invoiceContext="invoiceContext"
+              @update:model-value="handleInvoiceTypeUpdate" />
           </v-col>
 
           <!-- إدخال سيريال / باركود -->
-          <v-col cols="12" sm="6" class="py-1 px-0"><SerialOrBarcodeInput v-model="serialInput" @update:model-value="onSerialInputEnter" /></v-col>
+          <v-col cols="12" sm="6" class="py-1 px-0">
+            <SerialOrBarcodeInput v-model="serialInput" @update:model-value="onSerialInputEnter" />
+          </v-col>
 
           <!-- بحث المنتج -->
-          <v-col cols="12" sm="6" class="py-1 px-0"
-            ><ProductSearchInput v-model="productSearch" label="ابحث عن منتج" @update:model-value="onProductSelect"
-          /></v-col>
+          <v-col cols="12" sm="6" class="py-1 px-0">
+            <ProductSearchInput v-model="productSearch" label="ابحث عن منتج" @update:model-value="onProductSelect" />
+          </v-col>
         </v-row>
 
         <!-- رسالة الخطأ -->
@@ -59,9 +60,57 @@
 
         <!-- المجموع الكلي -->
         <v-row justify="end" class="ma-3">
-          <v-chip color="primary" class="pa-3 text-h6"
-            ><v-icon left>ri-calculator-line</v-icon> المجموع الكلي: {{ formatCurrency(form.total_amount) }}</v-chip
-          >
+          <v-col cols="12" sm="4" md="3" class="py-1 px-2">
+            <v-text-field v-model.number="form.discount" label="خصم عام على الفاتورة" type="number" min="0"
+              :max="form.total_amount" density="comfortable" color="warning"
+              prepend-inner-icon="ri-discount-percent-line" hide-details
+              @input="e => { if (form.discount < 0) form.discount = 0; if (form.discount > form.total_amount) form.discount = form.total_amount; }" />
+          </v-col>
+          <v-col cols="12" sm="4" md="3" class="py-1 px-2 d-flex align-center">
+            <v-chip color="primary" class="pa-3 text-h6 w-100">
+              <v-icon left>ri-calculator-line</v-icon>
+              المجموع بعد الخصم: {{ formatCurrency(Math.max(form.total_amount - form.discount, 0)) }}
+            </v-chip>
+          </v-col>
+        </v-row>
+        <!-- حقل إدخال المدفوع والمتبقي -->
+        <v-row justify="end" class="ma-3 align-center">
+          <v-col cols="12" sm="4" md="3" class="py-1 px-2">
+            <v-text-field v-model.number="form.paid_amount" label="المبلغ المدفوع من العميل" type="number" min="0"
+              :max="Math.max(form.total_amount - form.discount, 0)" density="comfortable" color="success"
+              prepend-inner-icon="ri-cash-line" hide-details
+              @input="e => { if (form.paid_amount < 0) form.paid_amount = 0; if (form.paid_amount > Math.max(form.total_amount - form.discount, 0)) form.paid_amount = Math.max(form.total_amount - form.discount, 0); }" />
+          </v-col>
+          <v-col cols="12" sm="4" md="3" class="py-1 px-2 d-flex align-center">
+            <v-chip color="info" class="pa-3 text-h6 w-100">
+              <v-icon left>ri-wallet-3-line</v-icon>
+              المتبقي: {{ formatCurrency(form.remaining_amount) }}
+            </v-chip>
+          </v-col>
+        </v-row>
+        <!-- طريقة الدفع -->
+        <v-row class="ma-3">
+          <v-col cols="12" sm="6" md="4" class="py-1 px-2">
+            <v-select v-model="form.payment_type" :items="paymentTypes" item-title="name" item-value="id"
+              label="طريقة الدفع" prepend-inner-icon="ri-bank-card-line" density="comfortable" color="primary"
+              hide-details :menu-props="{ maxHeight: '300px' }" />
+          </v-col>
+        </v-row>
+        <!-- ملاحظات الفاتورة -->
+        <v-row class="ma-3">
+          <v-col cols="12" sm="8" md="6" class="py-1 px-2">
+            <v-textarea v-model="form.notes" label="ملاحظات الفاتورة (اختياري)" auto-grow rows="2"
+              prepend-inner-icon="ri-sticky-note-line" color="info" density="comfortable" hide-details />
+          </v-col>
+        </v-row>
+        <!-- اسم البائع -->
+        <v-row class="ma-3">
+          <v-col cols="12" sm="6" md="4" class="py-1 px-2 d-flex align-center">
+            <v-chip color="secondary" class="pa-3 text-h6 w-100">
+              <v-icon left>ri-user-3-line</v-icon>
+              اسم البائع: {{ sellerName }}
+            </v-chip>
+          </v-col>
         </v-row>
       </v-form>
     </v-card-text>
@@ -69,26 +118,24 @@
     <!-- أزرار الحفظ / الإلغاء -->
     <v-card-actions class="actions-sticky justify-start">
       <v-spacer />
-      <v-btn color="primary" append-icon="ri-save-3-line" :loading="isSaving" :disabled="!formValid || isSaving" @click="checkInvoiceTypeBeforeSave"
-        >حفظ</v-btn
-      >
+      <v-btn color="primary" append-icon="ri-save-3-line" :loading="isSaving" :disabled="!formValid || isSaving"
+        @click="checkInvoiceTypeBeforeSave">حفظ</v-btn>
+      <v-spacer />
+      <v-btn color="info" append-icon="ri-printer-line" @click="printInvoice" :disabled="isSaving || !form.id">طباعة /
+        معاينة</v-btn>
       <v-spacer />
       <v-btn color="error" append-icon="ri-close-line" @click="$emit('close')" :disabled="isSaving">إلغاء</v-btn>
       <v-spacer />
     </v-card-actions>
 
     <!-- حوار التقسيط -->
-    <InstallmentDialog
-      :form="form"
-      :visible="showInstallmentDialog"
-      @installment-saved="handleInstallmentSaved"
-      @update:visible="showInstallmentDialog = $event"
-    />
+    <InstallmentDialog :form="form" :visible="showInstallmentDialog" @installment-saved="handleInstallmentSaved"
+      @update:visible="showInstallmentDialog = $event" />
   </v-card>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { getAll, saveItem, getOne } from '@/services/api';
 import UserSearchInput from '@/components/users/UserSearchInput.vue';
 import InvoiceTypeSelect from '@/components/Invoice/InvoiceTypeSelect.vue';
@@ -96,6 +143,7 @@ import ProductSearchInput from '@/components/products/ProductSearchInput.vue';
 import SerialOrBarcodeInput from '@/components/products/SerialOrBarcodeInput.vue';
 import InstallmentDialog from '@/components/Invoice/InstallmentDialog.vue';
 import InvoiceItemsTable from '@/components/Invoice/InvoiceItemsTable.vue';
+import { useUserStore } from '@/stores/user';
 
 const emit = defineEmits(['saved', 'close']);
 const props = defineProps({
@@ -113,8 +161,25 @@ const selectedUser = ref(null);
 const formRef = ref(null);
 const formValid = ref(false);
 const itemsError = ref(null);
-const form = ref({ id: null, invoice_type_id: null, invoice_type_code: null, status: null, total_amount: 0, items: [], user_id: null });
+const form = ref({
+  id: null,
+  invoice_type_id: null,
+  invoice_type_code: null,
+  status: null,
+  total_amount: 0,
+  items: [],
+  user_id: null,
+  paid_amount: 0,
+  remaining_amount: 0,
+  notes: '',
+  discount: 0,
+  payment_type: '',
+});
+const paymentTypes = ref([]);
 const showInstallmentDialog = ref(false);
+
+const userStore = useUserStore();
+const sellerName = computed(() => userStore.user?.nickname || userStore.user?.name || '');
 
 /* =============== Lifecycle =============== */
 async function loadInvoice(id) {
@@ -129,7 +194,17 @@ async function loadInvoice(id) {
   }
 }
 
+async function fetchPaymentTypes() {
+  try {
+    const res = await getAll('cashBoxTypes');
+    paymentTypes.value = res.data?.items || [];
+  } catch (e) {
+    paymentTypes.value = [];
+  }
+}
+
 onMounted(() => {
+  fetchPaymentTypes();
   if (props.invoiceId) {
     loadInvoice(props.invoiceId);
   } else if (props.modelValue) {
@@ -146,13 +221,24 @@ watch(
   { deep: true }
 );
 
+// تحديث المتبقي تلقائياً عند تغيير المدفوع أو المجموع الكلي أو الخصم
+watch([
+  () => form.value.paid_amount,
+  () => form.value.total_amount,
+  () => form.value.discount
+], ([paid, total, discount]) => {
+  const afterDiscount = Math.max((total || 0) - (discount || 0), 0);
+  form.value.remaining_amount = Math.max(afterDiscount - (paid || 0), 0);
+});
+
 /* ==================== Helpers ==================== */
 function formatCurrency(val) {
   return new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP' }).format(val || 0);
 }
 
 function updateTotal() {
-  form.value.total_amount = form.value.items.reduce((acc, item) => acc + (item.total || 0), 0);
+  const sum = form.value.items.reduce((acc, item) => acc + (item.total || 0), 0);
+  form.value.total_amount = sum;
 }
 
 function updateItemQuantity(item) {
@@ -287,6 +373,15 @@ async function saveInvoice(payload) {
     console.error(e);
   } finally {
     isSaving.value = false;
+  }
+}
+
+// دالة طباعة/معاينة الفاتورة
+function printInvoice() {
+  // حفظ بيانات الفاتورة مؤقتاً في sessionStorage
+  if (form.value.id) {
+    sessionStorage.setItem('print_invoice', JSON.stringify(form.value));
+    window.open(`/invoices/print/${form.value.id}`, '_blank');
   }
 }
 </script>

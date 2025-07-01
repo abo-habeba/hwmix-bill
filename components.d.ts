@@ -63,6 +63,7 @@ declare module 'vue' {
     'ProductDialog copy 2': typeof import('./src/components/products/ProductDialog copy 2.vue')['default']
     ProductGeneralInfoForm: typeof import('./src/components/products/ProductGeneralInfoForm.vue')['default']
     ProductSearchInput: typeof import('./src/components/products/ProductSearchInput.vue')['default']
+    ProductStickerDialog: typeof import('./src/components/products/ProductStickerDialog.vue')['default']
     ProductVariantAttributes: typeof import('./src/components/products/ProductVariantAttributes.vue')['default']
     ProductVariantForm: typeof import('./src/components/products/ProductVariantForm.vue')['default']
     ProductVariants: typeof import('./src/components/productVariants/productVariants.vue')['default']

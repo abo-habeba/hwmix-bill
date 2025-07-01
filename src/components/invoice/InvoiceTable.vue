@@ -1,8 +1,9 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, createApp, h, nextTick } from 'vue';
 import { getAll, deleteOne } from '@/services/api';
 import InvoiceForm from '@/components/Invoice/InvoiceForm.vue';
 import dayjs from 'dayjs';
+import { useUserStore } from '@/stores/user';
 
 const items = ref([]);
 const loading = ref(false);
@@ -98,6 +99,43 @@ function formatDate(date) {
   return date ? dayjs(date).format('YYYY-MM-DD') : '-';
 }
 
+function printItem(item) {
+  if (item && item.id) {
+    // جلب بيانات الشركة من user store
+    const userStore = useUserStore();
+    let companyName = 'اسم الشركة';
+    if (userStore.user && userStore.user.companies && userStore.user.company_id) {
+      const company = userStore.user.companies.find(c => c.id === userStore.user.company_id);
+      if (company) companyName = company.name;
+    }
+    const invoiceData = item;
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    import('@/pages/invoices/print/ThermalInvoicePrint.vue').then(module => {
+      const ThermalInvoicePrint = module.default;
+      const app = createApp({
+        render() {
+          return h(ThermalInvoicePrint, {
+            invoice: invoiceData,
+            companyName,
+            ref: 'thermalRef',
+          });
+        },
+        mounted() {
+          nextTick(() => {
+            this.$refs.thermalRef.printThermal && this.$refs.thermalRef.printThermal();
+            setTimeout(() => {
+              app.unmount();
+              document.body.removeChild(container);
+            }, 500);
+          });
+        },
+      });
+      app.mount(container);
+    });
+  }
+}
+
 onMounted(fetchItems);
 </script>
 
@@ -152,6 +190,9 @@ onMounted(fetchItems);
       <template #item.actions="{ item }">
         <v-btn icon @click="editItem(item)" :title="'تعديل ' + item.invoice_number">
           <v-icon>ri-pencil-line</v-icon>
+        </v-btn>
+        <v-btn icon color="info" @click="printItem(item)" :title="'طباعة ' + item.invoice_number">
+          <v-icon>ri-printer-line</v-icon>
         </v-btn>
         <v-btn icon color="error" @click="removeItem(item)" :title="'حذف ' + item.invoice_number">
           <v-icon>ri-delete-bin-line</v-icon>
