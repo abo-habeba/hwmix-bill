@@ -152,28 +152,50 @@ function saveVariant(editedVariant) {
   variantDialog.value = false;
 }
 
+function isMobileDevice() {
+  return /android|iphone|ipad|ipod|opera mini|iemobile|mobile/i.test(navigator.userAgent);
+}
+
+const showMobileStickerDialog = ref(false);
+
 function openStickerDialog(variant) {
-  // نافذة طباعة مباشرة بدون دايالوج
-  const container = document.createElement('div');
-  document.body.appendChild(container);
-  const app = createApp({
-    render() {
-      return h(ProductSticker, {
-        product: variant,
-        ref: 'stickerRef',
-      });
-    },
-    mounted() {
-      nextTick(() => {
-        this.$refs.stickerRef.printSticker();
-        setTimeout(() => {
-          app.unmount();
-          document.body.removeChild(container);
-        }, 5000);
-      });
-    },
-  });
-  app.mount(container);
+  if (!isMobileDevice()) {
+    // نافذة طباعة مباشرة بدون دايالوج (سطح المكتب)
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const app = createApp({
+      render() {
+        return h(ProductSticker, {
+          product: variant,
+          ref: 'stickerRef',
+        });
+      },
+      mounted() {
+        nextTick(() => {
+          this.$refs.stickerRef.printSticker();
+          setTimeout(() => {
+            app.unmount();
+            document.body.removeChild(container);
+          }, 5000);
+        });
+      },
+    });
+    app.mount(container);
+  } else {
+    // منطق خاص بالموبايل: عرض الاستيكر في Dialog ثم طباعة الصفحة كاملة
+    stickerComponentRef.value = variant;
+    showMobileStickerDialog.value = true;
+  }
+}
+
+function printMobileSticker() {
+  // إخفاء كل شيء عدا الاستيكر أثناء الطباعة
+  const originalBody = document.body.innerHTML;
+  const stickerHtml = document.getElementById('mobile-sticker-print').outerHTML;
+  document.body.innerHTML = stickerHtml;
+  window.print();
+  document.body.innerHTML = originalBody;
+  showMobileStickerDialog.value = false;
 }
 </script>
 
@@ -256,6 +278,22 @@ function openStickerDialog(variant) {
     <v-card-actions>
       <v-btn color="error" @click="removeProduct" size="small">تأكيد</v-btn>
       <v-btn @click="confirmDelete = false" size="small">إلغاء</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+<!-- Dialog خاص بطباعة الاستيكر على الموبايل -->
+<v-dialog v-model="showMobileStickerDialog" max-width="350">
+  <v-card>
+    <v-card-title class="text-center">معاينة استيكر المنتج</v-card-title>
+    <v-card-text>
+      <div id="mobile-sticker-print">
+        <ProductSticker :product="stickerComponentRef" ref="mobileStickerRef" />
+      </div>
+    </v-card-text>
+    <v-card-actions class="justify-center">
+      <v-btn color="primary" @click="printMobileSticker">طباعة</v-btn>
+      <v-btn color="grey" @click="showMobileStickerDialog = false">إغلاق</v-btn>
     </v-card-actions>
   </v-card>
 </v-dialog>
