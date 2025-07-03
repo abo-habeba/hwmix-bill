@@ -1,4 +1,5 @@
 <script setup>
+import { getAll } from '@/services/api';
 import { useappState } from '@/stores/appState';
 import axios from 'axios';
 import { ref } from 'vue';
@@ -106,17 +107,17 @@ async function fetchUsers() {
   const perPage = itemsPerPage === -1 ? total.value : itemsPerPage;
 
   try {
-    const response = await apiClient.get('users', {
+    const response = await getAll('users', {
       params: {
         page,
         per_page: perPage,
         sort_by: sortField,
         sort_order: sortOrder,
-        ...filters.value, // إضافة الفلاتر إلى الطلب
+        ...filters.value,
       },
     });
-    users.value = response;
-    total.value = response;
+    users.value = response.data;
+    total.value = response.total;
   } catch (error) {
     console.error('Error fetching users:', error);
   } finally {

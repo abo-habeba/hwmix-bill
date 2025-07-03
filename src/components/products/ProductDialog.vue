@@ -130,9 +130,12 @@ const productRules = {
 };
 
 function setInitialWarehouseForFirstStock() {
-  if (localProduct.value.variants.length > 0 && localProduct.value.variants[0].stocks.length > 0 && warehouses.value.length > 0) {
-    if (localProduct.value.variants[0].stocks[0].warehouse_id === null) {
-      localProduct.value.variants[0].stocks[0].warehouse_id = warehouses.value[0].id;
+
+  if (localProduct.value?.variants) {
+    if (localProduct.value.variants && localProduct.value.variants[0]?.stocks && warehouses.value) {
+      if (localProduct.value.variants[0].stocks[0].warehouse_id === null) {
+        localProduct.value.variants[0].stocks[0].warehouse_id = warehouses.value[0].id;
+      }
     }
   }
 }

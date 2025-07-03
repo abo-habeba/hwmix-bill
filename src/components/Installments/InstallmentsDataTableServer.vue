@@ -216,8 +216,8 @@ async function fetchUsers() {
       sort_order: sortOrder,
       ...filters.value,
     });
-    users.value = response;
-    total.value = response;
+    users.value = response.data;
+    total.value = response.total;
     console.log('users', users.value);
   } catch (error) {
     console.error('Error fetching users:', error);

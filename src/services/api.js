@@ -56,13 +56,21 @@ export default apiClient;
 
 // تم تعديل الدالة لتقبل showToast
 const handleSuccess = (response, log, userStore, loading, type, showToast) => {
-  log ? console.log(`${type}: ✅`, response.data) : '';
-  loading ? (userStore.loadingApi = false) : '';
-  if (showToast) {
-    // تحقق من showToast
-    toast.success(response.data.message);
+  const resData = response.data;
+
+  if (log) console.log(`${type}: ✅`, resData);
+  if (loading) userStore.loadingApi = false;
+  if (showToast && resData.message) toast.success(resData.message);
+
+  // ✅ استخدام hasOwnProperty بدل فحص القيمة نفسها
+  if (resData.hasOwnProperty('total')) {
+    console.log(`${type} total:`, resData);
+
+    return resData;
   }
-  return response.data.data || response.data;
+  console.log(`${type} data:`, resData.data);
+
+  return resData.data ?? resData;
 };
 
 // تم تعديل الدالة لتقبل showToast
@@ -94,20 +102,21 @@ export const getAll = async (apiEndpoint, params = null, loading = true, showToa
   loading ? (userStore.loadingApi = true) : '';
   try {
     const response = await apiClient.get(apiEndpoint, { params: params });
-    return handleSuccess(response, log, userStore, loading, 'getAll', showToast);
+    return handleSuccess(response, log, userStore, loading, apiEndpoint, showToast);
   } catch (error) {
-    return handleError(error, log, userStore, loading, 'getAll', showToast);
+    return handleError(error, log, userStore, loading, apiEndpoint, showToast);
   }
 };
 
 export const getOne = async (apiEndpoint, id, loading = true, showToast = true, log = false) => {
   const userStore = useUserStore();
-  loading ? (userStore.loadingApi = true) : '';
   try {
+    loading ? (userStore.loadingApi = true) : '';
     const response = await apiClient.get(`${apiEndpoint}/${id}`);
-    return handleSuccess(response, log, userStore, loading, 'getOne', showToast);
+    loading ? (userStore.loadingApi = true) : '';
+    return handleSuccess(response, log, userStore, loading, apiEndpoint, showToast);
   } catch (error) {
-    return handleError(error, log, userStore, loading, 'getOne', showToast);
+    return handleError(error, log, userStore, loading, apiEndpoint, showToast);
   }
 };
 
@@ -125,9 +134,9 @@ export const saveItem = async (apiEndpoint, data, id = false, loading = true, sh
     } else {
       response = await apiClient.post(apiEndpoint, formData);
     }
-    return handleSuccess(response, log, userStore, loading, `saveItem (${id ? 'Update' : 'Create'})`, showToast);
+    return handleSuccess(response, log, userStore, loading, `${apiEndpoint} => (${id ? 'Update' : 'Create'})`, showToast);
   } catch (error) {
-    return handleError(error, log, userStore, loading, `saveItem (${id ? 'Update' : 'Create'})`, showToast);
+    return handleError(error, log, userStore, loading, `${apiEndpoint} => (${id ? 'Update' : 'Create'})`, showToast);
   }
 };
 
@@ -136,9 +145,9 @@ export const deleteOne = async (apiEndpoint, id, loading = true, showToast = tru
   loading ? (userStore.loadingApi = true) : '';
   try {
     const response = await apiClient.delete(`${apiEndpoint}/${id}`);
-    return handleSuccess(response, log, userStore, loading, 'deleteOne', showToast);
+    return handleSuccess(response, log, userStore, loading, apiEndpoint, showToast);
   } catch (error) {
-    return handleError(error, log, userStore, loading, 'deleteOne', showToast);
+    return handleError(error, log, userStore, loading, apiEndpoint, showToast);
   }
 };
 
@@ -147,9 +156,9 @@ export const updateItem = async (apiEndpoint, data, loading = true, showToast = 
   loading ? (userStore.loadingApi = true) : '';
   try {
     const response = await apiClient.put(apiEndpoint, data);
-    return handleSuccess(response, log, userStore, loading, 'updateItem', showToast);
+    return handleSuccess(response, log, userStore, loading, apiEndpoint, showToast);
   } catch (error) {
-    return handleError(error, log, userStore, loading, 'updateItem', showToast);
+    return handleError(error, log, userStore, loading, apiEndpoint, showToast);
   }
 };
 
@@ -158,9 +167,9 @@ export const deleteAll = async (apiEndpoint, ids, loading = true, showToast = tr
   loading ? (userStore.loadingApi = true) : '';
   try {
     const response = await apiClient.post(apiEndpoint, { item_ids: ids });
-    return handleSuccess(response, log, userStore, loading, 'deleteAll', showToast);
+    return handleSuccess(response, log, userStore, loading, apiEndpoint, showToast);
   } catch (error) {
-    return handleError(error, log, userStore, loading, 'deleteAll', showToast);
+    return handleError(error, log, userStore, loading, apiEndpoint, showToast);
   }
 };
 
@@ -169,9 +178,9 @@ export const register = async (apiEndpoint, data, loading = true, showToast = tr
   loading ? (userStore.loadingApi = true) : '';
   try {
     const response = await apiClient.post(apiEndpoint, data);
-    return handleSuccess(response, log, userStore, loading, 'register', showToast);
+    return handleSuccess(response, log, userStore, loading, apiEndpoint, showToast);
   } catch (error) {
-    return handleError(error, log, userStore, loading, 'register', showToast);
+    return handleError(error, log, userStore, loading, apiEndpoint, showToast);
   }
 };
 
@@ -213,7 +222,7 @@ export const logOut = async (apiEndpoint, loading = true, showToast = true, log 
     location.reload();
     return response.data;
   } catch (error) {
-    return handleError(error, log, userStore, loading, 'logOut', showToast);
+    return handleError(error, log, userStore, loading, apiEndpoint, showToast);
   }
 };
 
@@ -222,9 +231,9 @@ export const deleteItem = async (resource, id, showToast = true) => {
   userStore.loadingApi = true;
   try {
     const response = await apiClient.delete(`${resource}/${id}`);
-    return handleSuccess(response, false, userStore, true, 'deleteItem', showToast);
+    return handleSuccess(response, false, userStore, true, apiEndpoint, showToast);
   } catch (error) {
-    return handleError(error, false, userStore, true, 'deleteItem', showToast);
+    return handleError(error, false, userStore, true, apiEndpoint, showToast);
   }
 };
 
@@ -233,9 +242,9 @@ export const archiveItem = async (resource, id, showToast = true) => {
   userStore.loadingApi = true;
   try {
     const response = await apiClient.post(`${resource}/${id}/archive`);
-    return handleSuccess(response, false, userStore, true, 'archiveItem', showToast);
+    return handleSuccess(response, false, userStore, true, apiEndpoint, showToast);
   } catch (error) {
-    return handleError(error, false, userStore, true, 'archiveItem', showToast);
+    return handleError(error, false, userStore, true, apiEndpoint, showToast);
   }
 };
 
@@ -244,9 +253,9 @@ export const restoreItem = async (resource, id, showToast = true) => {
   userStore.loadingApi = true;
   try {
     const response = await apiClient.post(`${resource}/${id}/restore`);
-    return handleSuccess(response, false, userStore, true, 'restoreItem', showToast);
+    return handleSuccess(response, false, userStore, true, apiEndpoint, showToast);
   } catch (error) {
-    return handleError(error, false, userStore, true, 'restoreItem', showToast);
+    return handleError(error, false, userStore, true, apiEndpoint, showToast);
   }
 };
 export async function getLocalPermissions(remotePermissions) {

@@ -1,39 +1,29 @@
 <script setup>
 import { getOne, saveItem, getAll } from '@/services/api';
-// import { permissionsFile } from '@/@core/utils/permissions';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import UsersEditUserRolse from '../../components/users/UsersEditUserRolse.vue';
 import RoleDetails from '@/components/roles/RoleDetails.vue';
 import { useUserStore } from '@/stores/user';
 import PhoneNumberInput from '@/components/users/PhoneNumberInput.vue';
-import { toast } from 'vue3-toastify';
-import 'vue3-toastify/dist/index.css';
-import translateErrors from '@/utils/translateErrors';
+
 const { xs } = useDisplay();
 const route = useRoute();
 const router = useRouter();
 const loading = ref(false);
-const userId = ref(route.params.id);
+const userId = ref(null);
 const roles = ref([]);
 const companyIds = ref([]);
-const userCompanies = ref([]);
 const selectedCompanies = ref([]);
 const allCompanies = ref([]);
 const userStore = useUserStore();
 const roleDetail = ref(null);
+
+
 const tabs = [
-  {
-    title: 'بيانات الحساب',
-    icon: 'ri-group-line',
-    tab: 'account',
-  },
-  {
-    title: 'الادوار و الصلاحيات',
-    icon: 'ri-lock-line',
-    tab: 'role',
-  },
+  { title: 'بيانات الحساب', icon: 'ri-group-line', tab: 'account' },
+  { title: 'الادوار و الصلاحيات', icon: 'ri-lock-line', tab: 'role' },
 ];
 
 const user = ref({
@@ -53,33 +43,57 @@ const userFormValid = ref(false);
 const nicknameRules = [v => !!v || 'اسم الشهرة مطلوب'];
 const phoneRules = [v => !!v || 'رقم الهاتف مطلوب'];
 
-onMounted(() => {
-  mergedCompanies();
-  if (route.params.id) {
-    loading.value = true;
-    getAll('roles')
-      .then(data => {
-        roles.value = data.data;
-        console.log('roles', roles.value);
-      })
-      .catch(e => {
-        roles.value = [];
-      });
-    getOne('user', userId.value, true)
-      .then(res => {
-        user.value = res;
-        selectedCompanies.value = res.companies;
-      })
-      .finally(e => {
-        loading.value = false;
-      });
-  } else {
-    // وضع قيمة افتراضية للباسورد في حالة الإضافة فقط
-    user.value.password = '12345678';
-  }
-});
+// onMounted(() => {
+//   mergedCompanies();
+// });
 
-// جمع الشركات من مصدرين مع إضافة خاصية disabled:
+watch(
+  () => userStore.user,
+  (val) => {
+    if (val) {
+      mergedCompanies();
+    }
+  },
+  { immediate: true }
+);
+watch(
+  () => route.params.id,
+  (newId) => {
+    if (newId) {
+      userId.value = newId;
+      loadUserData();
+    } else {
+      user.value.password = '12345678';
+      loading.value = false;
+    }
+  },
+  { immediate: true }
+);
+
+function loadUserData() {
+  loading.value = true;
+
+  getAll('roles', {}, false, false, false)
+    .then(data => {
+      roles.value = data;
+      loading.value = false;
+    })
+
+    .catch(() => {
+      roles.value = [];
+    });
+
+  getOne('user', userId.value, false, false, false)
+    .then(res => {
+      user.value = res;
+      selectedCompanies.value = res.user.companies;
+      loading.value = false;
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
 function mergedCompanies() {
   const allComp = [
     ...user.value.companies.map(company => ({ ...company, disabled: false })),
@@ -96,36 +110,27 @@ function itemProps(item) {
     title: item.name,
     subtitle: item.field,
     disabled: !item.disabled,
-    // class: item.disabled ? '' : 'disabled-item',
   };
 }
 
 function sendData() {
-  console.log('selectedCompanies', selectedCompanies.value);
   companyIds.value = Array.from(
     selectedCompanies.value.map(company => {
-      // إذا كان العنصر كائنًا يحتوي على خاصية id، أرجع قيمة id
-      if (typeof company === 'object' && company.id !== undefined) {
-        return company.id;
-      }
-      // إذا كان العنصر رقمًا، أرجع الرقم مباشرة
+      if (typeof company === 'object' && company.id !== undefined) return company.id;
       return company;
     })
   );
-  console.log('companyIds', companyIds.value);
-  // return;
   user.value.company_id = companyIds.value.length <= 0 ? null : companyIds.value[0];
   user.value.company_ids = companyIds.value.length > 0 ? companyIds.value : null;
   user.value.companies = null;
 
   saveItem('user', user.value, route.params.id).then(() => {
-    // toast.success(route.params.id ? 'تم تعديل المستخدم بنجاح' : 'تم إضافة المستخدم بنجاح');
-    // تاخير الانتقال للصفحة السابقة
     setTimeout(() => {
       router.go(-1);
     }, 1200);
   });
 }
+
 const userRole = ref({});
 function openRoleDetails(role) {
   if (role) {

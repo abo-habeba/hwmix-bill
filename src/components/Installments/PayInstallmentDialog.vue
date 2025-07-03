@@ -71,7 +71,7 @@ const cashboxes = ref([]);
 onMounted(async () => {
   try {
     const methods = await getAll('payment-methods', {}, true, false, false);
-    paymentMethods.value = methods;
+    paymentMethods.value = methods || [];
 
     // اختيار طريقة الدفع الافتراضية (كاش)
     const cashMethod = methods.find(method => method.code?.trim().toLowerCase() === 'cash');
@@ -82,11 +82,12 @@ onMounted(async () => {
     const userStore = useUserStore();
     if (userStore.user?.cashBoxes) {
       cashboxes.value = userStore.user.cashBoxes || [];
-
       // اختيار الصندوق الافتراضي
-      const defaultBox = cashboxes.value.find(box => box.is_default);
-      if (defaultBox) {
-        payData.value.cash_box_id = defaultBox.id;
+      if (cashboxes.value.length) {
+        const defaultBox = cashboxes.value.find(box => box.is_default);
+        if (defaultBox) {
+          payData.value.cash_box_id = defaultBox.id;
+        }
       }
     }
   } catch (error) {

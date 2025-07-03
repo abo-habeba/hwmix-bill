@@ -83,8 +83,8 @@ async function fetchInstallments() {
 
   try {
     const res = await getAll('installments', params, true, true, true);
-    installments.value = res;
-    totalItems.value = res;
+    installments.value = res.data;
+    totalItems.value = res.total;
   } catch (error) {
     console.error('فشل في جلب الأقساط:', error);
   } finally {

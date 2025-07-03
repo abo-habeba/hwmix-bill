@@ -163,8 +163,8 @@ async function fetchCompanys() {
       sort_order: sortOrder,
       ...filters.value,
     });
-    companys.value = response;
-    total.value = response;
+    companys.value = response.data;
+    total.value = response.total;
   } catch (error) {
     console.error('Error fetching company:', error);
   } finally {

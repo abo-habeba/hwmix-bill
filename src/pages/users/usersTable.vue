@@ -1,4 +1,5 @@
 <script setup>
+import { getAll } from '@/services/api';
 import { useappState } from '@/stores/appState';
 import axios from 'axios';
 import { ref } from 'vue';
@@ -106,7 +107,7 @@ async function fetchUsers() {
   const perPage = itemsPerPage === -1 ? total.value : itemsPerPage;
 
   try {
-    const response = await apiClient.get('users', {
+    const response = await getAll('users', {
       params: {
         page,
         per_page: perPage,
@@ -114,9 +115,9 @@ async function fetchUsers() {
         sort_order: sortOrder,
         ...filters.value, // إضافة الفلاتر إلى الطلب
       },
-    });
-    users.value = response.data.data;
-    total.value = response.data.total;
+    }, false, false, false);
+    users.value = response.data;
+    total.value = response.total;
   } catch (error) {
     console.error('Error fetching users:', error);
   } finally {
@@ -135,51 +136,25 @@ const updateSelectedUsers = selected => {
   <v-container>
     <DeletedItem :dataDelete="{ items: deletedUsers, key: 'name' }" />
     <!-- Advanced Search -->
-    <AdvancedSearch
-      :fields="[
-        { name: 'nickname', type: 'input', label: ' اسم الشهرة ' },
-        { name: 'status', type: 'select', label: 'الحالة', items: ['نشط', 'غير نشط'] },
-        { name: 'role', type: 'select', label: 'الدور', items: ['مشرف', 'مستخدم', 'زائر'] },
-      ]"
-    />
+    <AdvancedSearch :fields="[
+      { name: 'nickname', type: 'input', label: ' اسم الشهرة ' },
+      { name: 'status', type: 'select', label: 'الحالة', items: ['نشط', 'غير نشط'] },
+      { name: 'role', type: 'select', label: 'الدور', items: ['مشرف', 'مستخدم', 'زائر'] },
+    ]" />
 
     <!-- Delete User -->
-    <v-btn
-      v-if="selectedUsers.length"
-      class="text-center my-2 mx-10"
-      density="compact"
-      variant="flat"
-      style="background-color: #dc3545 !important; color: white"
-      prepend-icon="ri-delete-bin-line"
-      @click="deleteUser"
-    >
+    <v-btn v-if="selectedUsers.length" class="text-center my-2 mx-10" density="compact" variant="flat"
+      style="background-color: #dc3545 !important; color: white" prepend-icon="ri-delete-bin-line" @click="deleteUser">
       حذف عدد {{ selectedUsers.length }} من العناصر
     </v-btn>
     <!-- Data Table Server -->
     <div id="dataTable" style="position: relative !important">
-      <v-data-table-server
-        item-value="id"
-        v-model:items-per-page="itemsPerPage"
-        v-model:options="options"
-        v-model:expanded="expanded"
-        :headers="headers"
-        :items="users"
-        :items-length="total"
-        :loading="loading"
-        hover
-        show-current-page
-        :row-props="getRowProps"
-        v-model="selectedUsers"
-        show-select
-        item-selectable
-        loading-text=" جاري تحمل البيانات "
-        no-data-text=" لا توجد بيانات "
-        items-per-page-text="عدد الصفوف في الصفحة"
-        @update="updateSelectedUsers({ item })"
-        @update:options="fetchUsers"
-        @contextmenu:row="showContextMenu"
-        @click="colsContextMenu"
-      >
+      <v-data-table-server item-value="id" v-model:items-per-page="itemsPerPage" v-model:options="options"
+        v-model:expanded="expanded" :headers="headers" :items="users || []" :items-length="total" :loading="loading"
+        hover show-current-page :row-props="getRowProps" v-model="selectedUsers" show-select item-selectable
+        loading-text=" جاري تحمل البيانات " no-data-text=" لا توجد بيانات " items-per-page-text="عدد الصفوف في الصفحة"
+        @update="updateSelectedUsers({ item })" @update:options="fetchUsers" @contextmenu:row="showContextMenu"
+        @click="colsContextMenu">
         <!-- عمود التسلسل -->
         <template #item.index="{ index }">
           {{ index + 1 }}
@@ -187,13 +162,8 @@ const updateSelectedUsers = selected => {
 
         <!-- عمود الإجراءات -->
         <template #item.action="{ item }">
-          <v-btn
-            density="compact"
-            variant="text"
-            color="#0086CD"
-            prepend-icon="ri-more-2-fill"
-            @click.stop="event => showContextMenu(event, { item })"
-          >
+          <v-btn density="compact" variant="text" color="#0086CD" prepend-icon="ri-more-2-fill"
+            @click.stop="event => showContextMenu(event, { item })">
           </v-btn>
         </template>
 
@@ -220,9 +190,12 @@ const updateSelectedUsers = selected => {
 
 <style>
 .active-row {
-  background-color: transparent; /* لون خلفية للصف النشط */
+  background-color: transparent;
+  /* لون خلفية للصف النشط */
 }
+
 .inactive-row {
-  background-color: #f65a69; /* لون خلفية للصف غير النشط */
+  background-color: #f65a69;
+  /* لون خلفية للصف غير النشط */
 }
 </style>
