@@ -4,9 +4,8 @@ import { useUserStore } from '@/stores/user';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
 import translateErrors from '@/utils/translateErrors';
-// http://10.0.0.64:8008/   bill-api.hwnix.com  http://127.0.0.1:8000/
+
 const apiClient = axios.create({
-  // baseURL: process.env.NODE_ENV === 'production' ? 'https://bill-api.hwnix.com/api/' : 'http://10.0.0.64:8008/api/',
   baseURL: process.env.NODE_ENV === 'production' ? 'https://bill-api.hwnix.com/api/' : 'http://127.0.0.1:8000/api/',
   headers: {
     'Cache-Control': 'no-cache',
@@ -17,44 +16,34 @@ const apiClient = axios.create({
 });
 
 const options = {
-  // nullsAsUndefineds: true,
   allowEmptyArrays: true,
   indices: true,
 };
 
-// Set Authorization dynamically
 apiClient.interceptors.request.use(config => {
   const token = localStorage.getItem('authToken');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
-  // If the request contains FormData, don't set Content-Type as application/json
   if (config.data instanceof FormData) {
-    // Remove the default 'Content-Type' to let axios set it correctly
     delete config.headers['Content-Type'];
   } else {
-    // Set content-type for JSON requests
     config.headers['Content-Type'] = 'application/json';
   }
-
   return config;
 });
+
 apiClient.interceptors.response.use(
   response => response,
   error => {
-    // إذا كان الخطأ 401 أو رسالة Unauthenticated (انتهاء الجلسة أو التوكن غير صالح)
     if (error?.response?.status === 401 || error?.response?.data?.message === 'Unauthenticated.') {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       window.location.href = '/login';
       return Promise.reject(error);
     }
-    // إذا كان الخطأ 403 أو Forbidden أو Unauthorized (لا يملك صلاحية فقط)
     if (error?.response?.status === 403 || error?.response?.data?.message === 'Forbidden' || error?.response?.data?.message === 'Unauthorized') {
-      // يمكنك هنا استخدام toast أو alert حسب مكتبتك
       alert('ليس لديك صلاحية للوصول إلى هذا المورد.');
-      // أو استخدم toast('ليس لديك صلاحية ...')
       return Promise.reject(error);
     }
     return Promise.reject(error);
@@ -63,271 +52,201 @@ apiClient.interceptors.response.use(
 
 export default apiClient;
 
-export const getAll = (apiEndpoint, params = null, loading = true, log = false) => {
-  const userStore = useUserStore();
-  loading ? (userStore.loadingApi = true) : '';
-  return new Promise((resolve, reject) => {
-    apiClient
-      .get(apiEndpoint, { params: params })
-      .then(response => {
-        log ? console.log(`getAll:  => `, response.data) : '';
-        resolve(response.data);
-        loading ? (userStore.loadingApi = false) : '';
-      })
-      .catch(error => {
-        log ? console.log(`getAll:  => `, error) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء جلب البيانات';
-        reject(msg);
-      });
-  });
+// تم تعديل الدالة لتقبل showToast
+const handleSuccess = (response, log, userStore, loading, type, showToast) => {
+  log ? console.log(`${type}: ✅`, response.data) : '';
+  loading ? (userStore.loadingApi = false) : '';
+  if (showToast) {
+    // تحقق من showToast
+    toast.success(response.data.message);
+  }
+  return response.data.data || response.data;
 };
 
-export const getOne = (apiEndpoint, id, loading = true, log = false) => {
-  const userStore = useUserStore();
-  loading ? (userStore.loadingApi = true) : '';
-  return new Promise((resolve, reject) => {
-    apiClient
-      .get(`${apiEndpoint}/${id}`)
-      .then(response => {
-        log ? console.log(`getOne:  => `, response.data) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        resolve(response.data.data);
-      })
-      .catch(error => {
-        log ? console.log(`getOne:  => `, error) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء جلب البيانات';
-        reject(msg);
-      });
-  });
+// تم تعديل الدالة لتقبل showToast
+const handleError = (error, log, userStore, loading, type, showToast) => {
+  log ? console.log(`${type}: ❌`, error.response || error) : '';
+  loading ? (userStore.loadingApi = false) : '';
+
+  let errorMessage = 'حدث خطأ غير متوقع';
+  if (error.response && error.response.data) {
+    if (error.response.data.errors) {
+      errorMessage = translateErrors(error.response.data.errors);
+    } else if (error.response.data.message) {
+      errorMessage = error.response.data.message;
+    }
+  } else if (error.message) {
+    errorMessage = error.message;
+  }
+
+  if (showToast) {
+    // تحقق من showToast
+    toast.error(errorMessage, { autoClose: 7000 });
+  }
+  throw error;
 };
 
-export const saveItem = (apiEndpoint, data, id = false, loading = true, log = false) => {
+// تم تعديل الدوال لإضافة معامل showToast
+export const getAll = async (apiEndpoint, params = null, loading = true, showToast = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
-  return new Promise((resolve, reject) => {
-    const formData = serialize(data, options);
+  try {
+    const response = await apiClient.get(apiEndpoint, { params: params });
+    return handleSuccess(response, log, userStore, loading, 'getAll', showToast);
+  } catch (error) {
+    return handleError(error, log, userStore, loading, 'getAll', showToast);
+  }
+};
+
+export const getOne = async (apiEndpoint, id, loading = true, showToast = true, log = false) => {
+  const userStore = useUserStore();
+  loading ? (userStore.loadingApi = true) : '';
+  try {
+    const response = await apiClient.get(`${apiEndpoint}/${id}`);
+    return handleSuccess(response, log, userStore, loading, 'getOne', showToast);
+  } catch (error) {
+    return handleError(error, log, userStore, loading, 'getOne', showToast);
+  }
+};
+
+export const saveItem = async (apiEndpoint, data, id = false, loading = true, showToast = true, log = false) => {
+  const userStore = useUserStore();
+  loading ? (userStore.loadingApi = true) : '';
+  const formData = serialize(data, options);
+
+  try {
+    let response;
     if (id) {
       formData.append('_method', 'put');
       const apiEndpointIfId = `${apiEndpoint}/${id}`;
-      apiClient
-        .post(apiEndpointIfId, formData)
-        .then(response => {
-          log ? console.log(`saveItem:  => `, response.data) : '';
-          loading ? (userStore.loadingApi = false) : '';
-          toast.success('تم التعديل بنجاح!');
-          resolve(response.data);
-        })
-        .catch(error => {
-          log ? console.log(`saveItem:  => `, error) : '';
-          loading ? (userStore.loadingApi = false) : '';
-          let msg = '';
-          if (error && error.response && error.response.data && error.response.data.errors) {
-            msg = translateErrors(error.response.data.errors);
-          } else if (error && error.response && error.response.data && error.response.data.message) {
-            msg = error.response.data.message;
-          } else {
-            msg = 'حدث خطأ أثناء الحفظ';
-          }
-          toast.error(msg, { autoClose: 7000 });
-          reject(error);
-        });
+      response = await apiClient.post(apiEndpointIfId, formData);
     } else {
-      apiClient
-        .post(apiEndpoint, formData)
-        .then(response => {
-          log ? console.log(`saveItem:  => `, response.data) : '';
-          loading ? (userStore.loadingApi = false) : '';
-          toast.success('تم الحفظ بنجاح!');
-          resolve(response.data);
-        })
-        .catch(error => {
-          log ? console.log(`saveItem:  => `, error) : '';
-          loading ? (userStore.loadingApi = false) : '';
-          let msg = '';
-          if (error && error.response && error.response.data && error.response.data.errors) {
-            msg = translateErrors(error.response.data.errors);
-          } else if (error && error.response && error.response.data && error.response.data.message) {
-            msg = error.response.data.message;
-          } else {
-            msg = 'حدث خطأ أثناء الحفظ';
-          }
-          toast.error(msg, { autoClose: 7000 });
-          reject(error);
-        });
+      response = await apiClient.post(apiEndpoint, formData);
     }
-  });
+    return handleSuccess(response, log, userStore, loading, `saveItem (${id ? 'Update' : 'Create'})`, showToast);
+  } catch (error) {
+    return handleError(error, log, userStore, loading, `saveItem (${id ? 'Update' : 'Create'})`, showToast);
+  }
 };
 
-export const deleteOne = (apiEndpoint, id, loading = true, log = false) => {
+export const deleteOne = async (apiEndpoint, id, loading = true, showToast = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
-  return new Promise((resolve, reject) => {
-    apiClient
-      .delete(`${apiEndpoint}/${id}`)
-      .then(response => {
-        log ? console.log(`deleteOne:  => `, response.data) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        toast.success('تم الحذف بنجاح!');
-        resolve(response.data.data);
-      })
-      .catch(error => {
-        log ? console.log(`deleteOne:  => `, error) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الحذف  ';
-        reject(msg);
-      });
-  });
+  try {
+    const response = await apiClient.delete(`${apiEndpoint}/${id}`);
+    return handleSuccess(response, log, userStore, loading, 'deleteOne', showToast);
+  } catch (error) {
+    return handleError(error, log, userStore, loading, 'deleteOne', showToast);
+  }
 };
 
-export const updateItem = (apiEndpoint, loading = true, log = false) => {
+export const updateItem = async (apiEndpoint, data, loading = true, showToast = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
-  return new Promise((resolve, reject) => {
-    apiClient
-      .put(`${apiEndpoint}`)
-      .then(response => {
-        log ? console.log(`updateItem:  => `, response.data) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        toast.success('تم التعديل بنجاح!');
-        resolve(response.data.data);
-      })
-      .catch(error => {
-        log ? console.log(`updateItem:  => `, error) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء التحديث  ';
-        reject(msg);
-      });
-  });
+  try {
+    const response = await apiClient.put(apiEndpoint, data);
+    return handleSuccess(response, log, userStore, loading, 'updateItem', showToast);
+  } catch (error) {
+    return handleError(error, log, userStore, loading, 'updateItem', showToast);
+  }
 };
 
-export const deleteAll = (apiEndpoint, ids, loading = true, log = false) => {
+export const deleteAll = async (apiEndpoint, ids, loading = true, showToast = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
-  return new Promise((resolve, reject) => {
-    apiClient
-      .post(apiEndpoint, { item_ids: ids })
-      .then(response => {
-        log ? console.log(`deleteAll:  => `, response.data) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        resolve(response.data.data);
-      })
-      .catch(error => {
-        log ? console.log(`deleteAll:  => `, error) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الحذف  ';
-        reject(msg);
-      });
-  });
+  try {
+    const response = await apiClient.post(apiEndpoint, { item_ids: ids });
+    return handleSuccess(response, log, userStore, loading, 'deleteAll', showToast);
+  } catch (error) {
+    return handleError(error, log, userStore, loading, 'deleteAll', showToast);
+  }
 };
 
-export const register = (apiEndpoint, id, loading = true, log = false) => {
+export const register = async (apiEndpoint, data, loading = true, showToast = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
-  return new Promise((resolve, reject) => {
-    apiClient
-      .delete(`${apiEndpoint}/${id}`)
-      .then(response => {
-        log ? console.log(`register:  => `, response.data) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        resolve(response.data.data);
-      })
-      .catch(error => {
-        log ? console.log(`register:  => `, error) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء الخروج  ';
-        reject(msg);
-      });
-  });
+  try {
+    const response = await apiClient.post(apiEndpoint, data);
+    return handleSuccess(response, log, userStore, loading, 'register', showToast);
+  } catch (error) {
+    return handleError(error, log, userStore, loading, 'register', showToast);
+  }
 };
-export const login = (apiEndpoint, data, loading = true, log = false) => {
+
+export const login = async (apiEndpoint, data, loading = true, showToast = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
-  return new Promise((resolve, reject) => {
-    apiClient
-      .post(apiEndpoint, data)
-      .then(response => {
-        log ? console.log(`login:  => `, response.data) : '';
-        localStorage.setItem('authToken', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        loading ? (userStore.loadingApi = false) : '';
-        location.reload();
-        resolve(response.data);
-      })
-      .catch(error => {
-        log ? console.log(`login:  => `, error) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء تسجيل الدخول';
-        reject(msg);
-      });
-  });
+  try {
+    const response = await apiClient.post(apiEndpoint, data);
+    log ? console.log(`login: ✅`, response.data) : '';
+    localStorage.setItem('authToken', response.data.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data.data.user));
+    loading ? (userStore.loadingApi = false) : '';
+    userStore.fetchUser();
+    if (showToast) {
+      // تحقق من showToast
+      toast.success(response.data.message);
+    }
+    return response.data.data;
+  } catch (error) {
+    return handleError(error, log, userStore, loading, 'login', showToast);
+  }
 };
 
-export const logOut = (apiEndpoint, loading = true, log = false) => {
+export const logOut = async (apiEndpoint, loading = true, showToast = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
-  return new Promise((resolve, reject) => {
-    apiClient
-      .post(apiEndpoint)
-      .then(response => {
-        log ? console.log(`logOut:  => `, response.data) : '';
-        delete axios.defaults.headers.common['Authorization'];
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('products');
-        loading ? (userStore.loadingApi = false) : '';
-        resolve(response.data);
-        location.reload();
-      })
-      .catch(error => {
-        log ? console.log(`logOut:  => `, error) : '';
-        loading ? (userStore.loadingApi = false) : '';
-        const msg = error?.response?.data?.message || error?.message || 'حدث خطأ أثناء تسجيل الخروج';
-        reject(msg);
-      });
-  });
+  try {
+    const response = await apiClient.post(apiEndpoint);
+    log ? console.log(`logOut: ✅`, response.data) : '';
+    delete axios.defaults.headers.common['Authorization'];
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('products');
+    loading ? (userStore.loadingApi = false) : '';
+    if (showToast) {
+      // تحقق من showToast
+      toast.success(response.data.message);
+    }
+    location.reload();
+    return response.data;
+  } catch (error) {
+    return handleError(error, log, userStore, loading, 'logOut', showToast);
+  }
 };
 
-export function deleteItem(resource, id) {
-  return axios
-    .delete(`${baseURL}/${resource}/${id}`)
-    .then(response => {
-      toast.success('تم الحذف بنجاح!');
-      return response;
-    })
-    .catch(error => {
-      toast.error('حدث خطأ أثناء الحذف!');
-      throw error;
-    });
-}
+export const deleteItem = async (resource, id, showToast = true) => {
+  const userStore = useUserStore();
+  userStore.loadingApi = true;
+  try {
+    const response = await apiClient.delete(`${resource}/${id}`);
+    return handleSuccess(response, false, userStore, true, 'deleteItem', showToast);
+  } catch (error) {
+    return handleError(error, false, userStore, true, 'deleteItem', showToast);
+  }
+};
 
-export function archiveItem(resource, id) {
-  return axios
-    .post(`${baseURL}/${resource}/${id}/archive`)
-    .then(response => {
-      toast.success('تم الأرشفة بنجاح!');
-      return response;
-    })
-    .catch(error => {
-      toast.error('حدث خطأ أثناء الأرشفة!');
-      throw error;
-    });
-}
+export const archiveItem = async (resource, id, showToast = true) => {
+  const userStore = useUserStore();
+  userStore.loadingApi = true;
+  try {
+    const response = await apiClient.post(`${resource}/${id}/archive`);
+    return handleSuccess(response, false, userStore, true, 'archiveItem', showToast);
+  } catch (error) {
+    return handleError(error, false, userStore, true, 'archiveItem', showToast);
+  }
+};
 
-export function restoreItem(resource, id) {
-  return axios
-    .post(`${baseURL}/${resource}/${id}/restore`)
-    .then(response => {
-      toast.success('تم الاستعادة بنجاح!');
-      return response;
-    })
-    .catch(error => {
-      toast.error('حدث خطأ أثناء الاستعادة!');
-      throw error;
-    });
-}
-
+export const restoreItem = async (resource, id, showToast = true) => {
+  const userStore = useUserStore();
+  userStore.loadingApi = true;
+  try {
+    const response = await apiClient.post(`${resource}/${id}/restore`);
+    return handleSuccess(response, false, userStore, true, 'restoreItem', showToast);
+  } catch (error) {
+    return handleError(error, false, userStore, true, 'restoreItem', showToast);
+  }
+};
 export async function getLocalPermissions(remotePermissions) {
   let permissionGroups = allPermissionsConfig => {
     if (!allPermissionsConfig) return [];

@@ -21,7 +21,7 @@ function logind() {
     errMessages.value = 'جميع الحقول مطلوبة';
     return;
   }
-  login('login', form.value, true, true)
+  login('login', form.value, true)
     .then(() => {
       toast.success('تم تسجيل الدخول بنجاح');
       router.push('/dashboard');
@@ -61,7 +61,7 @@ const isPasswordVisible = ref(false);
       </VCardText>
 
       <VCardText>
-        <VForm @submit.prevent="() => {}">
+        <VForm @submit.prevent="() => { }">
           <VRow>
             <!-- login -->
             <VCol cols="12">
@@ -75,15 +75,10 @@ const isPasswordVisible = ref(false);
 
             <!-- password -->
             <VCol cols="12">
-              <VTextField
-                v-model="form.password"
-                label="الباسورد"
-                placeholder="············"
+              <VTextField v-model="form.password" label="الباسورد" placeholder="············"
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
-                @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                @keyup.enter="logind"
-              />
+                @click:append-inner="isPasswordVisible = !isPasswordVisible" @keyup.enter="logind" />
 
               <!-- remember me checkbox -->
               <div class="d-flex align-center justify-space-between flex-wrap my-6">

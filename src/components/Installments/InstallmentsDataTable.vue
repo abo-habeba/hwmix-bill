@@ -1,42 +1,22 @@
 <template>
-  <v-data-table-server
-    item-value="id"
-    v-model:options="options"
-    :headers="headers"
-    :items="installments"
-    :items-length="totalItems"
-    :loading="loading"
-    hover
-    show-current-page
-    @update:options="fetchInstallments"
-    :row-props="getRowProps"
-    loading-text="جاري تحميل البيانات"
-    no-data-text="لا توجد بيانات"
-    items-per-page-text="عدد الصفوف في الصفحة"
-  >
+  <v-data-table-server item-value="id" v-model:options="options" :headers="headers" :items="installments"
+    :items-length="totalItems" :loading="loading" hover show-current-page @update:options="fetchInstallments"
+    :row-props="getRowProps" loading-text="جاري تحميل البيانات" no-data-text="لا توجد بيانات"
+    items-per-page-text="عدد الصفوف في الصفحة">
     <template #item.index="{ index }">
       {{ index + 1 }}
     </template>
 
     <template #item.actions="{ item }">
-      <v-btn
-        :color="item.status === 'تم الدفع' ? 'grey' : 'primary'"
-        :disabled="item.status === 'تم الدفع'"
-        density="compact"
-        @click="openPayDialog(item)"
-      >
+      <v-btn :color="item.status === 'تم الدفع' ? 'grey' : 'primary'" :disabled="item.status === 'تم الدفع'"
+        density="compact" @click="openPayDialog(item)">
         {{ item.status === 'تم الدفع' ? 'تم الدفع' : 'دفع القسط' }}
       </v-btn>
     </template>
   </v-data-table-server>
 
-  <v-pagination
-    v-model="currentPage"
-    :length="Math.ceil(totalItems / itemsPerPage)"
-    class="mt-4"
-    :show-first-last="true"
-    :total-visible="5"
-  ></v-pagination>
+  <v-pagination v-model="currentPage" :length="Math.ceil(totalItems / itemsPerPage)" class="mt-4"
+    :show-first-last="true" :total-visible="5"></v-pagination>
 
   <!-- Dialog دفع القسط -->
   <PayInstallmentDialog v-model="payDialog" :installment="currentInstallment" @update:installment="updateInstallment" />
@@ -103,8 +83,8 @@ async function fetchInstallments() {
 
   try {
     const res = await getAll('installments', params, true, true, true);
-    installments.value = res.data;
-    totalItems.value = res.total;
+    installments.value = res;
+    totalItems.value = res;
   } catch (error) {
     console.error('فشل في جلب الأقساط:', error);
   } finally {
@@ -113,7 +93,7 @@ async function fetchInstallments() {
 }
 
 onMounted(() => {
-  fetchInstallments();
+  // fetchInstallments();
 });
 
 watch(
@@ -135,6 +115,7 @@ function getRowProps({ item, index }) {
 .paid-row {
   background-color: #d4edda;
 }
+
 .unpaid-row {
   background-color: #f8d7da;
 }

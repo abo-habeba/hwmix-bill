@@ -94,7 +94,7 @@ const headers = ref([
   { title: 'الإجراءات', key: 'action', sortable: false, align: 'center' },
 ]);
 onMounted(() => {
-  fetchUsers();
+  // fetchUsers();
 });
 const deletedUsers = ref(null);
 const advancedSearch = ref(null);
@@ -233,8 +233,8 @@ async function fetchUsers() {
       sort_order: sortOrder,
       ...filters.value,
     });
-    users.value = response.data;
-    total.value = response.total;
+    users.value = response;
+    total.value = response;
     console.log('users', users.value);
   } catch (error) {
     console.error('Error fetching users:', error);

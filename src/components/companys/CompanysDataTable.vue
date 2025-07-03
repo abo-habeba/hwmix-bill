@@ -54,7 +54,7 @@ const headers = ref([
   { title: 'الوصف', key: 'description', align: 'center' },
 ]);
 onMounted(() => {
-  fetchCompanys();
+  // fetchCompanys();
 });
 const deletedCompanys = ref(null);
 const editcompany = ref(() => {
@@ -163,8 +163,8 @@ async function fetchCompanys() {
       sort_order: sortOrder,
       ...filters.value,
     });
-    companys.value = response.data;
-    total.value = response.total;
+    companys.value = response;
+    total.value = response;
   } catch (error) {
     console.error('Error fetching company:', error);
   } finally {
