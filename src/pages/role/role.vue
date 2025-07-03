@@ -218,7 +218,7 @@ onMounted(async () => {
   loading.value = true;
   try {
     const data = await getAll('roles');
-    roles.value = data.data;
+    roles.value = data;
   } catch (e) {
     if (e.data?.error === 'Unauthorized') {
       // router.push({ name: 'unauthorized' });

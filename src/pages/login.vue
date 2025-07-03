@@ -23,7 +23,7 @@ function logind() {
   }
   login('login', form.value, true)
     .then(() => {
-      toast.success('تم تسجيل الدخول بنجاح');
+      // toast.success('تم تسجيل الدخول بنجاح');
       router.push('/dashboard');
     })
     .catch(e => {

@@ -3,6 +3,7 @@ import { serialize } from 'object-to-formdata';
 import { useUserStore } from '@/stores/user';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
+import router from '@/plugins/router';
 import translateErrors from '@/utils/translateErrors';
 
 const apiClient = axios.create({
@@ -39,7 +40,8 @@ apiClient.interceptors.response.use(
     if (error?.response?.status === 401 || error?.response?.data?.message === 'Unauthenticated.') {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      // window.location.href = '/login';
+      router.push('/login');
       return Promise.reject(error);
     }
     if (error?.response?.status === 403 || error?.response?.data?.message === 'Forbidden' || error?.response?.data?.message === 'Unauthorized') {
@@ -284,7 +286,7 @@ export async function getLocalPermissions(remotePermissions) {
     return groups;
   };
 
-  const permissionsApi = await getAll('permissions');
+  const permissionsApi = await getAll('permissions', null, false, false, false);
   if (!Array.isArray(remotePermissions)) {
     console.error('Invalid remotePermissions data:', remotePermissions);
     return [];

@@ -8,28 +8,17 @@
       <v-card-title> العلامات التجارية</v-card-title>
       <v-divider class="ma-1"></v-divider>
       <v-row class="flex-wrap ma-2" style="gap: 16px">
-        <v-col
-          v-for="brand in brands"
-          :key="brand.id"
-          cols="12"
-          sm="auto"
-          class="d-flex align-center elevation-2 pa-1 rounded"
-          style="background: white; min-width: 280px"
-        >
+        <v-col v-for="brand in brands" :key="brand.id" cols="12" sm="auto"
+          class="d-flex align-center elevation-2 pa-1 rounded" style="background: white; min-width: 280px">
           <v-avatar variant="text" icon="ri-price-tag-3-line" color="primary" size="32" class="me-3" />
           <div class="text-lg fw-medium">
             {{ brand.name }}
           </div>
           <v-spacer />
-          <v-btn icon="ri-edit-line" variant="text" color="success" @click.stop="editBrand(brand)" title="تعديل العلامة التجارية" class="mx-1" />
-          <v-btn
-            icon="ri-delete-bin-line"
-            variant="text"
-            color="error"
-            @click.stop="confirmDelete(brand.id)"
-            title="حذف العلامة التجارية"
-            class="mx-1"
-          />
+          <v-btn icon="ri-edit-line" variant="text" color="success" @click.stop="editBrand(brand)"
+            title="تعديل العلامة التجارية" class="mx-1" />
+          <v-btn icon="ri-delete-bin-line" variant="text" color="error" @click.stop="confirmDelete(brand.id)"
+            title="حذف العلامة التجارية" class="mx-1" />
         </v-col>
 
         <v-col v-if="brands.length === 0" cols="12">
@@ -126,7 +115,7 @@ function deleteBrand(id) {
 
 function getBrands() {
   getAll('brands').then(res => {
-    brands.value = res.data;
+    brands.value = res;
   });
 }
 

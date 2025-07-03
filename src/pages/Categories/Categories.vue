@@ -8,20 +8,15 @@
       <v-divider></v-divider>
       <div style="width: max-content">
         <!-- v-treeview لعرض الشجرة -->
-        <v-treeview
-          v-if="treeCategories.length"
-          :items="treeCategories"
-          item-title="name"
-          item-value="id"
-          open-on-click
-          :item-props="getItemProps"
-          class="treeview-border ma-auto"
-          max-width="unset"
-        >
+        <v-treeview v-if="treeCategories.length" :items="treeCategories" item-title="name" item-value="id" open-on-click
+          :item-props="getItemProps" class="treeview-border ma-auto" max-width="unset">
           <template #append="{ item }">
-            <v-btn icon="ri-add-line" variant="text" color="primary" @click.stop="openAddDialog(item)" title="إضافة فرعية" class="mx-1" />
-            <v-btn icon="ri-edit-line" variant="text" color="primary" @click.stop="openEditDialog(item)" title="تعديل الفئة" class="mx-1" />
-            <v-btn icon="ri-delete-bin-line" variant="text" color="error" @click.stop="deleteCategory(item.id)" title="حذف الفئة" class="mx-1" />
+            <v-btn icon="ri-add-line" variant="text" color="primary" @click.stop="openAddDialog(item)"
+              title="إضافة فرعية" class="mx-1" />
+            <v-btn icon="ri-edit-line" variant="text" color="primary" @click.stop="openEditDialog(item)"
+              title="تعديل الفئة" class="mx-1" />
+            <v-btn icon="ri-delete-bin-line" variant="text" color="error" @click.stop="deleteCategory(item.id)"
+              title="حذف الفئة" class="mx-1" />
           </template>
         </v-treeview>
       </div>
@@ -110,7 +105,7 @@ function buildTree(categoriesList) {
 }
 function getCategories() {
   getAll('categories').then(res => {
-    categories.value = res.data;
+    categories.value = res;
     console.log(categories.value);
 
     treeCategories.value = buildTree(categories.value);

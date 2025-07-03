@@ -8,7 +8,8 @@
       <v-card-title>المخازن</v-card-title>
       <v-divider></v-divider>
       <div class="d-flex flex-wrap gap-2 pa-3">
-        <v-chip class="pa-1" v-for="warehouse in warehouses" :key="warehouse.id" closable @click:close="confirmDelete(warehouse.id)">
+        <v-chip class="pa-1" v-for="warehouse in warehouses" :key="warehouse.id" closable
+          @click:close="confirmDelete(warehouse.id)">
           {{ warehouse.name }}
         </v-chip>
         <v-chip v-if="warehouses.length === 0">لا توجد مخازن حتى الآن</v-chip>
@@ -22,7 +23,8 @@
         <v-card-text>
           <v-row dense>
             <v-col cols="12">
-              <v-text-field v-model="warehouse.name" label="اسم المخزن" :rules="[v => !!v || 'اسم المخزن مطلوب']" required dense></v-text-field>
+              <v-text-field v-model="warehouse.name" label="اسم المخزن" :rules="[v => !!v || 'اسم المخزن مطلوب']"
+                required dense></v-text-field>
             </v-col>
             <v-col cols="12">
               <v-text-field v-model="warehouse.location" label="الموقع" dense></v-text-field>
@@ -34,15 +36,8 @@
               <v-text-field v-model="warehouse.capacity" label="السعة" type="number" dense></v-text-field>
             </v-col>
             <v-col cols="12">
-              <v-select
-                v-model="warehouse.status"
-                item-value="value"
-                item-title="name"
-                :items="statusOptions"
-                label="الحالة"
-                required
-                dense
-              ></v-select>
+              <v-select v-model="warehouse.status" item-value="value" item-title="name" :items="statusOptions"
+                label="الحالة" required dense></v-select>
             </v-col>
           </v-row>
           <!-- يمكن إضافة company_id و created_by عند الحاجة -->
@@ -134,7 +129,7 @@ function deleteWarehouse(id) {
 
 function getWarehouses() {
   getAll('warehouses').then(res => {
-    warehouses.value = res.data;
+    warehouses.value = res;
   });
 }
 

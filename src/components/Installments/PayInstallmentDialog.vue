@@ -11,37 +11,17 @@
         </template>
         <template v-else>
           <v-form ref="payForm" v-model="valid">
-            <v-text-field
-              class="ma-1"
-              label="مبلغ السداد"
-              v-model="payData.amount"
-              type="number"
+            <v-text-field class="ma-1" label="مبلغ السداد" v-model="payData.amount" type="number"
               :rules="[v => !!v || 'المبلغ مطلوب', v => v > 0 || 'المبلغ يجب أن يكون أكبر من صفر']"
-              required
-            ></v-text-field>
+              required></v-text-field>
 
             <v-text-field class="ma-1" label="تاريخ السداد" v-model="payData.paid_at" type="date"></v-text-field>
 
-            <v-select
-              class="ma-1"
-              label="طريقة الدفع"
-              v-model="payData.payment_method_id"
-              :items="paymentMethods"
-              item-title="name"
-              item-value="id"
-              :rules="[v => !!v || 'اختر طريقة الدفع']"
-              required
-            ></v-select>
+            <v-select class="ma-1" label="طريقة الدفع" v-model="payData.payment_method_id" :items="paymentMethods"
+              item-title="name" item-value="id" :rules="[v => !!v || 'اختر طريقة الدفع']" required></v-select>
 
-            <v-select
-              class="ma-1"
-              label="صندوق النقدية"
-              v-model="payData.cash_box_id"
-              :items="cashboxes"
-              item-title="name"
-              item-value="id"
-              :rules="[v => !!v || 'اختر صندوق النقدية']"
-            ></v-select>
+            <v-select class="ma-1" label="صندوق النقدية" v-model="payData.cash_box_id" :items="cashboxes"
+              item-title="name" item-value="id" :rules="[v => !!v || 'اختر صندوق النقدية']"></v-select>
 
             <v-text-field class="ma-1" label="ملاحظات" v-model="payData.notes"></v-text-field>
           </v-form>
@@ -90,7 +70,7 @@ const cashboxes = ref([]);
 
 onMounted(async () => {
   try {
-    const methods = await getAll('payment-methods');
+    const methods = await getAll('payment-methods', {}, true, false, false);
     paymentMethods.value = methods;
 
     // اختيار طريقة الدفع الافتراضية (كاش)

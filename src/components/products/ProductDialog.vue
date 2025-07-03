@@ -188,7 +188,7 @@ async function getBrands() {
 
 async function getAttributes() {
   try {
-    const res = await getAll('attributes', null, true, true);
+    const res = await getAll('attributes', null, true, false);
     attributes.value = res.data;
   } catch (error) {
     console.error('Error fetching attributes:', error);
