@@ -1,14 +1,6 @@
 <template>
-  <v-select
-    v-model="localValue"
-    :items="types"
-    item-title="name"
-    item-value="id"
-    return-object
-    :loading="loading"
-    :disabled="loading || !types.length"
-    label="نوع الفاتورة"
-  />
+  <v-select v-model="localValue" :items="types" item-title="name" item-value="id" return-object :loading="loading"
+    :disabled="loading || !types.length" label="نوع الفاتورة" />
 </template>
 
 <script setup>
@@ -38,11 +30,13 @@ onMounted(fetchTypes);
 async function fetchTypes() {
   loading.value = true;
   try {
-    const { data } = await getAll('invoice-types', {
+    const data = await getAll('invoice-types', {
       context: props.invoiceContext?.context,
+      per_page: -1
     });
-
-    types.value = Array.isArray(data) ? data : data.items || [];
+    types.value = data || [];
+    console.log('data', data);
+    console.log('types.value', types.value);
 
     // 🟢 تعيين النوع المناسب حسب الـ context بعد تحميل الأنواع
     if (!props.modelValue && props.invoiceContext?.code) {

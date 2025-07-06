@@ -7,6 +7,8 @@
     item-value="id"
     return-object
     :label="label"
+    :filter="() => true"
+    no-filter
     prepend-inner-icon="ri-search-line"
     clearable
     :loading="isLoading"
@@ -41,7 +43,7 @@ const products = ref([]);
 const isLoading = ref(false);
 const searchText = ref('');
 const productAutocomplete = ref(null);
-
+const useCustomFilter = ref(false);
 const selectedProduct = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val),
@@ -49,6 +51,7 @@ const selectedProduct = computed({
 
 const page = ref(1);
 const hasMore = ref(true);
+
 const noProductText = computed(() => {
   if (searchText.value.length < 3) {
     return 'أدخل 3 أحرف على الأقل';
@@ -75,6 +78,7 @@ function productTitle(item) {
   // عرض التنسيق المناسب
   return `${_product_name}`.replace(/\s+/g, ' ').trim();
 }
+
 let searchTimeout = null;
 function onProductSearch(val) {
   searchText.value = val;
@@ -84,6 +88,7 @@ function onProductSearch(val) {
     loadProducts(true);
   }, 400);
 }
+
 async function loadProducts(reset = false) {
   if (searchText.value.length < 3) return;
 
@@ -95,14 +100,10 @@ async function loadProducts(reset = false) {
   if (!hasMore.value) return;
   isLoading.value = true;
   try {
-    const params = { search: searchText.value, limit: 20, page: page.value };
+    const params = { search: searchText.value, per_page: 20, page: page.value };
     const res = await getAll('product-variants/search-by-product', params);
-    if (res.data.length < 20) {
-      hasMore.value = false;
-    } else {
-      page.value++;
-    }
-    products.value = reset ? res.data : products.value.concat(res.data);
+
+    products.value = res;
   } catch (e) {
     console.error('فشل تحميل المنتجات:', e);
   } finally {

@@ -133,12 +133,10 @@ const totalPaid = computed(() => {
 
 // جلب الخطط
 function fetchInstallmentPlans() {
-  getAll('installment-plans')
+  getAll('installment-plans', { per_page: -1 }, true, true, false)
     .then(res => {
       installmentPlans.value = res.data || [];
-      console.log('تم جلب الخطط بنجاح:', JSON.stringify(installmentPlans.value[1].installments));
     })
-    .catch(err => console.error('فشل في جلب الخطط:', err));
 }
 
 function updateInstallments(updatedInstallments) {

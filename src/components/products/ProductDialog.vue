@@ -192,7 +192,7 @@ async function getBrands() {
 async function getAttributes() {
   try {
     const res = await getAll('attributes', null, true, false);
-    attributes.value = res.data;
+    attributes.value = res;
   } catch (error) {
     console.error('Error fetching attributes:', error);
   }
@@ -301,7 +301,7 @@ async function saveProduct() {
       res = await saveItem('product', newProductPayload);
     }
 
-    emit('saved', res.data);
+    emit('saved', res);
     closeDialog();
   } catch (e) {
     console.error('Error saving product:', e);

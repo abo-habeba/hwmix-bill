@@ -14,8 +14,10 @@
       </v-col>
     </v-row>
     <v-card elevation="2">
-      <v-data-table :headers="headers" :items="roles" :loading="loading" :search="search" hover
-        loading-text=" جاري تحمل البيانات " no-data-text=" لا توجد بيانات " items-per-page-text="عدد الصفوف في الصفحة">
+      <v-data-table :headers="headers" :items="roles" :search="search" :loading="loading"
+        loading-text="جاري تحميل البيانات" no-data-text="لا توجد بيانات" items-per-page-text="عدد الصفوف في الصفحة"
+        items-per-page="10" class="elevation-1" hover>
+
         <template v-slot:top>
           <v-toolbar color="transparent">
             <v-text-field class="ma-10" v-model="search" prepend-icon="ri-search-line" label="بحث..."
@@ -217,7 +219,7 @@ watch(
 onMounted(async () => {
   loading.value = true;
   try {
-    const data = await getAll('roles');
+    const data = await getAll('roles', { per_page: -1 }, false, false, false);
     roles.value = data;
   } catch (e) {
     if (e.data?.error === 'Unauthorized') {

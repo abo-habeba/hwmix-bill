@@ -19,7 +19,7 @@ const selectedCompanies = ref([]);
 const allCompanies = ref([]);
 const userStore = useUserStore();
 const roleDetail = ref(null);
-
+const userForm = ref(null); // إضافة مرجع للقالب للوصول إلى مكون VForm
 
 const tabs = [
   { title: 'بيانات الحساب', icon: 'ri-group-line', tab: 'account' },
@@ -38,18 +38,18 @@ const user = ref({
 });
 
 const tab = ref(route.params.tab || tabs[0].tab);
-const userFormValid = ref(false);
+const userFormValid = ref(false); // حالة صحة النموذج
 
+// قواعد التحقق
 const nicknameRules = [v => !!v || 'اسم الشهرة مطلوب'];
 const phoneRules = [v => !!v || 'رقم الهاتف مطلوب'];
-
-// onMounted(() => {
-//   mergedCompanies();
-// });
+const companiesRules = [v => selectedCompanies.value.length > 0 || 'حدد شركة واحدة على الأقل']; // تحديث القاعدة
+const emailRules = [v => !v || /.+@.+\..+/.test(v) || 'البريد الإلكتروني يجب أن يكون صالحًا'];
+const passwordRules = [v => !!v || 'كلمة المرور مطلوبة', v => v.length >= 6 || 'كلمة المرور يجب أن لا تقل عن 6 أحرف'];
 
 watch(
   () => userStore.user,
-  (val) => {
+  val => {
     if (val) {
       mergedCompanies();
     }
@@ -58,13 +58,14 @@ watch(
 );
 watch(
   () => route.params.id,
-  (newId) => {
+  newId => {
     if (newId) {
       userId.value = newId;
       loadUserData();
     } else {
       user.value.password = '12345678';
       loading.value = false;
+      user.value.customer_type = 'retail';
     }
   },
   { immediate: true }
@@ -73,12 +74,11 @@ watch(
 function loadUserData() {
   loading.value = true;
 
-  getAll('roles', {}, false, false, false)
+  getAll('roles', { per_page: -1 }, false, false, false)
     .then(data => {
-      roles.value = data;
-      loading.value = false;
+      roles.value = data.data;
+      // loading.value = false; // لا حاجة لتعطيل هنا، سيتم تعطيله في finally
     })
-
     .catch(() => {
       roles.value = [];
     });
@@ -86,8 +86,7 @@ function loadUserData() {
   getOne('user', userId.value, false, false, false)
     .then(res => {
       user.value = res;
-      selectedCompanies.value = res.user.companies;
-      loading.value = false;
+      selectedCompanies.value = res.user?.companies || [];
     })
     .finally(() => {
       loading.value = false;
@@ -102,6 +101,7 @@ function mergedCompanies() {
   const uniqueCompanies = Array.from(new Map(allComp.map(company => [company.id, company])).values());
   allCompanies.value = uniqueCompanies;
   selectedCompanies.value = allCompanies.value.filter(c => c.id === userStore.user.company_id);
+
   return uniqueCompanies;
 }
 
@@ -113,7 +113,10 @@ function itemProps(item) {
   };
 }
 
-function sendData() {
+async function sendData() {
+  const { valid } = await userForm.value.validate(); // تحقق من صحة النموذج قبل الإرسال
+  if (!valid) return; // إذا لم يكن النموذج صالحًا، لا ترسل البيانات
+
   companyIds.value = Array.from(
     selectedCompanies.value.map(company => {
       if (typeof company === 'object' && company.id !== undefined) return company.id;
@@ -149,63 +152,79 @@ function openRoleDetails(role) {
       <v-tabs-window-item value="account">
         <VRow>
           <VCol cols="12">
-            <VCard elevation="0" :loading="loading" :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'"
-              class="ma-4">
+            <VCard elevation="0" :loading="loading" :title="route.params.id ? 'تعديل المستخدم' : 'اضافة مستخدم'" class="ma-4">
               <VDivider />
               <VCardText>
-                <!-- 👉 Form -->
                 <VForm class="mt-6" ref="userForm" v-model="userFormValid">
                   <VRow>
-                    <!-- 👉 First Name -->
                     <VCol sm="6" md="4" cols="12">
                       <VTextField v-model="user.full_name" label="الاسم بالكامل" />
                     </VCol>
 
-                    <!-- 👉 Name -->
                     <VCol sm="6" md="4" cols="12">
                       <VTextField required v-model="user.nickname" label=" اسم الشهرة " :rules="nicknameRules" />
                     </VCol>
 
-                    <!-- 👉 Email -->
                     <VCol cols="12" sm="6" md="4">
                       <VTextField v-model="user.email" label="الايميل" placeholder="johndoe@gmail.com" type="email" />
                     </VCol>
-                    <!-- 👉 Phone -->
                     <VCol cols="12" sm="6" md="4">
-                      <PhoneNumberInput :label="'رقم الهاتف'" :placeholder="'0123456789'"
-                        :initialPhoneNumber="user.phone" @update:phoneNumber="val => (user.phone = val)"
-                        :rules="phoneRules" required />
+                      <PhoneNumberInput
+                        :label="'رقم الهاتف'"
+                        :placeholder="'0123456789'"
+                        :initialPhoneNumber="user.phone"
+                        @update:phoneNumber="val => (user.phone = val)"
+                        :rules="phoneRules"
+                        required
+                      />
                     </VCol>
 
-                    <!-- 👉 username -->
                     <VCol cols="12" sm="6" md="4">
                       <VTextField v-model="user.username" label="اسم المستخدم" placeholder="اسم المستخدم" />
                     </VCol>
-                    <!-- 👉 نوع المستخدم -->
                     <VCol cols="12" sm="6" md="4">
-                      <v-select v-model="user.customer_type" :items="[
-                        { value: 'retail', title: 'عميل قطاعي' },
-                        { value: 'wholesale', title: 'عميل جملة ' },
-                      ]" label="نوع العميل" item-title="title" item-value="value" clearable />
+                      <v-select
+                        v-model="user.customer_type"
+                        :items="[
+                          { value: 'retail', title: 'عميل قطاعي' },
+                          { value: 'wholesale', title: 'عميل جملة ' },
+                        ]"
+                        label="نوع العميل"
+                        item-title="title"
+                        item-value="value"
+                        clearable
+                      />
                     </VCol>
 
                     <VCol cols="12">
-                      <v-select v-model="selectedCompanies" :items="allCompanies" label="حدد الشركة" item-title="name"
-                        item-value="id" item-color="red" chips closable-chips multiple :item-props="itemProps"
-                        return-object></v-select>
+                      <v-select
+                        v-model="selectedCompanies"
+                        :items="allCompanies"
+                        label="حدد شركة علي الاقل"
+                        item-title="name"
+                        item-value="id"
+                        item-color="red"
+                        chips
+                        closable-chips
+                        multiple
+                        :item-props="itemProps"
+                        return-object
+                        :rules="companiesRules"
+                        required
+                      ></v-select>
                     </VCol>
 
                     <v-divider style="width: 50%" :thickness="2" class="border-opacity-100" color="warning"></v-divider>
-                    <!-- 👉 password -->
                     <VCol cols="12" sm="6" md="4">
-                      <VTextField required v-model="user.password" label=" الباسورد " placeholder="اسم المستخدم" />
+                      <VTextField
+                        :required="!route.params.id"
+                        v-model="user.password"
+                        label=" الباسورد "
+                        :rules="!route.params.id ? passwordRules : true"
+                      />
                     </VCol>
-                    <!-- 👉 Form Actions -->
                     <VCol cols="12" class="d-flex flex-wrap gap-4">
-                      <VBtn :disabled="!userFormValid" :class="{ 'forbidden-cursor': !userFormValid }"
-                        @click="sendData"> حفظ </VBtn>
-                      <!-- reset Form -->
-                      <!-- <VBtn color="secondary" variant="outlined" type="reset" @click.prevent="resetForm"> Reset </VBtn> -->
+                      <VBtn :disabled="!userFormValid" :class="{ 'forbidden-cursor': !userFormValid }" @click="sendData"> حفظ </VBtn>
                     </VCol>
                   </VRow>
                 </VForm>
@@ -236,5 +255,7 @@ function openRoleDetails(role) {
 <style scoped>
 .forbidden-cursor {
   cursor: not-allowed !important;
+  /* background-color: white !important; */
+  color: #8c57ff47 !important;
 }
 </style>

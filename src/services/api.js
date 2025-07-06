@@ -3,7 +3,7 @@ import { serialize } from 'object-to-formdata';
 import { useUserStore } from '@/stores/user';
 import { toast } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
-import router from '@/plugins/router';
+import { router } from '@/plugins/router';
 import translateErrors from '@/utils/translateErrors';
 
 const apiClient = axios.create({
@@ -40,12 +40,13 @@ apiClient.interceptors.response.use(
     if (error?.response?.status === 401 || error?.response?.data?.message === 'Unauthenticated.') {
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
-      // window.location.href = '/login';
-      router.push('/login');
-      return Promise.reject(error);
+      console.log('Redirecting to login...');
+      router.push({ name: 'login', query: { sessionExpired: '1' } });
+
+      // return Promise.reject(error);
     }
     if (error?.response?.status === 403 || error?.response?.data?.message === 'Forbidden' || error?.response?.data?.message === 'Unauthorized') {
-      alert('ليس لديك صلاحية للوصول إلى هذا المورد.');
+      toast.error('ليس لديك صلاحية للوصول إلى هذا المورد.');
       return Promise.reject(error);
     }
     return Promise.reject(error);
@@ -64,7 +65,7 @@ const handleSuccess = (response, log, userStore, loading, type, showToast) => {
 
   // ✅ استخدام hasOwnProperty بدل فحص القيمة نفسها
   if (resData.hasOwnProperty('total')) {
-    console.log(`${type} total:`, resData);
+    console.log(`${type} Paginator:`, resData);
 
     return resData;
   }
@@ -75,6 +76,7 @@ const handleSuccess = (response, log, userStore, loading, type, showToast) => {
 
 // تم تعديل الدالة لتقبل showToast
 const handleError = (error, log, userStore, loading, type, showToast) => {
+  if (error?.response?.status === 401) return;
   log ? console.log(`${type}: ❌`, error.response || error) : '';
   loading ? (userStore.loadingApi = false) : '';
 
@@ -88,7 +90,6 @@ const handleError = (error, log, userStore, loading, type, showToast) => {
   } else if (error.message) {
     errorMessage = error.message;
   }
-
   if (showToast) {
     // تحقق من showToast
     toast.error(errorMessage, { autoClose: 7000 });
@@ -97,7 +98,7 @@ const handleError = (error, log, userStore, loading, type, showToast) => {
 };
 
 // تم تعديل الدوال لإضافة معامل showToast
-export const getAll = async (apiEndpoint, params = null, loading = true, showToast = true, log = false) => {
+export const getAll = async (apiEndpoint, params = null, loading = true, showToast = false, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   try {

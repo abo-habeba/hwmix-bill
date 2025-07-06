@@ -1,12 +1,17 @@
 <script setup>
 import { login } from '@/services/api';
 import logo from '@images/logo.svg?raw';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { toast } from 'vue3-toastify';
-
-import { useRouter } from 'vue-router';
-
+import { useRouter, useRoute } from 'vue-router';
 const router = useRouter();
+const route = useRoute();
+
+onMounted(() => {
+  if (route.query.sessionExpired === '1') {
+    toast.error('انتهت صلاحية الجلسة الحالية. الرجاء تسجيل الدخول من جديد.');
+  }
+});
 
 const form = ref({
   login: '',
@@ -14,6 +19,8 @@ const form = ref({
   remember: false,
 });
 const errMessages = ref(false);
+
+
 function logind() {
   errMessages.value = false;
   if (!form.value.login || !form.value.password) {
@@ -23,7 +30,6 @@ function logind() {
   }
   login('login', form.value, true)
     .then(() => {
-      // toast.success('تم تسجيل الدخول بنجاح');
       router.push('/dashboard');
     })
     .catch(e => {
@@ -39,6 +45,7 @@ function logind() {
       toast.error(msg);
     });
 }
+
 
 const isPasswordVisible = ref(false);
 </script>

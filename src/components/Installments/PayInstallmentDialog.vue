@@ -70,7 +70,7 @@ const cashboxes = ref([]);
 
 onMounted(async () => {
   try {
-    const methods = await getAll('payment-methods', {}, true, false, false);
+    const methods = await getAll('payment-methods', { per_page: -1 }, true, false, false);
     paymentMethods.value = methods || [];
 
     // اختيار طريقة الدفع الافتراضية (كاش)

@@ -16,6 +16,7 @@
     clearable
     required
     return-object
+    no-filter
     hide-details="auto"
   />
 </template>
