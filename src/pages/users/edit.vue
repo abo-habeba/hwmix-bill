@@ -20,6 +20,7 @@ const allCompanies = ref([]);
 const userStore = useUserStore();
 const roleDetail = ref(null);
 const userForm = ref(null); // إضافة مرجع للقالب للوصول إلى مكون VForm
+console.log('selectedCompanies init:', selectedCompanies.value);
 
 const tabs = [
   { title: 'بيانات الحساب', icon: 'ri-group-line', tab: 'account' },
@@ -43,7 +44,7 @@ const userFormValid = ref(false); // حالة صحة النموذج
 // قواعد التحقق
 const nicknameRules = [v => !!v || 'اسم الشهرة مطلوب'];
 const phoneRules = [v => !!v || 'رقم الهاتف مطلوب'];
-const companiesRules = [v => selectedCompanies.value.length > 0 || 'حدد شركة واحدة على الأقل']; // تحديث القاعدة
+const companiesRules = [v => (Array.isArray(v) && v.length > 0) || 'حدد شركة واحدة على الأقل'];
 const emailRules = [v => !v || /.+@.+\..+/.test(v) || 'البريد الإلكتروني يجب أن يكون صالحًا'];
 const passwordRules = [v => !!v || 'كلمة المرور مطلوبة', v => v.length >= 6 || 'كلمة المرور يجب أن لا تقل عن 6 أحرف'];
 
@@ -76,7 +77,9 @@ function loadUserData() {
 
   getAll('roles', { per_page: -1 }, false, false, false)
     .then(data => {
-      roles.value = data.data;
+      roles.value = data;
+      console.log('roles', roles.value);
+
       // loading.value = false; // لا حاجة لتعطيل هنا، سيتم تعطيله في finally
     })
     .catch(() => {
@@ -86,7 +89,9 @@ function loadUserData() {
   getOne('user', userId.value, false, false, false)
     .then(res => {
       user.value = res;
-      selectedCompanies.value = res.user?.companies || [];
+      console.log('user ', res);
+      console.log('user.value.companies:', user.value.companies);
+      mergedCompanies();
     })
     .finally(() => {
       loading.value = false;
@@ -94,22 +99,27 @@ function loadUserData() {
 }
 
 function mergedCompanies() {
-  const allComp = [
-    ...user.value.companies.map(company => ({ ...company, disabled: false })),
-    ...userStore.user?.companies.map(company => ({ ...company, disabled: true })),
-  ];
-  const uniqueCompanies = Array.from(new Map(allComp.map(company => [company.id, company])).values());
+  const modifiedUserCompanies = (user.value.companies || []).map(c => ({ ...c, disabled: true }));
+  const currentUserCompanies = (userStore.user?.companies || []).map(c => ({ ...c, disabled: false }));
+
+  const combined = [...currentUserCompanies, ...modifiedUserCompanies];
+
+  const uniqueCompanies = Array.from(new Map(combined.map(c => [c.id, c])).values());
+
   allCompanies.value = uniqueCompanies;
-  selectedCompanies.value = allCompanies.value.filter(c => c.id === userStore.user.company_id);
+
+  // هنا بقى: اختار من allCompanies نفسها (نفس الـ reference)
+  selectedCompanies.value = uniqueCompanies.filter(c => (user.value.companies || []).some(u => u.id === c.id));
 
   return uniqueCompanies;
 }
 
 function itemProps(item) {
+  console.log('itemProps →', item);
   return {
     title: item.name,
     subtitle: item.field,
-    disabled: !item.disabled,
+    disabled: item.disabled,
   };
 }
 
@@ -195,9 +205,9 @@ function openRoleDetails(role) {
                         clearable
                       />
                     </VCol>
-
                     <VCol cols="12">
                       <v-select
+                        v-if="allCompanies"
                         v-model="selectedCompanies"
                         :items="allCompanies"
                         label="حدد شركة علي الاقل"
@@ -205,8 +215,8 @@ function openRoleDetails(role) {
                         item-value="id"
                         item-color="red"
                         chips
-                        closable-chips
                         multiple
+                        closable-chips
                         :item-props="itemProps"
                         return-object
                         :rules="companiesRules"
@@ -220,7 +230,7 @@ function openRoleDetails(role) {
                         :required="!route.params.id"
                         v-model="user.password"
                         label=" الباسورد "
-                        :rules="!route.params.id ? passwordRules : true"
+                        :rules="!route.params.id ? passwordRules : []"
                       />
                     </VCol>
                     <VCol cols="12" class="d-flex flex-wrap gap-4">

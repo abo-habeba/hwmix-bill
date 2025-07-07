@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-col cols="12" md="6">
+    <v-col cols="12" :md="col">
       <v-select
         v-model="selectedCashBoxId"
         :items="userStore.user.cashBoxes"
@@ -13,7 +13,7 @@
       />
     </v-col>
 
-    <v-col cols="12" md="6">
+    <v-col cols="12" :md="col">
       <v-select
         v-model="selectedPaymentType"
         :items="paymentTypes"
@@ -37,6 +37,7 @@ import { useUserStore } from '@/stores/user';
 const emit = defineEmits(['update:cashBoxId', 'update:paymentType']);
 const props = defineProps({
   cashBoxId: { type: Number, default: null },
+  col: { type: Number, default: 6 },
   paymentType: { type: [Number, String], default: null },
 });
 

@@ -54,43 +54,46 @@
         <v-row>
           <v-col cols="12" md="6">
             <v-text-field
-              v-model.number="form.discount"
+              v-model.number="form.total_discount"
               label="خصم عام على الفاتورة"
               type="number"
               min="0"
-              :max="form.total_amount"
+              :max="form.gross_amount"
               color="warning"
               prepend-inner-icon="ri-discount-percent-line"
               hide-details
               @input="clampDiscount"
             />
           </v-col>
+
           <v-col cols="12" md="6">
-            <InfoDisplay icon="ri-calculator-line" label="الإجمالي بعد الخصم" :text="formatCurrency(finalTotalAmount)" />
+            <InfoDisplay icon="ri-calculator-line" label="الإجمالي بعد الخصم" :text="formatCurrency(form.net_amount)" />
           </v-col>
-
-          <SelectedCashBox
-            :cash-box-id="form.cash_box_id"
-            :payment-type="form.payment_type"
-            @update:cash-box-id="form.cash_box_id = $event"
-            @update:payment-type="form.payment_type = $event"
-          />
-
+          <v-col cols="12" md="12">
+            <SelectedCashBox
+              :cash-box-id="form.cash_box_id"
+              :payment-type="form.payment_type"
+              @update:cash-box-id="form.cash_box_id = $event"
+              @update:payment-type="form.payment_type = $event"
+            />
+          </v-col>
           <v-col cols="12" md="6">
             <v-text-field
               v-model.number="form.paid_amount"
               label="المبلغ المدفوع من العميل"
               type="number"
               min="0"
-              :max="finalTotalAmount"
+              :max="form.net_amount"
               color="success"
               prepend-inner-icon="ri-cash-line"
               hide-details
             />
           </v-col>
+
           <v-col cols="12" md="6" class="py-1 px-2 d-flex align-center">
-            <InfoDisplay icon="ri-wallet-3-line" label="المتبقي" :text="formatCurrency(remainingAmount)" />
+            <InfoDisplay icon="ri-wallet-3-line" label="المتبقي" :text="formatCurrency(form.remaining_amount)" />
           </v-col>
+
           <v-col cols="12" md="6">
             <v-textarea
               v-model="form.notes"
@@ -102,6 +105,7 @@
               hide-details
             />
           </v-col>
+
           <v-col cols="12" md="6" class="py-1 px-2 d-flex align-center">
             <InfoDisplay icon="ri-user-3-line" label="اسم البائع" :text="sellerName" />
           </v-col>
@@ -165,13 +169,14 @@ const form = ref({
   invoice_type_id: null,
   invoice_type_code: null,
   status: null,
-  total_amount: 0,
-  items: [],
-  user_id: null,
+  gross_amount: 0,
+  total_discount: 0,
+  net_amount: 0,
   paid_amount: 0,
   remaining_amount: 0,
   notes: '',
-  discount: 0,
+  user_id: null,
+  items: [],
   cash_box_id: null,
   payment_type: '',
 });
@@ -180,23 +185,46 @@ const userStore = useUserStore();
 const sellerName = computed(() => userStore.user?.nickname || userStore.user?.name || '');
 
 /* ==================== Computed Properties ==================== */
-
-// الإجمالي الكلي لعناصر الفاتورة
-const totalInvoiceAmount = computed(() => {
-  return form.value.items.reduce((acc, item) => acc + (item.total || 0), 0);
+const grossAmount = computed(() => {
+  return form.value.items.reduce((acc, item) => acc + item.unit_price * item.quantity, 0);
 });
 
-// الإجمالي بعد الخصم
-const finalTotalAmount = computed(() => {
-  return Math.max(totalInvoiceAmount.value - (form.value.discount || 0), 0);
+const netAmount = computed(() => {
+  return Math.max(grossAmount.value - (form.value.total_discount || 0), 0);
 });
 
-// المبلغ المتبقي
 const remainingAmount = computed(() => {
-  return Math.max(finalTotalAmount.value - (form.value.paid_amount || 0), 0);
+  return Math.max(netAmount.value - (form.value.paid_amount || 0), 0);
 });
 
-/* =============== Lifecycle Hooks =============== */
+watch(
+  () => form.value.items,
+  () => {
+    form.value.gross_amount = grossAmount.value;
+    form.value.net_amount = netAmount.value;
+    form.value.remaining_amount = remainingAmount.value;
+  },
+  { deep: true }
+);
+
+watch(
+  () => form.value.total_discount,
+  () => {
+    form.value.net_amount = netAmount.value;
+    form.value.remaining_amount = remainingAmount.value;
+  }
+);
+
+watch(
+  () => form.value.paid_amount,
+  () => {
+    form.value.remaining_amount = remainingAmount.value;
+  }
+);
+
+watch(selectedUser, user => {
+  form.value.user_id = user?.id || null;
+});
 
 onMounted(() => {
   if (props.invoiceId) {
@@ -207,56 +235,22 @@ onMounted(() => {
   }
 });
 
-/* =============== Watchers =============== */
-
-// تحديث معرف المستخدم عند تغيير العميل المحدد
-watch(selectedUser, user => {
-  form.value.user_id = user?.id || null;
-});
-
-// تحديث الإجمالي الكلي عند تغيير عناصر الفاتورة
-watch(
-  () => form.value.items,
-  () => {
-    form.value.total_amount = totalInvoiceAmount.value; // تحديث total_amount في الفورم
-  },
-  { deep: true }
-);
-
-// تحديث المبلغ المتبقي تلقائياً
-// لم تعد هناك حاجة لـ watcher منفصل لـ remaining_amount لأنه computed property
-// سيتم تحديثه تلقائيًا عند تغيير paid_amount أو finalTotalAmount
-
-/* ==================== Helper Functions ==================== */
-
-// تنسيق العملة
 function formatCurrency(val) {
-  return new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'EGP' }).format(val || 0);
+  return new Intl.NumberFormat('EN-EG', { style: 'currency', currency: 'EGP' }).format(val || 0);
 }
 
-// تعديل كمية المنتج وحساب الإجمالي الفرعي
 function updateInvoiceItem(item) {
   item.total = item.unit_price * item.quantity - (item.discount || 0);
   if (item.total < 0) item.total = 0;
-  // totalInvoiceAmount computed property سيتكفل بتحديث total_amount
 }
 
-// إزالة المنتج من الفاتورة
 function removeInvoiceItem(itemToRemove) {
-  if (!itemToRemove || !itemToRemove.product_id) {
-    console.error('Invalid item passed to removeInvoiceItem:', itemToRemove);
-    return;
-  }
+  if (!itemToRemove || !itemToRemove.product_id) return;
   form.value.items = form.value.items.filter(item => item.product_id !== itemToRemove.product_id);
-  // totalInvoiceAmount computed property سيتكفل بتحديث total_amount
 }
 
-// إضافة أو زيادة كمية المنتج
 function addOrIncrementProduct(product) {
-  if (!product || !product.id || !product.product_name) {
-    console.error('بيانات المنتج غير صالحة:', product);
-    return;
-  }
+  if (!product || !product.id || !product.product_name) return;
 
   const userType = selectedUser.value?.user_type || 'retail';
   const price =
@@ -283,74 +277,55 @@ function addOrIncrementProduct(product) {
       stocks: product.stocks || [],
     };
     form.value.items.push(newItem);
-    updateInvoiceItem(newItem); // تحديث الإجمالي للعنصر الجديد
+    updateInvoiceItem(newItem);
   }
-  itemsError.value = null; // مسح رسالة الخطأ عند إضافة منتج بنجاح
+  itemsError.value = null;
 }
 
-// البحث عن منتج بالسيريال
 async function searchProductBySerial(serial) {
   if (!serial) return;
   isSaving.value = true;
   try {
     const { data } = await getAll('products', { serial });
     const product = Array.isArray(data) ? data[0] : data.items?.[0];
-    if (product) {
-      addOrIncrementProduct(product);
-    } else {
-      itemsError.value = 'لم يتم العثور على منتج بهذا السيريال';
-    }
+    if (product) addOrIncrementProduct(product);
+    else itemsError.value = 'لم يتم العثور على منتج بهذا السيريال';
   } catch (e) {
     itemsError.value = 'حدث خطأ أثناء البحث عن المنتج';
-    console.error(e);
   } finally {
     isSaving.value = false;
     serialInput.value = '';
   }
 }
 
-// التعامل مع إدخال السيريال
 function onSerialInputEnter(val) {
   if (val && val.length >= 3) searchProductBySerial(val);
 }
 
-// التعامل مع اختيار المنتج من البحث
 function onProductSelect(product) {
-  if (!product || typeof product !== 'object') {
-    console.error('منتج غير صالح:', product);
-    return;
-  }
-  productSearch.value = product; // يمكن إزالة هذا السطر إذا لم يكن له تأثير مرئي
+  if (!product || typeof product !== 'object') return;
+  productSearch.value = product;
   addOrIncrementProduct(product);
 }
 
-// التحكم في قيمة الخصم لضمان أنها ضمن النطاق
 function clampDiscount() {
-  if (form.value.discount < 0) form.value.discount = 0;
-  if (form.value.discount > totalInvoiceAmount.value) form.value.discount = totalInvoiceAmount.value;
+  if (form.value.total_discount < 0) form.value.total_discount = 0;
+  if (form.value.total_discount > grossAmount.value) form.value.total_discount = grossAmount.value;
 }
 
-/* ============ Invoice Type & Dialogs ============ */
-
-// تحديث نوع الفاتورة
 function handleInvoiceTypeUpdate(type) {
   form.value.invoice_type_id = type?.id || null;
   form.value.invoice_type_code = type?.code || null;
 }
 
-// فتح حوار التقسيط
 function openInstallmentDialog() {
   showInstallmentDialog.value = true;
 }
 
-// التعامل مع حفظ التقسيط
 function handleInstallmentSaved(payload) {
   saveInvoice(payload);
 }
 
-/* ============ Invoice Saving Logic ============ */
-
-// التحقق قبل حفظ الفاتورة
 function checkInvoiceTypeBeforeSave() {
   form.value.invoice_type_id = invoiceType.value?.id || null;
   form.value.invoice_type_code = invoiceType.value?.code || null;
@@ -364,14 +339,12 @@ function checkInvoiceTypeBeforeSave() {
     itemsError.value = 'يجب إضافة منتجات إلى الفاتورة';
     return;
   }
-
   const invalidItem = form.value.items.find(item => !item.product_id || !item.name);
   if (invalidItem) {
     itemsError.value = 'يرجى التأكد من أن جميع المنتجات تحتوي على الحقول المطلوبة';
     return;
   }
-
-  itemsError.value = null; // مسح أي أخطاء سابقة
+  itemsError.value = null;
 
   if (form.value.invoice_type_code === 'installment_sale') {
     openInstallmentDialog();
@@ -380,7 +353,6 @@ function checkInvoiceTypeBeforeSave() {
   }
 }
 
-// تحميل الفاتورة من الـ API
 async function loadInvoice(id) {
   try {
     const res = await getOne('invoices', id);
@@ -389,12 +361,10 @@ async function loadInvoice(id) {
       if (res.data.user) selectedUser.value = res.data.user;
     }
   } catch (e) {
-    console.error('خطأ في تحميل الفاتورة:', e);
     itemsError.value = 'حدث خطأ أثناء تحميل الفاتورة.';
   }
 }
 
-// حفظ الفاتورة
 async function saveInvoice(payload) {
   isSaving.value = true;
   itemsError.value = null;
@@ -405,13 +375,11 @@ async function saveInvoice(payload) {
     emit('close');
   } catch (e) {
     itemsError.value = 'حدث خطأ أثناء الحفظ. يرجى التحقق من البيانات والمحاولة مرة أخرى.';
-    console.error('خطأ في حفظ الفاتورة:', e);
   } finally {
     isSaving.value = false;
   }
 }
 
-// دالة طباعة/معاينة الفاتورة
 function printInvoice() {
   if (form.value.id) {
     sessionStorage.setItem('print_invoice', JSON.stringify(form.value));
