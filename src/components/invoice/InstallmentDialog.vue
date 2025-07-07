@@ -8,29 +8,58 @@
       <v-card-text>
         <v-row dense class="my-2">
           <v-col cols="8">
-            <div class="d-flex align-center flex-column justify-center" dark>
+            <div class="d-flex align-center flex-column justify-center">
               <span class="text-center"> اجمالي الفاتورة </span>
-              <span class="text-subtitle-1 font-weight-bold">{{ formatCurrency(form.total_amount) }}</span>
+              <span class="text-subtitle-1 font-weight-bold">{{ formatCurrency(planForm.total_amount) }}</span>
             </div>
           </v-col>
           <v-col cols="4">
-            <v-text-field hide-details="auto" v-model="form.round_step" label="نسبة التقريب" type="number"
-              @input="calculateInstallment" outlined />
+            <v-text-field
+              hide-details="auto"
+              v-model="form.round_step"
+              label="نسبة التقريب"
+              type="number"
+              @input="calculateInstallment"
+              outlined
+            />
           </v-col>
         </v-row>
+
         <v-row dense class="my-2">
           <v-col cols="12" class="pa-1">
-            <v-text-field hide-details="auto" v-model="downPayment" label="المقدم المدفوع" type="number"
-              @input="calculateInstallment" outlined dense />
+            <v-text-field
+              hide-details="auto"
+              v-model="downPayment"
+              label="المقدم المدفوع"
+              type="number"
+              @input="calculateInstallment"
+              outlined
+              dense
+            />
           </v-col>
           <v-col cols="12" class="pa-1">
-            <v-text-field hide-details="auto" v-model="months" label="عدد الشهور" type="number"
-              @input="calculateInstallment" outlined dense />
+            <v-text-field
+              hide-details="auto"
+              v-model="months"
+              label="عدد الشهور"
+              type="number"
+              @input="calculateInstallment"
+              outlined
+              dense
+            />
           </v-col>
           <v-col cols="12" class="pa-1">
-            <v-text-field hide-details="auto" v-model="startDate" label="تاريخ البدء" type="date" outlined dense />
+            <v-text-field
+              hide-details="auto"
+              v-model="startDate"
+              label="تاريخ البدء"
+              type="date"
+              outlined
+              dense
+            />
           </v-col>
         </v-row>
+
         <v-row dense class="my-2">
           <v-col cols="6" sm="6" md="4" v-for="(item, index) in previewPlan" :key="index">
             <v-card :color="item.color" class="d-flex align-center flex-column justify-center elevation-6" dark>
@@ -63,61 +92,46 @@
 </template>
 
 <script setup>
-// == Imports ==
-import { ref, watch, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import dayjs from 'dayjs';
 
-// == Props & Emits ==
 const props = defineProps({
   form: { type: Object, required: true },
   visible: Boolean,
 });
 const emit = defineEmits(['installment-saved', 'update:visible']);
-const formattedStartDate = computed({
-  get: () => {
-    return startDate.value ? new Date(startDate.value) : null
-  },
-  set: (val) => {
-    startDate.value = val
-  }
-})
 
-// == Reactive refs ==
+// == Refs ==
 const downPayment = ref(0);
 const months = ref(12);
 const monthlyInstallment = ref(0);
 const totalAfterInstallment = ref(0);
 const startDate = ref(dayjs().format('YYYY-MM-DD'));
-const dueDate = ref(dayjs().format('YYYY-MM-DD'));
-const maxDate = ref(dayjs().format('YYYY-MM-DD'));
 
-// == Helper: تقريب لأعلى step ==
-const ceilTo = (val, step = 10) => Math.ceil(val / step) * step;
+// == Helper functions ==
+function ceilTo(val, step = 10) {
+  return Math.ceil(val / step) * step;
+}
 
-// == Plan form (يستخدمه previewPlan) ==
 const planForm = computed(() => ({
   round_step: props.form.round_step ?? 10,
-  total_amount: props.form.total_amount ?? 0,
+  total_amount: +props.form.net_amount || 0,
   down_payment: +downPayment.value || 0,
   number_of_installments: +months.value || 1,
   start_date: startDate.value,
 }));
 
-// == Preview plan (للعرض فقط) ==
 const previewPlan = computed(() => {
-  /* 1) الأساسيات */
   const step = +planForm.value.round_step || 10;
-  const total = +totalAfterInstallment.value; // استخدم إجمالي سعر الفاتورة بعد حساب الفائدة
+  const total = +totalAfterInstallment.value;
   const down = +planForm.value.down_payment;
   const n = +planForm.value.number_of_installments;
   const start = dayjs(planForm.value.start_date);
 
-  /* 2) الحسابات الدقيقة */
   const remaining = +(total - down).toFixed(2);
   const avg = +(remaining / n).toFixed(2);
   const stdInst = +ceilTo(avg, step).toFixed(2);
 
-  /* 3) توليد الأقساط للعرض */
   const installments = [];
   let paid = 0;
   for (let i = 1; i <= n; i++) {
@@ -130,9 +144,7 @@ const previewPlan = computed(() => {
   }
 
   const lastInstallmentAmount = installments.at(-1)?.amount || null;
-  const lastInstallmentDate = installments.at(-1)?.due_date || null;
 
-  /* 4) Return preview object */
   return [
     {
       label: 'سعر التقسيط',
@@ -161,69 +173,44 @@ const previewPlan = computed(() => {
       color: 'teal-darken-2',
       format: 'currency',
     },
-    // {
-    //   label: 'المبلغ المتبقي بعد المقدم',
-    //   value: remaining.toFixed(2),
-    //   icon: 'ri-wallet-3-line',
-    //   color: 'deep-orange-darken-2',
-    //   format: 'currency',
-    // },
-    // {
-    //   label: 'تاريخ أول قسط',
-    //   value: start.format('YYYY-MM-DD'),
-    //   icon: 'ri-calendar-line',
-    //   color: 'cyan-darken-2',
-    // },
-    // {
-    //   label: 'تاريخ آخر قسط',
-    //   value: lastInstallmentDate,
-    //   icon: 'ri-calendar-event-line',
-    //   color: 'orange-darken-2',
-    // },
   ];
 });
 
-// == Utils ==
 function formatCurrency(v) {
   return new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 2 }).format(+v || 0);
 }
 
-// == Monthly calculation ==
 function calculateInstallment() {
   const monthsCount = +months.value || 1;
-  const remainingAmount = (+props.form.total_amount || 0) - (+downPayment.value || 0);
-  const monthlyRate = 0.025; // 2.5% شهريًا
-  const interest = remainingAmount * monthlyRate * monthsCount;
-  const total = remainingAmount + interest;
+  const net = +props.form.net_amount || 0;
+  const down = +downPayment.value || 0;
+  const remaining = net - down;
+  const monthlyRate = 0.025;
+  const interest = remaining * monthlyRate * monthsCount;
+  const total = remaining + interest;
   monthlyInstallment.value = +(total / monthsCount).toFixed(2);
-  totalAfterInstallment.value = +(total + +downPayment.value).toFixed(2);
+  totalAfterInstallment.value = +(total + down).toFixed(2);
 }
 
-// == Actions ==
 function saveInstallment() {
   const data = {
     ...props.form,
     installment_plan: {
-      down_payment: downPayment.value,
-      number_of_installments: months.value,
-      installment_amount: monthlyInstallment.value,
-      total_amount: totalAfterInstallment.value,
+      down_payment: +downPayment.value || 0,
+      number_of_installments: +months.value || 1,
+      installment_amount: +monthlyInstallment.value || 0,
+      total_amount: +totalAfterInstallment.value || 0,
       start_date: startDate.value,
-      due_date: dueDate.value,
-      round_step: form.round_step,
+      due_date: dayjs(startDate.value).add(months.value, 'month').format('YYYY-MM-DD'),
+      round_step: +props.form.round_step || 10,
     },
   };
   emit('installment-saved', data);
 }
 
-function validateStartDate() {
-  const today = dayjs().format('YYYY-MM-DD');
-  if (startDate.value < today) startDate.value = today;
-}
-
 function updateVisible(val) {
   emit('update:visible', !!val);
-  if (!val) validateStartDate();
+  if (val) calculateInstallment();
 }
 
 function closeDialog() {
@@ -231,19 +218,7 @@ function closeDialog() {
 }
 
 // == Watchers ==
-watch(
-  [downPayment, months],
-  () => {
-    props.form.round_step = 10;
-    calculateInstallment();
-  },
-  { immediate: true }
-);
-watch(() => props.form.total_amount, calculateInstallment);
+watch([downPayment, months], calculateInstallment, { immediate: true });
+watch(() => props.form.net_amount, calculateInstallment);
+watch(() => props.visible, (v) => { if (v) calculateInstallment(); });
 </script>
-
-<style scoped>
-.text-h6 {
-  font-size: 1.1rem;
-}
-</style>
