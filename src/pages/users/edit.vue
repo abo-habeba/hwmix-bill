@@ -99,8 +99,17 @@ function loadUserData() {
 }
 
 function mergedCompanies() {
-  const modifiedUserCompanies = (user.value.companies || []).map(c => ({ ...c, disabled: true }));
-  const currentUserCompanies = (userStore.user?.companies || []).map(c => ({ ...c, disabled: false }));
+  const currentUserCompanyIds = new Set((userStore.user?.companies || []).map(c => c.id));
+  const modifiedUserCompanies = (user.value.companies || []).map(c => ({
+    ...c,
+    // اجعل الشركة disabled فقط إذا لم تكن موجودة عند المستخدم الحالي
+    disabled: !currentUserCompanyIds.has(c.id),
+  }));
+
+  const currentUserCompanies = (userStore.user?.companies || []).map(c => ({
+    ...c,
+    disabled: false, // شركات المستخدم الحالي دائمًا متاحة
+  }));
 
   const combined = [...currentUserCompanies, ...modifiedUserCompanies];
 
@@ -108,7 +117,7 @@ function mergedCompanies() {
 
   allCompanies.value = uniqueCompanies;
 
-  // هنا بقى: اختار من allCompanies نفسها (نفس الـ reference)
+  // نفس المنطق: اختيار الشركات المرتبطة بالمستخدم المعدل
   selectedCompanies.value = uniqueCompanies.filter(c => (user.value.companies || []).some(u => u.id === c.id));
 
   return uniqueCompanies;
