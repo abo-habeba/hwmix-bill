@@ -122,9 +122,7 @@ function mergedCompanies() {
   allCompanies.value = uniqueCompanies;
 
   // اختيار الشركات اللي كانت موجودة أصلًا عند المستخدم المعدل
-  selectedCompanies.value = uniqueCompanies.filter(c =>
-    (user.value.companies || []).some(u => u.id === c.id)
-  );
+  selectedCompanies.value = uniqueCompanies.filter(c => (user.value.companies || []).some(u => u.id === c.id));
 
   return uniqueCompanies;
 }
@@ -234,7 +232,6 @@ function openRoleDetails(role) {
                         closable-chips
                         :item-props="itemProps"
                         return-object
-                        :rules="companiesRules"
                         required
                       ></v-select>
                     </VCol>
