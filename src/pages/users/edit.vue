@@ -35,6 +35,8 @@ const user = ref({
   username: '',
   roles: [],
   companies: [],
+  company_id: null,
+  company_ids: [],
   password: '',
 });
 
@@ -149,6 +151,8 @@ async function sendData() {
   user.value.company_id = companyIds.value.length <= 0 ? userStore.user.company_id : companyIds.value[0];
   user.value.company_ids = companyIds.value.length > 0 ? companyIds.value : [];
   user.value.companies = null;
+  delete user.value.roles;
+  delete user.value.permissions;
 
   saveItem('user', user.value, route.params.id).then(() => {
     setTimeout(() => {
