@@ -146,8 +146,8 @@ async function sendData() {
       return company;
     })
   );
-  user.value.company_id = companyIds.value.length <= 0 ? null : companyIds.value[0];
-  user.value.company_ids = companyIds.value.length > 0 ? companyIds.value : null;
+  user.value.company_id = companyIds.value.length <= 0 ? userStore.user.company_id : companyIds.value[0];
+  user.value.company_ids = companyIds.value.length > 0 ? companyIds.value : [];
   user.value.companies = null;
 
   saveItem('user', user.value, route.params.id).then(() => {

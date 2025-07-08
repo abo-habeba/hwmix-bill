@@ -55,6 +55,7 @@ function sendData() {
   saveItem('company', payload, route.params.id)
     .then(res => {
       userStore.fetchUser();
+
       router.go(-1);
     })
     .catch(error => {
