@@ -20,7 +20,6 @@ const form = ref({
 });
 const errMessages = ref(false);
 
-
 function logind() {
   errMessages.value = false;
   if (!form.value.login || !form.value.password) {
@@ -33,6 +32,8 @@ function logind() {
       router.push('/dashboard');
     })
     .catch(e => {
+      console.log(e);
+
       let msg = e?.message || 'فشل تسجيل الدخول، تحقق من البيانات';
       if (e?.response?.status === 401) {
         msg = 'بيانات الدخول غير صحيحة';
@@ -45,7 +46,6 @@ function logind() {
       toast.error(msg);
     });
 }
-
 
 const isPasswordVisible = ref(false);
 </script>
@@ -68,7 +68,7 @@ const isPasswordVisible = ref(false);
       </VCardText>
 
       <VCardText>
-        <VForm @submit.prevent="() => { }">
+        <VForm @submit.prevent="() => {}">
           <VRow>
             <!-- login -->
             <VCol cols="12">
@@ -82,10 +82,15 @@ const isPasswordVisible = ref(false);
 
             <!-- password -->
             <VCol cols="12">
-              <VTextField v-model="form.password" label="الباسورد" placeholder="············"
+              <VTextField
+                v-model="form.password"
+                label="الباسورد"
+                placeholder="············"
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
-                @click:append-inner="isPasswordVisible = !isPasswordVisible" @keyup.enter="logind" />
+                @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                @keyup.enter="logind"
+              />
 
               <!-- remember me checkbox -->
               <div class="d-flex align-center justify-space-between flex-wrap my-6">

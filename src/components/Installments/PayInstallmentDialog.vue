@@ -11,17 +11,37 @@
         </template>
         <template v-else>
           <v-form ref="payForm" v-model="valid">
-            <v-text-field class="ma-1" label="مبلغ السداد" v-model="payData.amount" type="number"
+            <v-text-field
+              class="ma-1"
+              label="مبلغ السداد"
+              v-model="payData.amount"
+              type="number"
               :rules="[v => !!v || 'المبلغ مطلوب', v => v > 0 || 'المبلغ يجب أن يكون أكبر من صفر']"
-              required></v-text-field>
+              required
+            ></v-text-field>
 
             <v-text-field class="ma-1" label="تاريخ السداد" v-model="payData.paid_at" type="date"></v-text-field>
 
-            <v-select class="ma-1" label="طريقة الدفع" v-model="payData.payment_method_id" :items="paymentMethods"
-              item-title="name" item-value="id" :rules="[v => !!v || 'اختر طريقة الدفع']" required></v-select>
+            <v-select
+              class="ma-1"
+              label="طريقة الدفع"
+              v-model="payData.payment_method_id"
+              :items="paymentMethods"
+              item-title="name"
+              item-value="id"
+              :rules="[v => !!v || 'اختر طريقة الدفع']"
+              required
+            ></v-select>
 
-            <v-select class="ma-1" label="صندوق النقدية" v-model="payData.cash_box_id" :items="cashboxes"
-              item-title="name" item-value="id" :rules="[v => !!v || 'اختر صندوق النقدية']"></v-select>
+            <v-select
+              class="ma-1"
+              label="صندوق النقدية"
+              v-model="payData.cash_box_id"
+              :items="cashboxes"
+              item-title="name"
+              item-value="id"
+              :rules="[v => !!v || 'اختر صندوق النقدية']"
+            ></v-select>
 
             <v-text-field class="ma-1" label="ملاحظات" v-model="payData.notes"></v-text-field>
           </v-form>
@@ -152,27 +172,11 @@ function submitPayment() {
   saveItem('installment-payment/pay', payData.value)
     .then(newInstallments => {
       console.log('تم تحديث القسط:', newInstallments);
-      emit('update:installment', newInstallments.installments);
+      emit('update:installment', newInstallments);
       closePayDialog();
-      Toastify({
-        text: 'تم الدفع بنجاح',
-        duration: 3000,
-        close: true,
-        gravity: 'top',
-        position: 'right',
-        backgroundColor: '#4CAF50',
-      }).showToast();
     })
     .catch(error => {
       console.error('Error submitting payment:', error);
-      Toastify({
-        text: 'حدث خطأ أثناء الدفع',
-        duration: 3000,
-        close: true,
-        gravity: 'top',
-        position: 'right',
-        backgroundColor: '#F44336',
-      }).showToast();
     });
 }
 </script>

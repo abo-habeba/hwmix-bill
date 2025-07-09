@@ -1,22 +1,42 @@
 <template>
-  <v-data-table-server item-value="id" v-model:options="options" :headers="headers" :items="installments"
-    :items-length="totalItems" :loading="loading" hover show-current-page @update:options="fetchInstallments"
-    :row-props="getRowProps" loading-text="جاري تحميل البيانات" no-data-text="لا توجد بيانات"
-    items-per-page-text="عدد الصفوف في الصفحة">
+  <v-data-table-server
+    item-value="id"
+    v-model:options="options"
+    :headers="headers"
+    :items="installments"
+    :items-length="totalItems"
+    :loading="loading"
+    hover
+    show-current-page
+    @update:options="fetchInstallments"
+    :row-props="getInstallmentRowProps"
+    loading-text="جاري تحميل البيانات"
+    no-data-text="لا توجد بيانات"
+    items-per-page-text="عدد الصفوف في الصفحة"
+  >
     <template #item.index="{ index }">
       {{ index + 1 }}
     </template>
 
     <template #item.actions="{ item }">
-      <v-btn :color="item.status === 'تم الدفع' ? 'grey' : 'primary'" :disabled="item.status === 'تم الدفع'"
-        density="compact" @click="openPayDialog(item)">
+      <v-btn
+        :color="item.status === 'تم الدفع' ? 'grey' : 'primary'"
+        :disabled="item.status === 'تم الدفع'"
+        density="compact"
+        @click="openPayDialog(item)"
+      >
         {{ item.status === 'تم الدفع' ? 'تم الدفع' : 'دفع القسط' }}
       </v-btn>
     </template>
   </v-data-table-server>
 
-  <v-pagination v-model="currentPage" :length="Math.ceil(totalItems / itemsPerPage)" class="mt-4"
-    :show-first-last="true" :total-visible="5"></v-pagination>
+  <v-pagination
+    v-model="currentPage"
+    :length="Math.ceil(totalItems / itemsPerPage)"
+    class="mt-4"
+    :show-first-last="true"
+    :total-visible="5"
+  ></v-pagination>
 
   <!-- Dialog دفع القسط -->
   <PayInstallmentDialog v-model="payDialog" :installment="currentInstallment" @update:installment="updateInstallment" />
@@ -56,7 +76,24 @@ function openPayDialog(item) {
   currentInstallment.value = item;
   payDialog.value = true;
 }
+// دالة لتنسيق صف جدول الأقساط بناءً على حالة القسط
+function getInstallmentRowProps({ item }) {
+  const remainingAmount = parseFloat(item.remaining) || 0;
+  const dueDate = new Date(item.due_date);
+  const today = new Date();
+  // لضمان مقارنة التواريخ فقط (تجاهل الوقت)
+  dueDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
 
+  if (item.status === 'تم الدفع') {
+    return { style: { backgroundColor: '#A5D6A7' } }; // أخضر أغمق قليلاً (Material Design Light Green 300)
+  } else if (remainingAmount > 0 && dueDate < today) {
+    return { style: { backgroundColor: '#EF9A9A' } }; // أحمر أغمق قليلاً (Material Design Red 200)
+  } else if (remainingAmount > 0) {
+    return { style: { backgroundColor: '#FFE082' } }; // أصفر/برتقالي أغمق قليلاً (Material Design Amber 200)
+  }
+  return {}; // لا يوجد تنسيق خاص
+}
 function updateInstallment(newInstallments) {
   newInstallments.forEach(newInstallment => {
     const index = installments.value.findIndex(i => i.id === newInstallment.id);
