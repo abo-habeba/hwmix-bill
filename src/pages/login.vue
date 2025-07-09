@@ -35,7 +35,7 @@ function logind() {
       console.log(e);
 
       let msg = e?.message || 'فشل تسجيل الدخول، تحقق من البيانات';
-      if (e?.response?.status === 401) {
+      if (e?.response?.status === 422) {
         msg = 'بيانات الدخول غير صحيحة';
       } else if (e?.response?.status === 429) {
         msg = 'عدد محاولات الدخول كبير، يرجى المحاولة لاحقاً';
