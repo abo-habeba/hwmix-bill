@@ -201,7 +201,7 @@ export const login = async (apiEndpoint, data, loading = true, showToast = true,
     }
     return response.data.data;
   } catch (error) {
-    return handleError(error, log, userStore, loading, 'login', showToast);
+    return error;
   }
 };
 

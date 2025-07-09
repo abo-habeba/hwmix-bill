@@ -42,14 +42,31 @@
       <v-card-text>
         <!-- ملخص الخطة -->
         <v-row class="px-4 pt-4" dense>
-          <v-col cols="6"><strong>المستخدم:</strong> {{ currentPlan.user?.nickname || 'غير متوفر' }}</v-col>
-          <v-col cols="6"><strong>الفاتورة:</strong> {{ currentPlan.invoice?.invoice_number || '—' }}</v-col>
-          <v-col cols="6"><strong>تاريخ البدء:</strong> {{ formattedStartDate }}</v-col>
-          <v-col cols="6"><strong>إجمالي الفاتورة:</strong> {{ currentPlan.total_amount }}</v-col>
-          <v-col cols="6"><strong>إجمالي المتبقي:</strong> {{ currentPlan.total_installments_remaining }}</v-col>
-          <v-col cols="6"><strong>إجمالي المدفوع:</strong> {{ currentPlan.total_pay }}</v-col>
-          <v-col cols="6"><strong>المقدم:</strong> {{ currentPlan.down_payment }}</v-col>
-          <v-col cols="6"><strong>عدد الأقساط:</strong> {{ currentPlan.installments?.length || 0 }}</v-col>
+          <!-- تم تعديل cols إلى cols="12" sm="6" -->
+          <v-col cols="12" sm="6">
+            <InfoDisplay icon="ri-user-line" label="المستخدم" :text="currentPlan.user?.nickname || 'غير متوفر'" />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <InfoDisplay icon="ri-file-text-line" label="الفاتورة" :text="currentPlan.invoice?.invoice_number || '—'" />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <InfoDisplay icon="ri-calendar-line" label="تاريخ البدء" :text="formattedStartDate" />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <InfoDisplay icon="ri-money-dollar-box-line" label="إجمالي الفاتورة" :text="currentPlan.total_amount" />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <InfoDisplay icon="ri-wallet-line" label="إجمالي المتبقي" :text="currentPlan.total_installments_remaining" />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <InfoDisplay icon="ri-hand-coin-line" label="إجمالي المدفوع" :text="currentPlan.total_pay" />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <InfoDisplay icon="ri-hand-heart-line" label="المقدم" :text="currentPlan.down_payment" />
+          </v-col>
+          <v-col cols="12" sm="6">
+            <InfoDisplay icon="ri-list-ordered" label="عدد الأقساط" :text="currentPlan.installments?.length || 0" />
+          </v-col>
         </v-row>
 
         <!-- جدول الأقساط بدون ترقيم صفحات -->
