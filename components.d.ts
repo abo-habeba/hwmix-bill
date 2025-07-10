@@ -36,6 +36,7 @@ declare module 'vue' {
     DefaultTextarea: typeof import('./src/@core/components/DefaultTextarea.vue')['default']
     DeletedItem: typeof import('./src/components/DeletedItem.vue')['default']
     ErrorHeader: typeof import('./src/components/ErrorHeader.vue')['default']
+    ImagePickerDialog: typeof import('./src/components/images/ImagePickerDialog.vue')['default']
     InfoDisplay: typeof import('./src/components/InfoDisplay.vue')['default']
     InstallmentDialog: typeof import('./src/components/Invoice/InstallmentDialog.vue')['default']
     'InstallmentDialog copy': typeof import('./src/components/Invoice/InstallmentDialog copy.vue')['default']

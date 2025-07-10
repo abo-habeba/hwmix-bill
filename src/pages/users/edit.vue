@@ -168,6 +168,14 @@ function openRoleDetails(role) {
     roleDetail.value.openDialog();
   }
 }
+import ImagePickerDialog from '@/components/images/ImagePickerDialog.vue';
+const showImageDialog = ref(false);
+const selectedImageIds = ref([]);
+
+const onImagesSelected = ids => {
+  selectedImageIds.value = ids;
+  user.value.images_ids = ids;
+};
 </script>
 
 <template>
@@ -238,6 +246,13 @@ function openRoleDetails(role) {
                         return-object
                         required
                       ></v-select>
+                    </VCol>
+
+                    <VCol cols="12">
+                      <VCol cols="12" class="d-flex flex-wrap gap-4">
+                        <VBtn @click="showImageDialog = true"> اضافة صورة </VBtn>
+                      </VCol>
+                      <ImagePickerDialog v-model="showImageDialog" @close="onImagesSelected" />
                     </VCol>
 
                     <v-divider style="width: 50%" :thickness="2" class="border-opacity-100" color="warning"></v-divider>

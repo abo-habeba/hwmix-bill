@@ -167,7 +167,7 @@ export const deleteAll = async (apiEndpoint, ids, loading = true, showToast = tr
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   try {
-    const response = await apiClient.post(apiEndpoint, { item_ids: ids });
+    const response = await apiClient.post(apiEndpoint, ids);
     return handleSuccess(response, log, userStore, loading, apiEndpoint, showToast);
   } catch (error) {
     return handleError(error, log, userStore, loading, apiEndpoint, showToast);
