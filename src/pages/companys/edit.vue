@@ -25,6 +25,15 @@ const generateImagePreview = () => {
   }
 };
 
+import ImagePickerDialog from '@/components/images/ImagePickerDialog.vue';
+const showImageDialog = ref(false);
+const selectedImageIds = ref([]);
+const onImagesSelected = ids => {
+  selectedImageIds.value = ids;
+  console.log(selectedImageIds.value);
+  company.value.logo = ids;
+};
+
 //companies
 const company = ref({});
 
@@ -46,11 +55,8 @@ onMounted(() => {
 function sendData() {
   const payload = { ...company.value };
 
-  if (image.value) {
-    payload.logo = image.value; // إرسال الصورة فقط إذا تم اختيار صورة جديدة
-  } else {
-    delete payload.logo; // حذف المفتاح إذا لم يتم اختيار صورة جديدة
-  }
+  payload.images_ids = selectedImageIds.value; // إرسال الصورة فقط إذا تم اختيار صورة جديدة
+  delete payload.logo; // حذف المفتاح إذا لم يتم اختيار صورة جديدة
 
   saveItem('company', payload, route.params.id)
     .then(res => {
@@ -141,21 +147,13 @@ function validateImage() {
                 <!-- 👉 Image -->
                 <VCol cols="12" sm="6" md="4">
                   <v-col cols="12" md="6">
-                    <div v-if="imagePreview">
-                      <v-img :src="imagePreview" class="mb-2" aspect-ratio="1" cover></v-img>
+                    <div v-if="company?.logo">
+                      <v-img :src="company?.logo" class="mb-2" aspect-ratio="1" cover></v-img>
                     </div>
                   </v-col>
                   <v-col cols="12">
                     <!-- إدخال الملف -->
-                    <v-file-input
-                      v-model="image"
-                      label="اختر شعار"
-                      prepend-icon="ri-image-add-fill"
-                      accept="image/*"
-                      chips
-                      placeholder="اختر شعار للشركة"
-                      @change="generateImagePreview"
-                    ></v-file-input>
+                    <ImagePickerDialog v-model="showImageDialog" @close="onImagesSelected" />
                   </v-col>
                 </VCol>
                 <!-- 👉 Form Actions -->

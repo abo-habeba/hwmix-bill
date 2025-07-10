@@ -249,9 +249,6 @@ const onImagesSelected = ids => {
                     </VCol>
 
                     <VCol cols="12">
-                      <VCol cols="12" class="d-flex flex-wrap gap-4">
-                        <VBtn @click="showImageDialog = true"> اضافة صورة </VBtn>
-                      </VCol>
                       <ImagePickerDialog v-model="showImageDialog" @close="onImagesSelected" />
                     </VCol>
 
