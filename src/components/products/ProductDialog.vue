@@ -130,7 +130,6 @@ const productRules = {
 };
 
 function setInitialWarehouseForFirstStock() {
-
   if (localProduct.value?.variants) {
     if (localProduct.value.variants && localProduct.value.variants[0]?.stocks && warehouses.value) {
       if (localProduct.value.variants[0].stocks[0].warehouse_id === null) {
@@ -183,7 +182,7 @@ onMounted(async () => {
 async function getBrands() {
   try {
     const res = await getAll('brands', null, true, false);
-    brands.value = res.data;
+    brands.value = res;
   } catch (error) {
     console.error('Error fetching brands:', error);
   }
@@ -213,7 +212,7 @@ async function getWarehouses() {
 async function getCategories() {
   try {
     const res = await getAll('categories', null, true, false);
-    categories.value = res.data;
+    categories.value = res;
   } catch (error) {
     console.error('Error fetching categories:', error);
   }
@@ -323,22 +322,32 @@ function closeDialog() {
 <template>
   <v-dialog v-model="dialog" max-width="900px">
     <v-card>
-      <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line"
-        @click="closeDialog"></v-btn>
+      <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line" @click="closeDialog"></v-btn>
       <v-card-title class="ma-3 text-center">
         <h2>{{ isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد' }}</h2>
       </v-card-title>
       <v-card-text class="pa-0">
         <v-form ref="productForm" v-model="productFormValid">
-          <ProductGeneralInfoForm :modelValue="localProduct" :categories="categories" :brands="brands"
-            :productRules="productRules" @update:modelValue="value => (localProduct = value)" />
+          <ProductGeneralInfoForm
+            :modelValue="localProduct"
+            :categories="categories"
+            :brands="brands"
+            :productRules="productRules"
+            @update:modelValue="value => (localProduct = value)"
+          />
 
           <v-card class="pa-2 ma-1" outlined>
             <v-card-title class="ma-2"> خيارات المنتج </v-card-title>
             <v-row class="bg-grey-lighten-1 pa-2" v-for="(variant, vIndex) in localProduct.variants" :key="vIndex">
-              <ProductVariantForm :variant="variant" :variantIndex="vIndex" :attributes="attributes"
-                :warehouses="warehouses" :statusOptions="statusOptions" :productRules="productRules"
-                @remove-variant="removeVariant" />
+              <ProductVariantForm
+                :variant="variant"
+                :variantIndex="vIndex"
+                :attributes="attributes"
+                :warehouses="warehouses"
+                :statusOptions="statusOptions"
+                :productRules="productRules"
+                @remove-variant="removeVariant"
+              />
             </v-row>
           </v-card>
 
@@ -351,12 +360,17 @@ function closeDialog() {
           <v-sheet class="position-sticky bottom-0 bg-grey-lighten-2" elevation="1">
             <v-divider class="my-2"></v-divider>
             <v-card-actions class="justify-center bg-grey-lighten-3 pa-2 ma-2 gap-8">
-              <v-btn prepend-icon="ri-save-line" color="success" variant="outlined" :disabled="!productFormValid"
-                @click="saveProduct" class="text-capitalize">
+              <v-btn
+                prepend-icon="ri-save-line"
+                color="success"
+                variant="outlined"
+                :disabled="!productFormValid"
+                @click="saveProduct"
+                class="text-capitalize"
+              >
                 {{ isEditMode ? 'حفظ التعديلات' : 'إضافة المنتج' }}
               </v-btn>
-              <v-btn prepend-icon="ri-close-line" color="error" variant="outlined" @click="closeDialog"
-                class="text-capitalize"> إلغاء </v-btn>
+              <v-btn prepend-icon="ri-close-line" color="error" variant="outlined" @click="closeDialog" class="text-capitalize"> إلغاء </v-btn>
             </v-card-actions>
           </v-sheet>
         </v-form>
