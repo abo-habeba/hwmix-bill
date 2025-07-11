@@ -1,7 +1,7 @@
 <template>
-  <div class="app-footer d-flex align-center justify-md-space-between justify-center">
+  <div class="app-footer d-flex justify-center w-100">
     <!-- 👉 تذييل: المحتوى الأيسر -->
-    <span class="d-flex align-center text-body-2 text-medium-emphasis">
+    <div class="d-flex align-center text-body-2 text-medium-emphasis">
       &copy; 2025 - {{ new Date().getFullYear() }}
       صنع من
       <VIcon icon="ri-heart-line" color="error" size="1.25rem" class="mx-1" />
@@ -9,7 +9,7 @@
       <a href="https://www.facebook.com/hesham.mohamed.ahmed.abdalmaboud" target="_blank" rel="noopener noreferrer" class="text-primary ms-1"
         >ابو حبيبة</a
       >
-    </span>
+    </div>
     <!-- 👉 تذييل: المحتوى الأيمن (معطل حاليًا) -->
     <!-- <span class="d-md-flex gap-x-4 text-primary d-none">
       <a href="https://themeselection.com/license/" target="noopener noreferrer">الترخيص</a>
