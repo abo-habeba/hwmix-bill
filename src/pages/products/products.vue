@@ -31,7 +31,7 @@ const stickerComponentRef = ref(null);
 
 const headers = [
   { title: 'الاسم', key: 'name' },
-  // { title: 'الكمية', key: 'stock_quantity' },
+  { title: 'اجمالي الكمية', key: 'total_available_quantity' },
   { title: 'القسم', key: 'category' },
   { title: 'الماركة', key: 'brand' },
   { title: 'الإجراء', key: 'actions', sortable: false },
@@ -208,26 +208,50 @@ function printMobileSticker() {
         <h3 class="text-h6 font-weight-bold mb-0">قائمة المنتجات</h3>
         <v-btn color="primary" @click="openAddDialog" size="small">+ إضافة منتج</v-btn>
         <div class="d-flex align-center gap-2">
-          <v-text-field v-model="search" placeholder="بحث عن منتج..." hide-details rounded
-            style="max-width: 180px; min-width: 120px; font-size: 13px" @keydown.enter="fetchProducts"
-            @blur="fetchProducts" clearable @click:clear="
+          <v-text-field
+            v-model="search"
+            placeholder="بحث عن منتج..."
+            hide-details
+            rounded
+            style="max-width: 180px; min-width: 120px; font-size: 13px"
+            @keydown.enter="fetchProducts"
+            @blur="fetchProducts"
+            clearable
+            @click:clear="
               () => {
                 search = '';
                 fetchProducts();
               }
-            " prepend-inner-icon="ri-search-line" @click:prepend-inner="fetchProducts" />
+            "
+            prepend-inner-icon="ri-search-line"
+            @click:prepend-inner="fetchProducts"
+          />
         </div>
       </div>
 
-      <v-data-table :items="products" :headers="headers" item-key="id" class="text-start" density="compact"
-        style="direction: rtl" :loading="loading" :options.sync="options" :server-items-length="total"
-        :items-per-page="options.itemsPerPage" :page.sync="options.page" :sort-by.sync="options.sortBy"
-        no-data-text="لا توجد بيانات" loading-text="جاري تحميل البيانات..." items-per-page-text="عدد العناصر في الصفحة"
-        page-text="{0}-{1} من {2}" @update:options="fetchProducts">
+      <v-data-table
+        :items="products"
+        :headers="headers"
+        item-key="id"
+        class="text-start"
+        density="compact"
+        style="direction: rtl"
+        :loading="loading"
+        :options.sync="options"
+        :server-items-length="total"
+        :items-per-page="options.itemsPerPage"
+        :page.sync="options.page"
+        :sort-by.sync="options.sortBy"
+        no-data-text="لا توجد بيانات"
+        loading-text="جاري تحميل البيانات..."
+        items-per-page-text="عدد العناصر في الصفحة"
+        page-text="{0}-{1} من {2}"
+        @update:options="fetchProducts"
+      >
         <template #item="{ item }">
-          <tr :class="{ 'bg-product-expanded': expandedId === item.id }" @click="toggleExpand(item.id)"
-            style="cursor: pointer">
+          <tr :class="{ 'bg-product-expanded': expandedId === item.id }" @click="toggleExpand(item.id)" style="cursor: pointer">
             <td>{{ item.name }}</td>
+            <td>{{ item.total_available_quantity }}</td>
             <td>{{ item.category?.name ?? '-' }}</td>
             <td>{{ item.brand?.name ?? '-' }}</td>
             <td @click.stop>
@@ -237,67 +261,76 @@ function printMobileSticker() {
           </tr>
           <tr v-if="expandedId === item.id">
             <td colspan="5" class="pa-0">
-              <v-data-table :items="item.variants" :headers="variantHeaders" item-key="id" density="compact"
-                class="text-start" hide-default-footer no-data-text="لا يوجد متغيرات لهذا المنتج">
+              <v-data-table
+                :items="item.variants"
+                :headers="variantHeaders"
+                item-key="id"
+                density="compact"
+                class="text-start"
+                hide-default-footer
+                no-data-text="لا يوجد متغيرات لهذا المنتج"
+              >
                 <template #item="{ item: variant }">
-          <tr :class="variant.quantity <= variant.min_quantity ? 'bg-variant-min-quantity' : 'bg-variant-normal'">
-            <td>{{ variant.sku }}</td>
-            <td>{{ variant.barcode }}</td>
-            <td>{{ variant.quantity }}</td>
-            <td>{{ variant.min_quantity }}</td>
-            <td>{{ variant.cost }}</td>
-            <td>{{ variant.wholesale_price }}</td>
-            <td>{{ variant.retail_price }}</td>
-            <td>{{ variant.discount }}</td>
-            <td>
-              <!-- استبدل هذا الجزء بمكون عرض الاتربيوت -->
-              <AttributesDisplay :attributes="variant.attributes" font-size="10px" />
-            </td>
-            <td>
-              <div>
-                <v-btn size="x-small" icon color="blue" title="تعديل"
-                  @click.stop="openVariantEditDialog(variant, item.id)"><v-icon size="16">ri-edit-line</v-icon></v-btn>
-                <v-btn size="x-small" icon color="red" title="حذف"><v-icon size="16">ri-delete-bin-line</v-icon></v-btn>
-                <v-btn size="x-small" icon color="success" title="طباعة استيكر"
-                  @click.stop="openStickerDialog(variant)"><v-icon size="16">ri-printer-line</v-icon></v-btn>
-              </div>
+                  <tr :class="variant.quantity <= variant.min_quantity ? 'bg-variant-min-quantity' : 'bg-variant-normal'">
+                    <td>{{ variant.sku }}</td>
+                    <td>{{ variant.barcode }}</td>
+                    <td>{{ variant.quantity }}</td>
+                    <td>{{ variant.min_quantity }}</td>
+                    <td>{{ variant.cost }}</td>
+                    <td>{{ variant.wholesale_price }}</td>
+                    <td>{{ variant.retail_price }}</td>
+                    <td>{{ variant.discount }}</td>
+                    <td>
+                      <!-- استبدل هذا الجزء بمكون عرض الاتربيوت -->
+                      <AttributesDisplay :attributes="variant.attributes" font-size="10px" />
+                    </td>
+                    <td>
+                      <div>
+                        <v-btn size="x-small" icon color="blue" title="تعديل" @click.stop="openVariantEditDialog(variant, item.id)"
+                          ><v-icon size="16">ri-edit-line</v-icon></v-btn
+                        >
+                        <v-btn size="x-small" icon color="red" title="حذف"><v-icon size="16">ri-delete-bin-line</v-icon></v-btn>
+                        <v-btn size="x-small" icon color="success" title="طباعة استيكر" @click.stop="openStickerDialog(variant)"
+                          ><v-icon size="16">ri-printer-line</v-icon></v-btn
+                        >
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </v-data-table>
             </td>
           </tr>
         </template>
       </v-data-table>
-      </td>
-      </tr>
-</template>
-</v-data-table>
-</v-card>
+    </v-card>
 
-<v-dialog v-model="confirmDelete" max-width="340">
-  <v-card>
-    <v-card-title>تأكيد الحذف</v-card-title>
-    <v-card-text>هل أنت متأكد أنك تريد حذف هذا المنتج؟</v-card-text>
-    <v-card-actions>
-      <v-btn color="error" @click="removeProduct" size="small">تأكيد</v-btn>
-      <v-btn @click="confirmDelete = false" size="small">إلغاء</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
+    <v-dialog v-model="confirmDelete" max-width="340">
+      <v-card>
+        <v-card-title>تأكيد الحذف</v-card-title>
+        <v-card-text>هل أنت متأكد أنك تريد حذف هذا المنتج؟</v-card-text>
+        <v-card-actions>
+          <v-btn color="error" @click="removeProduct" size="small">تأكيد</v-btn>
+          <v-btn @click="confirmDelete = false" size="small">إلغاء</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
-<!-- Dialog خاص بطباعة الاستيكر على الموبايل -->
-<v-dialog v-model="showMobileStickerDialog" max-width="350">
-  <v-card>
-    <v-card-title class="text-center">معاينة استيكر المنتج</v-card-title>
-    <v-card-text>
-      <div id="mobile-sticker-print">
-        <ProductSticker :product="stickerComponentRef" ref="mobileStickerRef" />
-      </div>
-    </v-card-text>
-    <v-card-actions class="justify-center">
-      <v-btn color="primary" @click="printMobileSticker">طباعة</v-btn>
-      <v-btn color="grey" @click="showMobileStickerDialog = false">إغلاق</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
-</v-container>
+    <!-- Dialog خاص بطباعة الاستيكر على الموبايل -->
+    <v-dialog v-model="showMobileStickerDialog" max-width="350">
+      <v-card>
+        <v-card-title class="text-center">معاينة استيكر المنتج</v-card-title>
+        <v-card-text>
+          <div id="mobile-sticker-print">
+            <ProductSticker :product="stickerComponentRef" ref="mobileStickerRef" />
+          </div>
+        </v-card-text>
+        <v-card-actions class="justify-center">
+          <v-btn color="primary" @click="printMobileSticker">طباعة</v-btn>
+          <v-btn color="grey" @click="showMobileStickerDialog = false">إغلاق</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-container>
 </template>
 
 <style scoped>

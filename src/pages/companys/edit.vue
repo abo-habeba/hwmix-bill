@@ -54,7 +54,6 @@ onMounted(() => {
 });
 function sendData() {
   const payload = { ...company.value };
-
   payload.images_ids = selectedImageIds.value; // إرسال الصورة فقط إذا تم اختيار صورة جديدة
   delete payload.logo; // حذف المفتاح إذا لم يتم اختيار صورة جديدة
 

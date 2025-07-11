@@ -124,16 +124,29 @@ export const getOne = async (apiEndpoint, id, loading = true, showToast = true, 
 export const saveItem = async (apiEndpoint, data, id = false, loading = true, showToast = true, log = false) => {
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
-  const formData = serialize(data, options);
+  // const formData = serialize(data, options);
 
   try {
     let response;
+    // تحقق هل فيه صورة
+    const shouldUseFormData = apiEndpoint === 'image';
+    console.log('shouldUseFormData', shouldUseFormData);
+
+    // لو فيه صورة، نحول البيانات لـ FormData
+    let finalData = shouldUseFormData ? serialize(data) : data;
+
+    // لو تعديل، ضيف _method = put
     if (id) {
-      formData.append('_method', 'put');
+      if (shouldUseFormData) {
+        finalData.append('_method', 'put');
+      } else {
+        finalData['_method'] = 'put';
+      }
+
       const apiEndpointIfId = `${apiEndpoint}/${id}`;
-      response = await apiClient.post(apiEndpointIfId, formData);
+      response = await apiClient.post(apiEndpointIfId, finalData);
     } else {
-      response = await apiClient.post(apiEndpoint, formData);
+      response = await apiClient.post(apiEndpoint, finalData);
     }
     return handleSuccess(response, log, userStore, loading, `${apiEndpoint} => (${id ? 'Update' : 'Create'})`, showToast);
   } catch (error) {

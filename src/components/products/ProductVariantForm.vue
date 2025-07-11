@@ -7,8 +7,7 @@
       <v-text-field v-model="variant.wholesale_price" label="سعر البيع بالجملة" type="number" hide-details="auto" />
     </v-col>
     <v-col cols="12" sm="6" class="my-0 py-1">
-      <v-select v-model="variant.status" :items="statusOptions" item-value="value" item-title="text" label="الحالة"
-        hide-details="auto" />
+      <v-select v-model="variant.status" :items="statusOptions" item-value="value" item-title="text" label="الحالة" hide-details="auto" />
     </v-col>
     <v-col cols="12" sm="6" class="my-0 py-1">
       <v-text-field v-model="variant.min_quantity" label=" حد التحزير " hide-details="auto" />
