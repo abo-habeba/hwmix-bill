@@ -71,16 +71,8 @@ async function handleSubmit() {
   const payload = { name: nameValue.value };
   let response;
   try {
-    if (isEditMode.value && props.editAttribute) {
-      response = await saveItem('attribute', { ...payload, id: props.editAttribute.id }, props.editAttribute.id, true, true);
-      // تحديث الخاصية في المصفوفة
-      const updated = props.attributes.map(attr => (attr.id === props.editAttribute.id ? { ...attr, ...response.data } : attr));
-      emit('update:attributes', updated);
-    } else {
-      response = await saveItem('attribute', payload, false, true, true);
-      // إضافة الخاصية الجديدة للمصفوفة
-      emit('update:attributes', [...props.attributes, response.data]);
-    }
+    response = await saveItem('attribute', payload, props.editAttribute.id, false, true, true);
+    emit('update:attributes', response);
     closeDialog(null);
   } catch (e) {
     errorMessage.value = e?.message || 'حدث خطأ أثناء حفظ الخاصية';

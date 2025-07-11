@@ -9,16 +9,26 @@
       <div class="d-flex flex-wrap gap-2 pa-3">
         <v-row>
           <v-col v-if="attributes.length" v-for="attr in attributes" :key="attr.id" cols="12" sm="6" md="4" lg="3">
-            <v-chip class="d-flex align-center pa-1" @click="openValuesDialog(attr)" :style="{
-              minHeight: '35px',
-            }">
+            <v-chip
+              class="d-flex align-center pa-1"
+              @click="openValuesDialog(attr)"
+              :style="{
+                minHeight: '35px',
+              }"
+            >
               <div class="ma-3 flex-grow-1">{{ attr.name }}</div>
-              <v-btn icon size="x-small" color="primary" class="ma-1" style="margin-inline-start: 4px"
-                @click.stop="openEditDialog(attr)" title="تعديل">
+              <v-btn
+                icon
+                size="x-small"
+                color="primary"
+                class="ma-1"
+                style="margin-inline-start: 4px"
+                @click.stop="openEditDialog(attr)"
+                title="تعديل"
+              >
                 <v-icon size="18">ri-edit-line</v-icon>
               </v-btn>
-              <v-btn icon size="x-small" color="error" class="ma-1" style="margin-inline-start: 2px"
-                @click.stop="confirmDelete(attr.id)" title="حذف">
+              <v-btn icon size="x-small" color="error" class="ma-1" style="margin-inline-start: 2px" @click.stop="confirmDelete(attr.id)" title="حذف">
                 <v-icon size="18">ri-delete-bin-line</v-icon>
               </v-btn>
             </v-chip>
@@ -32,8 +42,12 @@
           <div v-if="showValuesId === attr.id && attr.values && attr.values.length" class="ms-8 mt-2 mb-4">
             <v-card flat class="pa-2" color="#f8f8f8">
               <div class="d-flex flex-wrap gap-2">
-                <v-chip v-for="val in attr.values" :key="val.id" class="d-flex align-center pa-1"
-                  :style="{ backgroundColor: val.color || '#e0e0e0' }">
+                <v-chip
+                  v-for="val in attr.values"
+                  :key="val.id"
+                  class="d-flex align-center pa-1"
+                  :style="{ backgroundColor: val.color || '#e0e0e0' }"
+                >
                   <span>{{ val.name }}</span>
                 </v-chip>
                 <v-chip v-if="attr.values.length === 0">لا توجد قيم لهذه الخاصية</v-chip>
@@ -44,8 +58,13 @@
       </div>
     </v-card>
     <!-- تم ربط dialog مع v-model هنا -->
-    <AddAttribute :attributes="attributes" :addDialog="addDialog" :editAttribute="editAttribute"
-      @update:addDialog="savedAttribute" @update:attributes="updateAttributes" />
+    <AddAttribute
+      :attributes="attributes"
+      :addDialog="addDialog"
+      :editAttribute="editAttribute"
+      @update:addDialog="savedAttribute"
+      @update:attributes="updateAttributes"
+    />
 
     <!-- حوار الحذف -->
     <v-dialog v-model="deleteDialog" max-width="400px">
@@ -66,36 +85,60 @@
         <v-card-title class="d-flex align-center justify-space-between">
           <span>قيم الخاصية : {{ selectedAttributeForValues?.name }}</span>
           <!-- استدعاء كمبوننت إضافة/تعديل قيمة -->
-          <AddAttributeValues :attributes="[selectedAttributeForValues]" v-if="selectedAttributeForValues"
-            :edit-value="editValueData" @value-added="onValueAdded" @value-edited="onValueEdited"
-            ref="addEditValueRef" />
+          <AddAttributeValues
+            :attributes="[selectedAttributeForValues]"
+            v-if="selectedAttributeForValues"
+            :edit-value="editValueData"
+            @value-added="onValueAdded"
+            @value-edited="onValueEdited"
+            ref="addEditValueRef"
+          />
         </v-card-title>
         <v-card-text class="my-2">
           <v-row>
             <v-col v-for="val in selectedAttributeForValues.values" :key="val.id" cols="12" sm="6" md="4" lg="3">
-              <div class="w-100 elevation-6 box-attribute-values" :style="{
-                backgroundColor: val.color || '#e0e0e0',
-                minHeight: '33px',
-                color: getTextColor(val.color),
-              }">
-                <div :style="{
+              <div
+                class="w-100 elevation-6 box-attribute-values"
+                :style="{
                   backgroundColor: val.color || '#e0e0e0',
+                  minHeight: '33px',
                   color: getTextColor(val.color),
-                }" class="ma-3 flex-grow-1">
+                }"
+              >
+                <div
+                  :style="{
+                    backgroundColor: val.color || '#e0e0e0',
+                    color: getTextColor(val.color),
+                  }"
+                  class="ma-3 flex-grow-1"
+                >
                   {{ val.name }}
                 </div>
-                <v-btn class="ma-2" icon size="x-small" color="primary" style="margin-inline-start: 4px"
-                  @click.stop="openEditValueDialog(val)" title="تعديل القيمة">
+                <v-btn
+                  class="ma-2"
+                  icon
+                  size="x-small"
+                  color="primary"
+                  style="margin-inline-start: 4px"
+                  @click.stop="openEditValueDialog(val)"
+                  title="تعديل القيمة"
+                >
                   <v-icon size="16">ri-edit-line</v-icon>
                 </v-btn>
-                <v-btn class="ma-2" icon size="x-small" color="error" style="margin-inline-start: 2px"
-                  @click.stop="confirmDeleteValue(val.id)" title="حذف القيمة">
+                <v-btn
+                  class="ma-2"
+                  icon
+                  size="x-small"
+                  color="error"
+                  style="margin-inline-start: 2px"
+                  @click.stop="confirmDeleteValue(val.id)"
+                  title="حذف القيمة"
+                >
                   <v-icon size="16">ri-delete-bin-line</v-icon>
                 </v-btn>
               </div>
             </v-col>
-            <v-col v-if="!selectedAttributeForValues.values || selectedAttributeForValues.values.length === 0"
-              cols="12">
+            <v-col v-if="!selectedAttributeForValues.values || selectedAttributeForValues.values.length === 0" cols="12">
               <v-chip>لا توجد قيم لهذه الخاصية</v-chip>
             </v-col>
           </v-row>
@@ -216,8 +259,16 @@ const openEditDialog = attribute => {
   addDialog.value = true;
 };
 
-const updateAttributes = updated => {
-  attributes.value = updated;
+const updateAttributes = attribute => {
+  const index = attributes.value.findIndex(attr => attr.id === attribute.id);
+
+  if (index !== -1) {
+    // لو الخاصية موجودة: استبدلها
+    attributes.value[index] = attribute;
+  } else {
+    // لو مش موجودة: أضفها
+    attributes.value.push(attribute);
+  }
 };
 
 function openValuesDialog(attr) {
