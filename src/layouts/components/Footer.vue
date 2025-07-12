@@ -2,7 +2,7 @@
   <div class="app-footer d-flex justify-center w-100">
     <!-- 👉 تذييل: المحتوى الأيسر -->
     <div class="d-flex align-center text-body-2 text-medium-emphasis">
-      &copy; 2025 - {{ new Date().getFullYear() }}
+      2025 &copy; {{ new Date().getFullYear() }}
       صنع من
       <VIcon icon="ri-heart-line" color="error" size="1.25rem" class="mx-1" />
       بواسطة

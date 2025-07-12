@@ -234,8 +234,8 @@ function fetchInstallmentPlans() {
   });
 }
 
-function updateInstallments(updatedInstallments) {
-  updatedInstallments.forEach(updated => {
+function updateInstallments(installments) {
+  installments.forEach(updated => {
     const index = currentInstallments.value.findIndex(i => i.id === updated.id);
     if (index !== -1) {
       currentInstallments.value[index] = { ...currentInstallments.value[index], ...updated };

@@ -64,6 +64,7 @@ const closeDialog = payload => {
 
 async function handleSubmit() {
   errorMessage.value = '';
+
   if (!formRef.value) return;
 
   const { valid } = await formRef.value.validate();
@@ -71,7 +72,8 @@ async function handleSubmit() {
   const payload = { name: nameValue.value };
   let response;
   try {
-    response = await saveItem('attribute', payload, props.editAttribute.id, false, true, true);
+    const editId = props.editAttribute?.id ?? false;
+    response = await saveItem('attribute', payload, editId, false, true, true);
     emit('update:attributes', response);
     closeDialog(null);
   } catch (e) {

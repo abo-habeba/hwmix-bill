@@ -122,6 +122,7 @@ export const getOne = async (apiEndpoint, id, loading = true, showToast = true, 
 };
 
 export const saveItem = async (apiEndpoint, data, id = false, loading = true, showToast = true, log = false) => {
+  console.log('saveItem called with:', { apiEndpoint, data, id });
   const userStore = useUserStore();
   loading ? (userStore.loadingApi = true) : '';
   // const formData = serialize(data, options);
