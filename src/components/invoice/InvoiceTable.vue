@@ -51,9 +51,12 @@ function fetchItems() {
     loading.value = false;
   });
 }
-
+// const invoiceId = ref(null);
 function editItem(item) {
   editedItem.value = { ...item };
+
+  // invoiceId.value = item.id;
+
   dialog.value = true;
 }
 
@@ -143,18 +146,26 @@ onMounted(fetchItems);
   <v-card class="pa-2">
     <!-- <v-card-title class="ma-1"> الفواتير </v-card-title> -->
 
-    <v-data-table :items="items" :loading="loading" class="no-wrap-table" :headers="[
-      { title: 'رقم الفاتورة', value: 'invoice_number', sortable: true },
-      { title: 'المستخدم', value: 'user.full_name', sortable: true },
-      { title: 'نوع الفاتورة', value: 'invoice_type.name', sortable: true },
-      // { title: 'اسم الشركة', value: 'company.name', sortable: true },
-      // { title: 'تاريخ الإصدار', value: 'issue_date', sortable: true },
-      // { title: 'تاريخ الاستحقاق', value: 'due_date', sortable: true },
-      { title: 'المبلغ الإجمالي', value: 'total_amount', sortable: true },
-      { title: 'الحالة', value: 'status', sortable: true },
-      { title: 'تاريخ الإنشاء', value: 'created_at', sortable: true },
-      { title: 'إجراءات', value: 'actions', sortable: false },
-    ]" :items-per-page-text="'عدد العناصر في الصفحة:'" :no-data-text="'لا توجد بيانات'" item-value="id">
+    <v-data-table
+      :items="items"
+      :loading="loading"
+      class="no-wrap-table"
+      :headers="[
+        { title: 'رقم الفاتورة', value: 'invoice_number', sortable: true },
+        { title: 'المستخدم', value: 'user.full_name', sortable: true },
+        { title: 'نوع الفاتورة', value: 'invoice_type.name', sortable: true },
+        // { title: 'اسم الشركة', value: 'company.name', sortable: true },
+        // { title: 'تاريخ الإصدار', value: 'issue_date', sortable: true },
+        // { title: 'تاريخ الاستحقاق', value: 'due_date', sortable: true },
+        { title: 'المبلغ الإجمالي', value: 'total_amount', sortable: true },
+        { title: 'الحالة', value: 'status', sortable: true },
+        { title: 'تاريخ الإنشاء', value: 'created_at', sortable: true },
+        { title: 'إجراءات', value: 'actions', sortable: false },
+      ]"
+      :items-per-page-text="'عدد العناصر في الصفحة:'"
+      :no-data-text="'لا توجد بيانات'"
+      item-value="id"
+    >
       <template #item.user.full_name="{ item }">
         {{ item.user?.full_name || '-' }}
       </template>
@@ -201,7 +212,7 @@ onMounted(fetchItems);
     </v-data-table>
 
     <v-dialog v-model="dialog" max-width="700">
-      <InvoiceForm :model-value="editedItem" @saved="onSaved" @close="dialog = false" />
+      <InvoiceForm :model-value="editedItem" :isEdit="true" @saved="onSaved" @close="dialog = false" />
     </v-dialog>
   </v-card>
 </template>

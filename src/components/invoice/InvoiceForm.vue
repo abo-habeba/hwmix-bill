@@ -35,22 +35,23 @@
           </v-col>
 
           <v-col cols="12" sm="6" class="py-1 px-0">
-            <InvoiceTypeSelect v-model="invoiceType" :invoiceContext="invoiceContext" @update:model-value="handleInvoiceTypeUpdate" />
+            <InvoiceTypeSelect
+              v-if="InvoiceTypeSelectRedy"
+              v-model="invoiceType"
+              :invoiceContext="invoiceContextToUse"
+              :isEdit="isEditLocal"
+              @update:model-value="handleInvoiceTypeUpdate"
+            />
           </v-col>
-
           <v-col cols="12" sm="6" class="py-1 px-0">
             <SerialOrBarcodeInput v-model="serialInput" @update:model-value="onSerialInputEnter" />
           </v-col>
-
           <v-col cols="12" sm="6" class="py-1 px-0">
             <ProductSearchInput v-model="productSearch" label="ابحث عن منتج" @update:model-value="onProductSelect" />
           </v-col>
         </v-row>
-
         <div v-if="itemsError" class="text-error text-center text-caption mt-1">{{ itemsError }}</div>
-
         <InvoiceItemsTable :items="form.items" @update-item="updateInvoiceItem" @remove-item="removeInvoiceItem" />
-
         <v-row>
           <v-col cols="12" md="6">
             <v-text-field
@@ -150,6 +151,7 @@ const emit = defineEmits(['saved', 'close']);
 const props = defineProps({
   invoiceId: { type: Number, default: null },
   modelValue: Object,
+  isEdit: { Boolean, default: false },
   invoiceContext: { type: Object, default: () => ({ context: 'sales', code: 'sales' }) },
 });
 
@@ -163,11 +165,14 @@ const formRef = ref(null);
 const formValid = ref(false);
 const itemsError = ref(null);
 const showInstallmentDialog = ref(false);
+const isEditLocal = ref(props.isEdit);
+const InvoiceTypeSelectRedy = ref(false);
 
 const form = ref({
   id: null,
   invoice_type_id: null,
   invoice_type_code: null,
+  invoice_type: null,
   status: null,
   gross_amount: 0,
   total_discount: 0,
@@ -183,6 +188,9 @@ const form = ref({
 
 const userStore = useUserStore();
 const sellerName = computed(() => userStore.user?.nickname || userStore.user?.name || '');
+const invoiceContextToUse = computed(() => {
+  return props.modelValue?.invoice_type || props.invoiceContext;
+});
 
 /* ==================== Computed Properties ==================== */
 const grossAmount = computed(() => {
@@ -231,24 +239,24 @@ onMounted(() => {
     loadInvoice(props.invoiceId);
   } else if (props.modelValue) {
     Object.assign(form.value, props.modelValue);
-    if (props.modelValue.user) selectedUser.value = props.modelValue.user;
+    selectedUser.value = props.modelValue.user || null;
+
+    // فعل بعد التهيئة
+    InvoiceTypeSelectRedy.value = true;
   }
 });
 
 function formatCurrency(val) {
   return new Intl.NumberFormat('EN-EG', { style: 'currency', currency: 'EGP' }).format(val || 0);
 }
-
 function updateInvoiceItem(item) {
   item.total = item.unit_price * item.quantity - (item.discount || 0);
   if (item.total < 0) item.total = 0;
 }
-
 function removeInvoiceItem(itemToRemove) {
   if (!itemToRemove || !itemToRemove.product_id) return;
   form.value.items = form.value.items.filter(item => item.product_id !== itemToRemove.product_id);
 }
-
 function addOrIncrementProduct(product) {
   if (!product || !product.id || !product.product_name) return;
 
@@ -281,7 +289,6 @@ function addOrIncrementProduct(product) {
   }
   itemsError.value = null;
 }
-
 async function searchProductBySerial(serial) {
   if (!serial) return;
   isSaving.value = true;
@@ -297,35 +304,28 @@ async function searchProductBySerial(serial) {
     serialInput.value = '';
   }
 }
-
 function onSerialInputEnter(val) {
   if (val && val.length >= 3) searchProductBySerial(val);
 }
-
 function onProductSelect(product) {
   if (!product || typeof product !== 'object') return;
   productSearch.value = product;
   addOrIncrementProduct(product);
 }
-
 function clampDiscount() {
   if (form.value.total_discount < 0) form.value.total_discount = 0;
   if (form.value.total_discount > grossAmount.value) form.value.total_discount = grossAmount.value;
 }
-
 function handleInvoiceTypeUpdate(type) {
   form.value.invoice_type_id = type?.id || null;
   form.value.invoice_type_code = type?.code || null;
 }
-
 function openInstallmentDialog() {
   showInstallmentDialog.value = true;
 }
-
 function handleInstallmentSaved(payload) {
   saveInvoice(payload);
 }
-
 function checkInvoiceTypeBeforeSave() {
   form.value.invoice_type_id = invoiceType.value?.id || null;
   form.value.invoice_type_code = invoiceType.value?.code || null;
@@ -359,6 +359,10 @@ async function loadInvoice(id) {
     if (res?.data) {
       Object.assign(form.value, res.data);
       if (res.data.user) selectedUser.value = res.data.user;
+      if (res.data.invoice_type) {
+        invoiceContextToUse.value = res.data.invoice_type;
+      }
+      InvoiceTypeSelectRedy.value = true;
     }
   } catch (e) {
     itemsError.value = 'حدث خطأ أثناء تحميل الفاتورة.';
