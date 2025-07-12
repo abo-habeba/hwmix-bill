@@ -28,7 +28,6 @@ declare module 'vue' {
     CompanysDataTable: typeof import('./src/components/companys/CompanysDataTable.vue')['default']
     CompanysEditUserRolse: typeof import('./src/components/companys/CompanysEditUserRolse.vue')['default']
     ContextMenu: typeof import('./src/components/ContextMenu.vue')['default']
-    copy: typeof import('./src/components/Invoice/InvoiceItemsTable copy.vue')['default']
     DataTable: typeof import('./src/components/cashboxs/transfer/DataTable.vue')['default']
     DatePicker: typeof import('./src/components/datePicker.vue')['default']
     DefaultAutocomplete: typeof import('./src/@core/components/DefaultAutocomplete.vue')['default']
