@@ -99,4 +99,17 @@ onMounted(() => {
 .forbidden-cursor {
   cursor: not-allowed !important;
 }
+html,
+body {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif !important;
+  font-feature-settings: 'lnum';
+  font-variant-numeric: lining-nums;
+  direction: rtl;
+}
+
+input,
+textarea {
+  direction: ltr !important;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif !important;
+}
 </style>

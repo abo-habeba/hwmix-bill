@@ -70,12 +70,6 @@ function operationDialog() {
 defineExpose({ operationDialog });
 </script>
 <style lang="scss">
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  margin: 0;
-  padding: 20px;
-}
 // .container {
 //   background: #fff;
 //   border-radius: 8px;

@@ -15,10 +15,10 @@
           </v-col>
           <v-col cols="4">
             <v-text-field
+              inputmode="numeric"
               hide-details="auto"
               v-model="form.round_step"
               label="نسبة التقريب"
-              type="number"
               @input="calculateInstallment"
               outlined
             />
@@ -28,35 +28,20 @@
         <v-row dense class="my-2">
           <v-col cols="12" class="pa-1">
             <v-text-field
+              inputmode="numeric"
               hide-details="auto"
               v-model="downPayment"
               label="المقدم المدفوع"
-              type="number"
               @input="calculateInstallment"
               outlined
               dense
             />
           </v-col>
           <v-col cols="12" class="pa-1">
-            <v-text-field
-              hide-details="auto"
-              v-model="months"
-              label="عدد الشهور"
-              type="number"
-              @input="calculateInstallment"
-              outlined
-              dense
-            />
+            <v-text-field inputmode="numeric" hide-details="auto" v-model="months" label="عدد الشهور" @input="calculateInstallment" outlined dense />
           </v-col>
           <v-col cols="12" class="pa-1">
-            <v-text-field
-              hide-details="auto"
-              v-model="startDate"
-              label="تاريخ البدء"
-              type="date"
-              outlined
-              dense
-            />
+            <v-text-field inputmode="numeric" hide-details="auto" v-model="startDate" label="تاريخ البدء" type="date" outlined dense />
           </v-col>
         </v-row>
 
@@ -92,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, watchEffect } from 'vue';
 import dayjs from 'dayjs';
 
 const props = defineProps({
@@ -120,6 +105,17 @@ const planForm = computed(() => ({
   number_of_installments: +months.value || 1,
   start_date: startDate.value,
 }));
+
+watchEffect(() => {
+  if (props.visible && props.form.installment_plan) {
+    const plan = props.form.installment_plan;
+    downPayment.value = +plan.down_payment || 0;
+    months.value = +plan.number_of_installments || 1;
+    startDate.value = plan.start_date?.substring(0, 10) || dayjs().format('YYYY-MM-DD');
+    props.form.round_step = +plan.round_step || 10;
+    calculateInstallment();
+  }
+});
 
 const previewPlan = computed(() => {
   const step = +planForm.value.round_step || 10;
@@ -177,10 +173,12 @@ const previewPlan = computed(() => {
 });
 
 function formatCurrency(v) {
-  return new Intl.NumberFormat('ar-EG', { maximumFractionDigits: 2 }).format(+v || 0);
+  return new Intl.NumberFormat('en-EG', { maximumFractionDigits: 2 }).format(+v || 0);
 }
 
 function calculateInstallment() {
+  console.log('props.form', props.form);
+
   const monthsCount = +months.value || 1;
   const net = +props.form.net_amount || 0;
   const down = +downPayment.value || 0;
@@ -220,5 +218,10 @@ function closeDialog() {
 // == Watchers ==
 watch([downPayment, months], calculateInstallment, { immediate: true });
 watch(() => props.form.net_amount, calculateInstallment);
-watch(() => props.visible, (v) => { if (v) calculateInstallment(); });
+watch(
+  () => props.visible,
+  v => {
+    if (v) calculateInstallment();
+  }
+);
 </script>

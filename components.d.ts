@@ -35,6 +35,7 @@ declare module 'vue' {
     DefaultSelect: typeof import('./src/@core/components/DefaultSelect.vue')['default']
     DefaultTextarea: typeof import('./src/@core/components/DefaultTextarea.vue')['default']
     DeletedItem: typeof import('./src/components/DeletedItem.vue')['default']
+    EnNumInput: typeof import('./src/components/form/EnNumInput.vue')['default']
     ErrorHeader: typeof import('./src/components/ErrorHeader.vue')['default']
     ImagePickerDialog: typeof import('./src/components/images/ImagePickerDialog.vue')['default']
     InfoDisplay: typeof import('./src/components/InfoDisplay.vue')['default']

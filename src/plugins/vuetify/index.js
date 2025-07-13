@@ -33,7 +33,7 @@ export default function (app) {
       themes,
     },
     locale: {
-      locale: 'ar',
+      locale: 'en',
       fallback: 'en',
       messages: {
         ar,
