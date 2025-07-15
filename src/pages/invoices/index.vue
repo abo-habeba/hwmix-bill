@@ -54,12 +54,6 @@ function closeForm() {
   showForm.value = false;
 }
 
-function handleEdit(inv) {
-  formModel.value = { ...inv };
-  dialogContext.value = inv.invoice_type || { code: 'sale', context: 'sales' };
-  showForm.value = true;
-}
-
 function handleSaved(data) {
   invoice.value = data; // لتحديث الجدول
 }

@@ -1,5 +1,4 @@
 <script setup>
-import DataTable from '@/components/users/UsersDataTable.vue';
 import UsersAddUser from '../../components/users/UsersAddUser.vue';
 import { useUserStore } from '@/stores/user';
 const userStore = useUserStore();

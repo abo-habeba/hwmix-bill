@@ -7,7 +7,8 @@
       <input
         v-model.number="item.quantity"
         type="number"
-        min="1"
+        min="0"
+        lang="en"
         class="native-input very-small-input"
         style="color: #111"
         @change="emitUpdateItem(item)"
@@ -74,7 +75,7 @@ function formatCurrency(value) {
 
 <style scoped>
 .native-input {
-  width: 60px;
+  min-width: 60px;
   padding: 3px 6px;
   border-radius: 6px;
   border: 1px solid #e0e0e0;
@@ -82,9 +83,9 @@ function formatCurrency(value) {
   background: #fff;
 }
 .very-small-input {
-  width: 38px !important;
-  min-width: 38px !important;
-  max-width: 45px !important;
+  width: 80px !important;
+  /* min-width: 38px !important;
+  max-width: 45px !important; */
   padding: 2px 3px !important;
   font-size: 13px !important;
   height: 28px !important;

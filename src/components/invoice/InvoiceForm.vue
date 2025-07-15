@@ -33,7 +33,6 @@
           <v-col cols="12" sm="6" class="py-1 px-0">
             <UserSearchInput v-model="selectedUser" />
           </v-col>
-
           <v-col cols="12" sm="6" class="py-1 px-0">
             <InvoiceTypeSelect
               v-if="InvoiceTypeSelectRedy"
@@ -84,7 +83,6 @@
               label="المبلغ المدفوع من العميل"
               type="number"
               min="0"
-              :max="form.net_amount"
               color="success"
               prepend-inner-icon="ri-cash-line"
               hide-details
@@ -202,7 +200,8 @@ const netAmount = computed(() => {
 });
 
 const remainingAmount = computed(() => {
-  return Math.max(netAmount.value - (form.value.paid_amount || 0), 0);
+  // تم إزالة Math.max(..., 0) للسماح بالقيم السالبة
+  return netAmount.value - (form.value.paid_amount || 0);
 });
 
 watch(
@@ -360,7 +359,7 @@ async function loadInvoice(id) {
       Object.assign(form.value, res.data);
       if (res.data.user) selectedUser.value = res.data.user;
       if (res.data.invoice_type) {
-        invoiceContextToUse.value = res.data.invoice_type;
+        invoiceType.value = res.data.invoice_type; // تم تعيين invoiceType هنا
       }
       InvoiceTypeSelectRedy.value = true;
     }
@@ -372,10 +371,13 @@ async function loadInvoice(id) {
 async function saveInvoice(payload) {
   isSaving.value = true;
   itemsError.value = null;
+  console.log('selectedUser.cash_box_id', selectedUser.value.cash_box_id);
+  payload.user_cash_box_id = selectedUser.value.cash_box_id;
   try {
     const apiCall = form.value.id ? saveItem('invoice', payload, form.value.id, true, true) : saveItem('invoice', payload, false, true, true);
     const res = await apiCall;
-    emit('saved', res.data);
+    userStore.fetchUser();
+    emit('saved', res);
     emit('close');
   } catch (e) {
     itemsError.value = 'حدث خطأ أثناء الحفظ. يرجى التحقق من البيانات والمحاولة مرة أخرى.';

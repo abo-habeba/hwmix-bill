@@ -112,4 +112,27 @@ textarea {
   direction: ltr !important;
   font-family: 'Segoe UI', Tahoma, Arial, sans-serif !important;
 }
+
+/* تنسيق عام لجعل الأرقام إنجليزية في كامل المشروع */
+body {
+  /* الطريقة الأفضل والموصى بها: */
+  font-variant-numeric: tabular-nums; /* يجعل الأرقام متساوية العرض (مجدولة) وتظهر بالإنجليزية */
+  /* يمكنك أيضًا تجربة oldstyle-nums إذا كنت تفضل هذا النمط */
+
+  /* بديل أقل تفضيلاً ولكن قد يعمل في بعض الخطوط والسياقات: */
+  /* font-feature-settings: "lnum" 1; */
+  /* font-feature-settings: "tnum" 1; */
+
+  /* إذا كانت الخطوط العربية تسبب مشكلة، قد تحتاج لتحديد خط بديل */
+  /* font-family: 'Roboto', 'Arial', sans-serif; */
+  /* هذا يضمن استخدام خط يدعم الأرقام اللاتينية بشكل افتراضي */
+}
+
+/* تأكد من أن حقول الإدخال تتبع نفس النمط */
+input[type='number'],
+input[type='text'],
+textarea {
+  font-variant-numeric: tabular-nums;
+  /* للتأكد في المتصفحات المختلفة، يمكنك أيضًا إضافة lang="en" في الـ HTML الخاص بحقول الإدخال إذا لزم الأمر */
+}
 </style>

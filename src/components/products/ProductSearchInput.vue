@@ -25,7 +25,6 @@
       </v-list-item>
     </template>
   </v-autocomplete>
-  <!-- stop -->
 </template>
 
 <script setup>
@@ -43,7 +42,7 @@ const products = ref([]);
 const isLoading = ref(false);
 const searchText = ref('');
 const productAutocomplete = ref(null);
-const useCustomFilter = ref(false);
+const useCustomFilter = ref(false); // غير مستخدم حالياً، يمكن إزالته إذا لم يكن له استخدام آخر
 const selectedProduct = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val),
@@ -81,6 +80,12 @@ function productTitle(item) {
 
 let searchTimeout = null;
 function onProductSearch(val) {
+  // لا تشغل البحث إذا كانت القيمة الجديدة هي المنتج المحدد بالفعل
+  // هذا يمنع إعادة البحث بعد التحديد
+  if (selectedProduct.value && val === productTitle(selectedProduct.value)) {
+    return;
+  }
+
   searchText.value = val;
 
   if (searchTimeout) clearTimeout(searchTimeout);
@@ -101,7 +106,7 @@ async function loadProducts(reset = false) {
   isLoading.value = true;
   try {
     const params = { search: searchText.value, per_page: 20, page: page.value };
-    const res = await getAll('product-variants/search-by-product', params);
+    const res = await getAll('product-variants/search-by-product', params, false, false, false);
 
     products.value = res;
   } catch (e) {
@@ -111,7 +116,16 @@ async function loadProducts(reset = false) {
   }
 }
 
+// هذه الدالة تُطلق عند اختيار قيمة من الـ Autocomplete (سواء يدوياً أو بواسطة النموذج)
 function onProductSelect(val) {
+  // نتحقق مما إذا كانت القيمة المختارة هي نفس القيمة الحالية لنص البحث
+  // إذا كانت كذلك، فهذا يعني أن المستخدم قام بتحديد عنصر من القائمة،
+  // ولا نرغب في تشغيل بحث جديد في هذه الحالة.
+  // نقوم بتحديث searchText ليتطابق مع اسم المنتج المحدد لمنع البحث اللاحق إذا كان النص يتطابق
+  if (val && typeof val === 'object' && val.id) {
+    searchText.value = productTitle(val); // تحديث نص البحث ليتطابق مع المنتج المحدد
+  }
+
   console.log('Selected product:', val);
   if (!val || typeof val !== 'object' || !val.id || !val.product_name) {
     console.error('Invalid product selected in ProductSearchInput:', val);
@@ -126,11 +140,11 @@ function onProductSelect(val) {
   // emit('update:modelValue', val);
 }
 
+// هذه الدالة ليست لها تأثير مباشر على المشكلة الحالية
 const showInput = ref(false);
-
 function handleBlur() {
   setTimeout(() => {
     showInput.value = false;
-  }, 200); // بنأخر الإخفاء شوية علشان اختيار العنصر ما يتلغيهوش
+  }, 200);
 }
 </script>

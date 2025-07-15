@@ -59,32 +59,20 @@ function editItem(item) {
 
   dialog.value = true;
 }
-
-function addItem() {
-  editedItem.value = {
-    id: null,
-    user_id: '',
-    invoice_type_id: '',
-    invoice_number: '',
-    issue_date: '',
-    due_date: '',
-    total_amount: '',
-    status: '',
-    notes: '',
-    items: [],
-  };
-  dialog.value = true;
-}
-
 function removeItem(item) {
   if (confirm('هل أنت متأكد من حذف الفاتورة؟')) {
     deleteOne('invoice', item.id).then(fetchItems);
   }
 }
 
-function onSaved() {
+function onSaved(data) {
   dialog.value = false;
-  fetchItems();
+  const index = items.value.findIndex(item => item.id === data.id);
+  if (index !== -1) {
+    items.value[index] = data;
+  } else {
+    items.value.push(data);
+  }
 }
 
 // دالة لتحويل الحالة من إنجليزي لعربي

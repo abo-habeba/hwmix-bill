@@ -10,7 +10,7 @@
     prepend-inner-icon="ri-user-line"
     :rules="[v => !!v || 'حقل العميل مطلوب']"
     @update:search="onUserSearch"
-    @update:model-value="emitUser"
+    @update:model-value="onUserSelect"
     :loading="isLoadingUsers"
     :no-data-text="userNoDataText"
     clearable
@@ -59,9 +59,17 @@ const userNoDataText = computed(() => {
 
 let userSearchTimeout = null;
 function onUserSearch(val) {
-  if (!val || val.length < 3) {
+  // 💡 إضافة الشرط لمنع البحث عند تحديد قيمة تتطابق مع العنصر المحدد
+  if (selectedUser.value && val === userTitle(selectedUser.value)) {
     return;
   }
+
+  if (!val || val.length < 3) {
+    // يمكن هنا مسح قائمة المستخدمين إذا كان نص البحث أقل من 3 أحرف
+    // users.value = [];
+    return;
+  }
+
   if (userSearchTimeout) clearTimeout(userSearchTimeout);
   userSearchTimeout = setTimeout(() => {
     fetchUsers(val);
@@ -71,7 +79,7 @@ function onUserSearch(val) {
 async function fetchUsers(search = '') {
   isLoadingUsers.value = true;
   try {
-    const res = await getAll('users', { search, limit: 10 });
+    const res = await getAll('users', { search, limit: 10 }, false, false, false);
     users.value = res.data || [];
   } catch (error) {
     users.value = [];
@@ -80,14 +88,23 @@ async function fetchUsers(search = '') {
   }
 }
 
-function emitUser(val) {
+// 💡 دالة جديدة لمعالجة حدث التحديد (update:model-value)
+function onUserSelect(val) {
+  // قم بتحديث userSearchText ليتطابق مع عنوان المستخدم المحدد
+  // هذا يمنع onUserSearch من تشغيل بحث جديد لاحقاً إذا كان النص يتطابق
+  if (val && typeof val === 'object' && val.id) {
+    userSearchText.value = userTitle(val);
+  }
   emit('update:modelValue', val);
 }
 
+// يمكن إزالة هذا الـ watch لأنه لا يضيف قيمة حقيقية مع الـ computed property
+/*
 watch(
   () => props.modelValue,
   val => {
     selectedUser.value = val;
   }
 );
+*/
 </script>

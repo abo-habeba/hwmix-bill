@@ -219,14 +219,6 @@ function getInstallmentRowProps({ item }) {
   return {}; // لا يوجد تنسيق خاص
 }
 
-const totalRemaining = computed(() => {
-  return currentInstallments.value.reduce((sum, i) => sum + (i.remaining || 0), 0);
-});
-
-const totalPaid = computed(() => {
-  return currentInstallments.value.reduce((sum, i) => sum + (i.amount - (i.remaining || 0)), 0);
-});
-
 // جلب الخطط
 function fetchInstallmentPlans() {
   getAll('installment-plans', { per_page: -1 }, true, true, false).then(res => {
