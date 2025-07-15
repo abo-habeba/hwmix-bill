@@ -52,7 +52,7 @@
         <div v-if="itemsError" class="text-error text-center text-caption mt-1">{{ itemsError }}</div>
         <InvoiceItemsTable :items="form.items" @update-item="updateInvoiceItem" @remove-item="removeInvoiceItem" />
         <v-row>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="6" v-if="invoiceContext.code !== 'installment_sale'">
             <v-text-field
               v-model.number="form.total_discount"
               label="خصم عام على الفاتورة"
@@ -66,7 +66,7 @@
             />
           </v-col>
 
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="6" v-if="invoiceContext.code !== 'installment_sale'">
             <InfoDisplay icon="ri-calculator-line" label="الإجمالي بعد الخصم" :text="formatCurrency(form.net_amount)" />
           </v-col>
           <v-col cols="12" md="12">
@@ -77,7 +77,7 @@
               @update:payment-type="form.payment_type = $event"
             />
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="6" v-if="invoiceContext.code !== 'installment_sale'">
             <v-text-field
               v-model.number="form.paid_amount"
               label="المبلغ المدفوع من العميل"
@@ -89,7 +89,7 @@
             />
           </v-col>
 
-          <v-col cols="12" md="6" class="py-1 px-2 d-flex align-center">
+          <v-col cols="12" md="6" class="px-2 d-flex align-center" v-if="invoiceContext.code !== 'installment_sale'">
             <InfoDisplay icon="ri-wallet-3-line" label="المتبقي" :text="formatCurrency(form.remaining_amount)" />
           </v-col>
 
@@ -98,7 +98,7 @@
               v-model="form.notes"
               label="ملاحظات الفاتورة (اختياري)"
               auto-grow
-              rows="2"
+              rows="auto"
               prepend-inner-icon="ri-sticky-note-line"
               color="info"
               hide-details
@@ -114,8 +114,13 @@
 
     <v-card-actions class="actions-sticky justify-start">
       <v-spacer />
-      <v-btn color="primary" append-icon="ri-save-3-line" :loading="isSaving" :disabled="!formValid || isSaving" @click="checkInvoiceTypeBeforeSave"
-        >حفظ</v-btn
+      <v-btn
+        color="primary"
+        append-icon="ri-save-3-line"
+        :loading="isSaving"
+        :disabled="!formValid || isSaving"
+        @click="checkInvoiceTypeBeforeSave"
+        >{{ invoiceContext.code === 'installment_sale' ? 'متابعة' : 'حفظ' }}</v-btn
       >
       <v-spacer />
       <v-btn color="info" append-icon="ri-printer-line" @click="printInvoice" :disabled="isSaving || !form.id">طباعة / معاينة</v-btn>

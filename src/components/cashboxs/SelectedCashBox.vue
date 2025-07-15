@@ -1,5 +1,5 @@
 <template>
-  <v-row>
+  <v-row class="my-1">
     <v-col cols="12" :md="col">
       <v-select
         v-model="selectedCashBoxId"
