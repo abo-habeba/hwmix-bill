@@ -16,7 +16,7 @@ const props = defineProps({
           <v-list-item>تاريخ الإصدار: {{ props.invoice.issue_date }}</v-list-item>
           <v-list-item>تاريخ الاستحقاق: {{ props.invoice.due_date }}</v-list-item>
           <v-list-item>المبلغ الإجمالي: {{ props.invoice.total_amount }}</v-list-item>
-          <v-list-item>الحالة: {{ props.invoice.status }}</v-list-item>
+          <v-list-item>الحالة: {{ props.invoice.status_label }}</v-list-item>
           <v-list-item>ملاحظات: {{ props.invoice.notes }}</v-list-item>
           <v-list-item>تاريخ الإنشاء: {{ props.invoice.created_at }}</v-list-item>
         </v-list>

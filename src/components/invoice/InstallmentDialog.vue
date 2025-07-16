@@ -10,18 +10,11 @@
           <v-col cols="8">
             <div class="d-flex align-center flex-column justify-center">
               <span class="text-center"> اجمالي الفاتورة </span>
-              <span class="text-subtitle-1 font-weight-bold">{{ formatCurrency(planForm.total_amount) }}</span>
+              <span class="text-subtitle-1 font-weight-bold">{{ formatCurrency(props.form.net_amount) }}</span>
             </div>
           </v-col>
           <v-col cols="4">
-            <v-text-field
-              inputmode="numeric"
-              hide-details="auto"
-              v-model="form.round_step"
-              label="نسبة التقريب"
-              @input="calculateInstallment"
-              outlined
-            />
+            <v-text-field inputmode="numeric" hide-details="auto" v-model="roundStep" label="نسبة التقريب" @input="calculateInstallment" outlined />
           </v-col>
         </v-row>
 
@@ -77,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, watchEffect } from 'vue';
+import { ref, watch } from 'vue';
 import dayjs from 'dayjs';
 
 const props = defineProps({
@@ -92,37 +85,56 @@ const months = ref(12);
 const monthlyInstallment = ref(0);
 const totalAfterInstallment = ref(0);
 const startDate = ref(dayjs().format('YYYY-MM-DD'));
+const roundStep = ref(10);
 
-// == Helper functions ==
+// == إعداد البيانات في وضع التعديل ==
+watch(
+  () => props.visible,
+  visible => {
+    if (visible) {
+      const plan = props.form.installment_plan ?? {};
+      downPayment.value = +plan.down_payment || 0;
+      months.value = +plan.number_of_installments || 12;
+      startDate.value = plan.start_date?.substring(0, 10) || dayjs().format('YYYY-MM-DD');
+      roundStep.value = +plan.round_step || 10;
+
+      calculateInstallment();
+    }
+  },
+  { immediate: true }
+);
+
+// == Watchers لأي تغيير في القيم المهمة ==
+watch([downPayment, months, () => props.form.net_amount, roundStep], calculateInstallment, {
+  immediate: true,
+});
+
+// == الحساب ==
 function ceilTo(val, step = 10) {
   return Math.ceil(val / step) * step;
 }
 
-const planForm = computed(() => ({
-  round_step: props.form.round_step ?? 10,
-  total_amount: +props.form.net_amount || 0,
-  down_payment: +downPayment.value || 0,
-  number_of_installments: +months.value || 1,
-  start_date: startDate.value,
-}));
+function calculateInstallment() {
+  const net = +props.form.net_amount || 0;
+  const down = +downPayment.value || 0;
+  const monthsCount = +months.value || 1;
+  const step = +roundStep.value || 10;
 
-watchEffect(() => {
-  if (props.visible && props.form.installment_plan) {
-    const plan = props.form.installment_plan;
-    downPayment.value = +plan.down_payment || 0;
-    months.value = +plan.number_of_installments || 1;
-    startDate.value = plan.start_date?.substring(0, 10) || dayjs().format('YYYY-MM-DD');
-    props.form.round_step = +plan.round_step || 10;
-    calculateInstallment();
-  }
-});
+  const remaining = net - down;
+  const monthlyRate = 0.025;
+  const interest = remaining * monthlyRate * monthsCount;
+  const total = remaining + interest;
+
+  monthlyInstallment.value = +(total / monthsCount).toFixed(2);
+  totalAfterInstallment.value = +(total + down).toFixed(2);
+}
 
 const previewPlan = computed(() => {
-  const step = +planForm.value.round_step || 10;
+  const step = +roundStep.value || 10;
   const total = +totalAfterInstallment.value;
-  const down = +planForm.value.down_payment;
-  const n = +planForm.value.number_of_installments;
-  const start = dayjs(planForm.value.start_date);
+  const down = +downPayment.value;
+  const n = +months.value;
+  const start = dayjs(startDate.value);
 
   const remaining = +(total - down).toFixed(2);
   const avg = +(remaining / n).toFixed(2);
@@ -176,23 +188,10 @@ function formatCurrency(v) {
   return new Intl.NumberFormat('en-EG', { maximumFractionDigits: 2 }).format(+v || 0);
 }
 
-function calculateInstallment() {
-  console.log('props.form', props.form);
-
-  const monthsCount = +months.value || 1;
-  const net = +props.form.net_amount || 0;
-  const down = +downPayment.value || 0;
-  const remaining = net - down;
-  const monthlyRate = 0.025;
-  const interest = remaining * monthlyRate * monthsCount;
-  const total = remaining + interest;
-  monthlyInstallment.value = +(total / monthsCount).toFixed(2);
-  totalAfterInstallment.value = +(total + down).toFixed(2);
-}
-
 function saveInstallment() {
   const data = {
     ...props.form,
+    round_step: +roundStep.value,
     installment_plan: {
       down_payment: +downPayment.value || 0,
       number_of_installments: +months.value || 1,
@@ -200,7 +199,7 @@ function saveInstallment() {
       total_amount: +totalAfterInstallment.value || 0,
       start_date: startDate.value,
       due_date: dayjs(startDate.value).add(months.value, 'month').format('YYYY-MM-DD'),
-      round_step: +props.form.round_step || 10,
+      round_step: +roundStep.value || 10,
     },
   };
   emit('installment-saved', data);
@@ -208,20 +207,9 @@ function saveInstallment() {
 
 function updateVisible(val) {
   emit('update:visible', !!val);
-  if (val) calculateInstallment();
 }
 
 function closeDialog() {
   emit('update:visible', false);
 }
-
-// == Watchers ==
-watch([downPayment, months], calculateInstallment, { immediate: true });
-watch(() => props.form.net_amount, calculateInstallment);
-watch(
-  () => props.visible,
-  v => {
-    if (v) calculateInstallment();
-  }
-);
 </script>

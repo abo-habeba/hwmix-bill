@@ -109,7 +109,7 @@ export const getAll = async (apiEndpoint, params = null, loading = true, showToa
   }
 };
 
-export const getOne = async (apiEndpoint, id, loading = true, showToast = true, log = false) => {
+export const getOne = async (apiEndpoint, id, loading = true, showToast = false, log = false) => {
   const userStore = useUserStore();
   try {
     loading ? (userStore.loadingApi = true) : '';

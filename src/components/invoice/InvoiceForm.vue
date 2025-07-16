@@ -1,32 +1,41 @@
 <template>
   <v-card class="w-100 h-100 py-4 px-0">
     <v-card-title class="d-flex align-center justify-space-between pb-2">
-      <div class="d-flex align-center">
-        <v-icon class="me-2" size="28">ri-file-list-3-line</v-icon>
-        <span class="text-h5">{{ form.id ? 'تعديل فاتورة' : 'فاتورة جديدة' }}</span>
-      </div>
-
-      <v-chip v-if="form.status" color="success" class="px-3">
-        <v-icon left small>ri-checkbox-circle-line</v-icon>
-        {{ form.status }}
-      </v-chip>
-
-      <v-chip
-        v-if="selectedUser && typeof selectedUser.balance !== 'undefined'"
-        class="ms-2 px-4 py-2 text-h6 font-weight-bold"
-        color="info"
-        prepend-icon="ri-wallet-3-line"
-        style="font-size: 1.1rem; min-width: 160px; direction: ltr"
-      >
-        <span class="me-1">رصيد العميل:</span>
-        <span :class="{ 'text-error': selectedUser.balance < 0, 'text-success': selectedUser.balance >= 0 }">
-          {{ formatCurrency(selectedUser.balance) }}
-        </span>
-      </v-chip>
+      <v-col cols="12">
+        <div v-if="invoiceType" class="d-flex align-center">
+          <v-icon class="me-2" size="28">ri-file-list-3-line</v-icon>
+          <span v-if="form.id" class="text-h5 me-2">{{ `تعديل  ${invoiceType?.name}` }}</span>
+          <span v-else class="text-h5">{{ `  انشاء ${invoiceType?.name}` }}</span>
+        </div>
+      </v-col>
     </v-card-title>
 
     <v-divider class="mb-3" />
 
+    <v-card-text>
+      <v-row>
+        <v-col cols="6">
+          <v-chip v-if="form.status" color="success" class="px-3">
+            <v-icon left small>ri-checkbox-circle-line</v-icon>
+            {{ form.status }}
+          </v-chip>
+        </v-col>
+        <v-col cols="6">
+          <v-chip
+            v-if="selectedUser && typeof selectedUser.balance !== 'undefined'"
+            class="ms-2 px-4 py-2 text-h6 font-weight-bold"
+            color="info"
+            prepend-icon="ri-wallet-3-line"
+            style="font-size: 1.1rem; min-width: 160px; direction: ltr"
+          >
+            <span class="me-1">رصيد العميل:</span>
+            <span :class="{ 'text-error': selectedUser.balance < 0, 'text-success': selectedUser.balance >= 0 }">
+              {{ formatCurrency(selectedUser.balance) }}
+            </span>
+          </v-chip>
+        </v-col>
+      </v-row>
+    </v-card-text>
     <v-card-text class="invoice-scrollable">
       <v-form ref="formRef" v-model="formValid" @submit.prevent="checkInvoiceTypeBeforeSave">
         <v-row class="ma-0">
@@ -242,6 +251,7 @@ onMounted(() => {
   if (props.invoiceId) {
     loadInvoice(props.invoiceId);
   } else if (props.modelValue) {
+    invoiceType.value = props.modelValue.invoice_type;
     Object.assign(form.value, props.modelValue);
     selectedUser.value = props.modelValue.user || null;
 
@@ -323,6 +333,7 @@ function clampDiscount() {
 function handleInvoiceTypeUpdate(type) {
   form.value.invoice_type_id = type?.id || null;
   form.value.invoice_type_code = type?.code || null;
+  invoiceType.value = type || {};
 }
 function openInstallmentDialog() {
   showInstallmentDialog.value = true;
@@ -378,6 +389,7 @@ async function saveInvoice(payload) {
   itemsError.value = null;
   console.log('selectedUser.cash_box_id', selectedUser.value.cash_box_id);
   payload.user_cash_box_id = selectedUser.value.cash_box_id;
+  // payload.cash_box_id = selectedUser.value.cash_box_id;
   try {
     const apiCall = form.value.id ? saveItem('invoice', payload, form.value.id, true, true) : saveItem('invoice', payload, false, true, true);
     const res = await apiCall;

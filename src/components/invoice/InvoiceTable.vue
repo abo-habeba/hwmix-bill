@@ -42,6 +42,7 @@ const editedItem = ref({
   status: '',
   notes: '',
   items: [],
+  invoice_type: {},
 });
 
 function fetchItems() {
@@ -54,8 +55,6 @@ function fetchItems() {
 // const invoiceId = ref(null);
 function editItem(item) {
   editedItem.value = { ...item };
-
-  // invoiceId.value = item.id;
 
   dialog.value = true;
 }
@@ -200,7 +199,7 @@ onMounted(fetchItems);
     </v-data-table>
 
     <v-dialog v-model="dialog" max-width="700">
-      <InvoiceForm :model-value="editedItem" :isEdit="true" @saved="onSaved" @close="dialog = false" />
+      <InvoiceForm :model-value="editedItem" :isEdit="true" :invoiceContext="editedItem.invoice_type" @saved="onSaved" @close="dialog = false" />
     </v-dialog>
   </v-card>
 </template>

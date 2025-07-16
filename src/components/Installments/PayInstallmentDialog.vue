@@ -169,13 +169,15 @@ function closePayDialog() {
 function submitPayment() {
   if (!props.directPay && !valid.value) return;
   // إرسال الطلب
-  saveItem('installment-payment/pay', payData.value)
+  saveItem('installment-payment/pay', payData.value, false, false)
     .then(newInstallments => {
       console.log('تم تحديث القسط:', newInstallments);
       emit('update:installment', newInstallments);
       closePayDialog();
     })
     .catch(error => {
+      closePayDialog();
+
       console.error('Error submitting payment:', error);
     });
 }

@@ -3,17 +3,27 @@
     <v-card class="pa-3">
       <h2>الفواتير</h2>
       <div class="d-flex justify-space-evenly flex-wrap justify-center align-center mb-2 w-100">
-        <v-btn class="px-1" color="primary" prepend-icon="ri-file-list-3-line" @click="handleAdd({ code: 'sale', context: 'sales' })">
+        <v-btn
+          class="px-1"
+          color="primary"
+          prepend-icon="ri-file-list-3-line"
+          @click="handleAdd({ code: 'sale', context: 'sales', label: 'فاتورة بيع' })"
+        >
           فاتورة بيع
         </v-btn>
-        <v-btn class="px-1" color="primary" prepend-icon="ri-shopping-cart-line" @click="handleAdd({ code: 'purchase', context: 'purchases' })">
+        <v-btn
+          class="px-1"
+          color="primary"
+          prepend-icon="ri-shopping-cart-line"
+          @click="handleAdd({ code: 'purchase', context: 'purchases', label: 'فاتورة شراء' })"
+        >
           فاتورة شراء
         </v-btn>
         <v-btn
           class="px-1"
           color="primary"
           prepend-icon="ri-money-dollar-circle-line"
-          @click="handleAdd({ code: 'installment_sale', context: 'sales' })"
+          @click="handleAdd({ code: 'installment_sale', context: 'sales', label: 'فاتورة تقسيط' })"
         >
           فاتورة تقسيط
         </v-btn>
