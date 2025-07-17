@@ -100,13 +100,14 @@ function getInstallmentRowProps({ item }) {
   return {}; // لا يوجد تنسيق خاص
 }
 
-function updateInstallment(newInstallments) {
-  newInstallments.forEach(newInstallment => {
-    const index = installments.value.findIndex(i => i.id === newInstallment.id);
-    if (index !== -1) {
-      installments.value[index] = newInstallment;
-    }
-  });
+function updateInstallment() {
+  fetchInstallments();
+  // newInstallments.forEach(newInstallment => {
+  //   const index = installments.value.findIndex(i => i.id === newInstallment.id);
+  //   if (index !== -1) {
+  //     installments.value[index] = newInstallment;
+  //   }
+  // });
 }
 
 async function fetchInstallments() {

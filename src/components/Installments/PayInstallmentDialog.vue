@@ -162,6 +162,15 @@ watch(
 );
 
 function closePayDialog() {
+  payData.value = {
+    amount: '',
+    // remaining: '',
+    paid_at: new Date().toISOString().substr(0, 10),
+    payment_method_id: '',
+    cash_box_id: null,
+    notes: '',
+    installment_ids: [],
+  };
   payDialog.value = false;
   emit('update:modelValue', false);
 }
