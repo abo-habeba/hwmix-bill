@@ -75,9 +75,10 @@ const emit = defineEmits(['update:modelValue', 'update:installment']);
 
 const payDialog = ref(false);
 const valid = ref(false);
+const alreadyPaid = ref(false);
+
 const payData = ref({
   amount: '',
-  // remaining: '',
   paid_at: new Date().toISOString().substr(0, 10),
   payment_method_id: '',
   cash_box_id: null,
@@ -93,7 +94,6 @@ onMounted(async () => {
     const methods = await getAll('payment-methods', { per_page: -1 }, true, false, false);
     paymentMethods.value = methods || [];
 
-    // اختيار طريقة الدفع الافتراضية (كاش)
     const cashMethod = methods.find(method => method.code?.trim().toLowerCase() === 'cash');
     if (cashMethod) {
       payData.value.payment_method_id = cashMethod.id;
@@ -102,12 +102,9 @@ onMounted(async () => {
     const userStore = useUserStore();
     if (userStore.user?.cashBoxes) {
       cashboxes.value = userStore.user.cashBoxes || [];
-      // اختيار الصندوق الافتراضي
-      if (cashboxes.value.length) {
-        const defaultBox = cashboxes.value.find(box => box.is_default);
-        if (defaultBox) {
-          payData.value.cash_box_id = defaultBox.id;
-        }
+      const defaultBox = cashboxes.value.find(box => box.is_default);
+      if (defaultBox) {
+        payData.value.cash_box_id = defaultBox.id;
       }
     }
   } catch (error) {
@@ -116,13 +113,13 @@ onMounted(async () => {
 });
 
 const installmentReady = ref(false);
-// مراقبة القسط وتحديث البيانات
+
 watch(
   () => props.installment,
   newInstallment => {
     if (newInstallment) {
       console.log('📥 استلام قسط جديد:', newInstallment);
-      console.log('installmentReady', installmentReady.value);
+
       payData.value.installment_ids = [newInstallment.id];
       payData.value.amount = newInstallment.remaining;
       payData.value.user_id = newInstallment.user_id;
@@ -136,24 +133,27 @@ watch(
       const defaultBox = cashboxes.value.find(box => box.is_default);
       payData.value.cash_box_id = defaultBox?.id || null;
 
-      // البيانات جاهزة
-      installmentReady.value = true;
+      // ✅ فقط لما تكون كل البيانات موجودة
+      if (payData.value.payment_method_id && payData.value.cash_box_id) {
+        installmentReady.value = true;
+      } else {
+        console.warn('⚠️ بيانات ناقصة تمنع تنفيذ الدفع التلقائي.');
+      }
     }
   }
 );
-// تنفيذ الدفع تلقائي لما تكون البيانات جاهزة والشروط مكتملة
+
 watch(
   () => installmentReady.value,
   ready => {
     console.log('🔄 مراقبة جاهزية القسط:', ready);
-    if (ready && props.directPay) {
+    if (ready && props.directPay && !alreadyPaid.value) {
       console.log('🚀 البيانات جاهزة والدفع مباشر، جاري التنفيذ...');
       submitPayment();
     }
   }
 );
 
-// فتح الديالوج فقط
 watch(
   () => props.modelValue,
   newVal => {
@@ -164,30 +164,31 @@ watch(
 function closePayDialog() {
   payData.value = {
     amount: '',
-    // remaining: '',
     paid_at: new Date().toISOString().substr(0, 10),
     payment_method_id: '',
     cash_box_id: null,
     notes: '',
     installment_ids: [],
   };
+  installmentReady.value = false;
+  alreadyPaid.value = false;
   payDialog.value = false;
   emit('update:modelValue', false);
 }
 
 function submitPayment() {
   if (!props.directPay && !valid.value) return;
-  // إرسال الطلب
+
   saveItem('installment-payment/pay', payData.value, false, false)
     .then(newInstallments => {
-      console.log('تم تحديث القسط:', newInstallments);
+      alreadyPaid.value = true;
+      console.log('✅ تم تحديث القسط:', newInstallments);
       emit('update:installment', newInstallments);
       closePayDialog();
     })
     .catch(error => {
+      console.error('❌ Error submitting payment:', error);
       closePayDialog();
-
-      console.error('Error submitting payment:', error);
     });
 }
 </script>
