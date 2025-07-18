@@ -1,6 +1,17 @@
 <template>
   <!-- جدول خطط التقسيط -->
-  <v-data-table :headers="headers" :items="installmentPlans" item-value="id" class="elevation-1" density="compact" hide-default-footer>
+  <v-data-table
+    fixed-header
+    :headers="headers"
+    :items="installmentPlans"
+    item-value="id"
+    :row-props="getInstallmentRowProps"
+    class="elevation-1"
+    density="compact"
+    hide-default-footer
+    hover
+    @click:row="handleRowClick"
+  >
     <template #item.actions="{ item }">
       <v-btn color="primary" density="compact" @click.stop="openInstallmentsDialog(item)">عرض الأقساط</v-btn>
     </template>
@@ -81,23 +92,23 @@
           hide-default-footer
         >
           <template #item.status="{ item }">
-            <v-chip :color="item.status === 'تم الدفع' ? 'success' : 'error'" dark>{{ item.status }}</v-chip>
+            <v-chip :color="item.status === 'paid' ? 'success' : 'error'" dark>{{ item.status }}</v-chip>
           </template>
 
           <template #item.actions="{ item }">
             <v-btn
-              v-if="item.status !== 'تم الدفع'"
-              :color="item.status === 'تم الدفع' ? 'grey' : 'success'"
-              :disabled="item.status === 'تم الدفع'"
+              v-if="item.status !== 'paid'"
+              :color="item.status === 'paid' ? 'grey' : 'success'"
+              :disabled="item.status === 'paid'"
               density="compact"
               class="me-1"
               @click.stop="openPayDialog(item, true)"
               >دفع القسط</v-btn
             >
             <v-btn
-              v-if="item.status !== 'تم الدفع'"
-              :color="item.status === 'تم الدفع' ? 'grey' : 'warning'"
-              :disabled="item.status === 'تم الدفع'"
+              v-if="item.status !== 'paid'"
+              :color="item.status === 'paid' ? 'grey' : 'warning'"
+              :disabled="item.status === 'paid'"
               density="compact"
               @click.stop="openPayDialog(item, false)"
               >مبلغ مختلف</v-btn
@@ -138,6 +149,16 @@ const headers = [
   { title: 'الدفعة الأولى', key: 'down_payment' },
   { title: 'الإجراءات', key: 'actions', sortable: false },
 ];
+const selectedRowId = ref(null);
+
+function handleRowClick(event, row) {
+  selectedRowId.value = row?.item?.id;
+  console.log('Selected Row ID:', selectedRowId.value);
+}
+
+function getRowClass(item) {
+  return item.id === selectedRowId.value ? 'active-row' : '';
+}
 
 // رؤوس جدول الأقساط
 const installmentsHeaders = [
@@ -145,7 +166,7 @@ const installmentsHeaders = [
   { title: 'تاريخ الاستحقاق', key: 'due_date' },
   { title: 'المبلغ', key: 'amount' },
   { title: 'المتبقي', key: 'remaining' },
-  { title: 'الحالة', key: 'status' },
+  { title: 'الحالة', key: 'status_label' },
   { title: 'الإجراءات', key: 'actions', sortable: false },
 ];
 
@@ -209,13 +230,16 @@ function getInstallmentRowProps({ item }) {
   dueDate.setHours(0, 0, 0, 0);
   today.setHours(0, 0, 0, 0);
 
-  if (item.status === 'تم الدفع') {
+  if (item.status === 'paid') {
     return { style: { backgroundColor: '#A5D6A7' } }; // أخضر أغمق قليلاً (Material Design Light Green 300)
   } else if (remainingAmount > 0 && dueDate < today) {
     return { style: { backgroundColor: '#EF9A9A' } }; // أحمر أغمق قليلاً (Material Design Red 200)
   } else if (remainingAmount > 0) {
     return { style: { backgroundColor: '#FFE082' } }; // أصفر/برتقالي أغمق قليلاً (Material Design Amber 200)
+  } else if (calculatePaidPercentage(item) == '100') {
+    return { style: { backgroundColor: '#E8F5E9' } };
   }
+
   return {}; // لا يوجد تنسيق خاص
 }
 
@@ -226,8 +250,8 @@ function fetchInstallmentPlans() {
   });
 }
 
-function updateInstallments(installments) {
-  installments.forEach(updated => {
+function updateInstallments(data) {
+  data.paid_installments.forEach(updated => {
     const index = currentInstallments.value.findIndex(i => i.id === updated.id);
     if (index !== -1) {
       currentInstallments.value[index] = { ...currentInstallments.value[index], ...updated };
@@ -239,6 +263,8 @@ function updateInstallments(installments) {
 function openInstallmentsDialog(plan) {
   if (!plan || !Array.isArray(plan.installments)) return;
   currentPlan.value = plan;
+  console.log('currentPlan.value', currentPlan.value);
+
   currentInstallments.value = plan.installments;
   installmentsDialog.value = true;
 }
@@ -259,6 +285,9 @@ onMounted(fetchInstallmentPlans);
   font-size: 0.8rem;
 }
 
+.active-row {
+  background-color: #e0f7fa !important; /* اللون اللي تحبه */
+}
 /* تنسيقات شريط التقدم */
 .progress-bar-container {
   width: 100%;
