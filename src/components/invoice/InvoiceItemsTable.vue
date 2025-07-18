@@ -61,6 +61,7 @@ function emitUpdateItem(item) {
   emit('update-item', item);
 }
 function emitRemoveItem(id) {
+  console.log('Removing item with id:', id);
   emit('remove-item', id);
 }
 function formatCurrency(value) {

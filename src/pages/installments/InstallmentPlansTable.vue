@@ -31,10 +31,11 @@
     </template>
     <template #item.plan_products="{ item }">
       <v-chip-group column>
-        <div>
-          <v-chip v-for="product in item.invoice_items" :key="product.id" size="small" color="info" variant="outlined">
+        <div class="d-flex flex-wrap">
+          <v-chip v-for="product in item.invoice_items.slice(0, 2)" :key="product.id" size="small" color="info" variant="outlined">
             {{ product.name }}
           </v-chip>
+          <v-chip class="text-grey px-1" v-if="item.invoice_items.length > 2">منتجات {{ item.invoice_items.length - 2 }} اخرين </v-chip>
         </div>
         <span v-if="!item.invoice_items || item.invoice_items.length === 0" class="text-grey-darken-1">لا توجد منتجات</span>
       </v-chip-group>

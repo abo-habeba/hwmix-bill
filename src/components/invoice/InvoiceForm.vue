@@ -107,7 +107,6 @@
               v-model="form.notes"
               label="ملاحظات الفاتورة (اختياري)"
               auto-grow
-              rows="auto"
               prepend-inner-icon="ri-sticky-note-line"
               color="info"
               hide-details
@@ -267,9 +266,11 @@ function updateInvoiceItem(item) {
   item.total = item.unit_price * item.quantity - (item.discount || 0);
   if (item.total < 0) item.total = 0;
 }
-function removeInvoiceItem(itemToRemove) {
-  if (!itemToRemove || !itemToRemove.product_id) return;
-  form.value.items = form.value.items.filter(item => item.product_id !== itemToRemove.product_id);
+function removeInvoiceItem(idItemToRemove) {
+  console.log('Removing item:', idItemToRemove);
+
+  if (!idItemToRemove) return;
+  form.value.items = form.value.items.filter(item => item.id !== idItemToRemove);
 }
 function addOrIncrementProduct(product) {
   if (!product || !product.id || !product.product_name) return;
@@ -288,6 +289,7 @@ function addOrIncrementProduct(product) {
     updateInvoiceItem(existingItem);
   } else {
     const newItem = {
+      id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
       variant_id: product.id,
       product_id: product.product_id,
       name: product.product_name,

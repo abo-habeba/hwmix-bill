@@ -79,7 +79,7 @@ function onUserSearch(val) {
 async function fetchUsers(search = '') {
   isLoadingUsers.value = true;
   try {
-    const res = await getAll('users', { search, limit: 10 }, false, false, false);
+    const res = await getAll('users/search', { search, limit: 10 }, false, false, false);
     users.value = res.data || [];
   } catch (error) {
     users.value = [];

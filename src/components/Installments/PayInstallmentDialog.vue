@@ -53,13 +53,14 @@
             <v-icon color="success" size="50" class="mb-1">ri-checkbox-circle-fill</v-icon>
             <h3 class="mb-2">تمت عملية الدفع بنجاح!</h3>
             <p class="text-h6 mb-2">المبلغ المدفوع : {{ dataReturn?.payment_record?.amount_paid }}</p>
-            <p v-if="dataReturn?.payment_record?.excess_amount" class="text-subtitle-1 success--text">
-              المبلغ الزائد المتبقي:{{ dataReturn?.payment_record?.excess_amount }} <br />
+            <p v-if="dataReturn?.payment_record?.excess_amount" class="d-flex flex-column align-center justify-center text-subtitle-1 success--text">
+              <span>تم دفع الاقساط بنجاح،</span>
+              <span>ولكن يوجد مبلغ متبقي بقيمة : {{ dataReturn?.payment_record?.excess_amount }}</span>
             </p>
 
             <v-divider class="my-4" style="width: 80%"></v-divider>
 
-            <p class="k">الأقساط التي تم تسويتها</p>
+            <p class="k">الأقساط التي تم دفعها</p>
             <div dense class="w-100" v-if="dataReturn?.paid_installments?.length">
               <div v-for="installment in dataReturn.paid_installments" :key="installment.id">
                 <div>
