@@ -234,14 +234,16 @@ function deleteAttribute(id) {
   deleteOne('attribute', id)
     .then(() => {
       getAttributes();
-      deleteDialog.value = false;
     })
-    .catch(() => toast.error('حدث خطأ أثناء حذف الخاصية'));
+    .finally(() => {
+      confirmDeleteId.value = null;
+      deleteDialog.value = false;
+    });
 }
 
 // دالة جلب الخصائص
 function getAttributes() {
-  getAll('attributes', null, true, true).then(res => {
+  getAll('attributes', null, true, false).then(res => {
     attributes.value = res;
   });
 }
@@ -305,11 +307,13 @@ function confirmDeleteValue(id) {
 function deleteValue() {
   deleteOne('attribute-value', valueToDeleteId.value)
     .then(() => {
-      toast.success('تم حذف القيمة بنجاح');
       reloadAttributeValues(valueToDeleteId.value);
       deleteValueDialog.value = false;
     })
-    .catch(() => toast.error('حدث خطأ أثناء حذف القيمة'));
+    .finally(() => {
+      confirmDeleteId.value = null;
+      deleteValueDialog.value = false;
+    });
 }
 
 function reloadAttributeValues(deletedId = null) {

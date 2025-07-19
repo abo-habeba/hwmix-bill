@@ -40,16 +40,16 @@ export default [
       roles: ['admin.super', 'admin.company', 'attributes.page'],
     },
   },
-  {
-    path: 'attribute-values',
-    component: () => import('@/pages/attributeValues/attributeValues.vue'),
-    name: 'attribute-values',
-    meta: {
-      title: 'قيم الخصائص',
-      description: 'إدارة وتعديل قيم الخصائص',
-      roles: ['admin.super', 'admin.company', 'attribute_values.page'],
-    },
-  },
+  // {
+  //   path: 'attribute-values',
+  //   component: () => import('@/pages/attributeValues/attributeValues.vue'),
+  //   name: 'attribute-values',
+  //   meta: {
+  //     title: 'قيم الخصائص',
+  //     description: 'إدارة وتعديل قيم الخصائص',
+  //     roles: ['admin.super', 'admin.company', 'attribute_values.page'],
+  //   },
+  // },
   {
     path: 'brands',
     component: () => import('@/pages/brands/brands.vue'),

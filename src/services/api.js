@@ -79,16 +79,21 @@ const handleError = (error, log, userStore, loading, type, showToast) => {
   if (error?.response?.status === 401) return;
   log ? console.log(`${type}: ❌`, error.response || error) : '';
   loading ? (userStore.loadingApi = false) : '';
+  console.log(`${type}: ❌`, error);
 
   let errorMessage = 'حدث خطأ غير متوقع';
+
   if (error.response && error.response.data) {
-    if (error.response.data.errors) {
+    if (error.response.data.errors.length) {
+      console.log('if (error.response.data.errors.length)');
       errorMessage = translateErrors(error.response.data.errors);
     } else if (error.response.data.message) {
+      console.log('else if (error.response.data.message)', errorMessage);
       errorMessage = error.response.data.message;
     }
-  } else if (error.message) {
-    errorMessage = error.message;
+  } else if (error.response.message) {
+    console.log('else if error.response.message');
+    errorMessage = error.response.message;
   }
   if (showToast) {
     // تحقق من showToast
