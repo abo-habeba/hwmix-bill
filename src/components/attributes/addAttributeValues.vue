@@ -7,35 +7,60 @@
         <v-card-title>{{ isEditMode ? 'تعديل قيمة' : 'اضافة قيمة جديدة' }}</v-card-title>
         <v-card-text>
           <v-form ref="formRef" v-model="formValid">
-            <!-- في حالة أن الخاصية لون -->
             <v-combobox
               v-if="isCurrentAttributeColor"
               v-model="colorNameInput"
               :items="colorSuggestions"
               item-title="name_ar"
-              :item-value="val => val.name_ar"
+              item-value="name_ar"
               label="اختر أو اكتب اسم اللون"
               clearable
-              :menu-props="{ maxHeight: '300px' }"
+              :menu-props="{ maxHeight: '300px', class: 'color-suggestions-menu' }"
               no-filter
               class="pa-3"
+              @update:modelValue="handleColorSelection"
+              @change="handleColorSelection"
             >
+              <template #prepend-inner>
+                <div
+                  v-if="displayColorHex"
+                  :style="{
+                    backgroundColor: displayColorHex,
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    border: '1px solid #ccc',
+                    marginRight: '8px',
+                  }"
+                ></div>
+              </template>
               <template #item="{ props, item }">
                 <v-list-item
-                  class="ma-1"
                   v-bind="props"
+                  :title="item.raw.name_ar"
                   :style="{
                     backgroundColor: item.raw.hex,
                     color: getContrastColor(item.raw.hex),
-                    borderRadius: '10px !important',
-                    overflow: 'hidden',
+                    borderRadius: '4px',
+                    margin: '4px 8px',
                   }"
+                  @click="selectSuggestedColor(item.raw)"
                 >
+                  <template #prepend>
+                    <div
+                      :style="{
+                        backgroundColor: item.raw.hex,
+                        width: '24px',
+                        height: '24px',
+                        borderRadius: '50%',
+                        border: '1px solid #ccc',
+                      }"
+                    ></div>
+                  </template>
                 </v-list-item>
               </template>
             </v-combobox>
 
-            <!-- إذا لم تكن الخاصية لون -->
             <v-text-field
               v-else
               class="pa-3"
@@ -48,7 +73,10 @@
             <v-btn
               v-if="isCurrentAttributeColor"
               class="ma-3"
-              :style="{ backgroundColor: attributeValue.color || '', color: getContrastColor(attributeValue.color) }"
+              :style="{
+                backgroundColor: displayColorHex || '',
+                color: getContrastColor(displayColorHex),
+              }"
               @click="colorPickerDialog = true"
             >
               اختر اللون يدويًا
@@ -70,9 +98,10 @@
       <v-card>
         <v-card-title
           :style="{
-            backgroundColor: attributeValue.color || '',
-            color: getContrastColor(attributeValue.color),
-            position: 'fixed',
+            backgroundColor: displayColorHex || '',
+            color: getContrastColor(displayColorHex),
+            position: 'sticky',
+            top: '0',
             zIndex: '100',
             width: '100%',
           }"
@@ -97,7 +126,7 @@
 import { ref, watch, defineExpose, computed } from 'vue';
 import { saveItem } from '@/services/api';
 import { toast } from 'vue3-toastify';
-import { isColorProperty, suggestClosestColors, getExactColorHexCode, normalizeText } from '@/utils/color-utils';
+import { isColorProperty, suggestClosestColors, getExactColorHexCode, normalizeText, colorDatabase } from '@/utils/color-utils';
 
 const props = defineProps({
   attribute: Object,
@@ -115,18 +144,29 @@ const formValid = ref(false);
 
 const colorNameInput = ref('');
 
-// هل الخاصية تتعلق بلون؟
 const isCurrentAttributeColor = computed(() => {
   return props.attribute ? isColorProperty(props.attribute.name) : false;
 });
 
-// اقتراحات الألوان
 const colorSuggestions = computed(() => {
   if (!colorNameInput.value) return [];
   return suggestClosestColors(colorNameInput.value, 10);
 });
 
-// تحديد لون الخط حسب الخلفية
+const displayColorHex = computed(() => {
+  if (attributeValue.value.color) return attributeValue.value.color;
+  if (colorNameInput.value) {
+    const exactColor = colorDatabase.find(
+      c =>
+        normalizeText(c.name_ar) === normalizeText(colorNameInput.value) ||
+        normalizeText(c.name_en) === normalizeText(colorNameInput.value) ||
+        (c.synonyms && c.synonyms.some(s => normalizeText(s) === normalizeText(colorNameInput.value)))
+    );
+    return exactColor ? exactColor.hex : getExactColorHexCode(colorNameInput.value);
+  }
+  return null;
+});
+
 function getContrastColor(hexcolor) {
   if (!hexcolor || hexcolor.length < 7) return '#000000';
   const r = parseInt(hexcolor.substring(1, 3), 16);
@@ -168,9 +208,9 @@ async function saveValue() {
   const { valid } = await formRef.value.validate();
   if (!valid) return;
 
-  // تحديث الاسم فقط لو الخاصية لون
   if (isCurrentAttributeColor.value) {
     attributeValue.value.name = colorNameInput.value;
+    attributeValue.value.color = displayColorHex.value || '';
   }
 
   try {
@@ -179,18 +219,40 @@ async function saveValue() {
     closeDialog();
   } catch (e) {
     console.error('Error saving:', e);
+    toast.error('حدث خطأ أثناء الحفظ. يرجى المحاولة مرة أخرى.');
   }
 }
 
-// تحديث اللون تلقائيًا بناءً على الاسم المدخل في الكمبوبوكس
-watch(colorNameInput, val => {
-  if (isCurrentAttributeColor.value && val) {
+// معالجة اختيار اللون من قائمة الاقتراحات
+function selectSuggestedColor(colorObject) {
+  if (isCurrentAttributeColor.value && colorObject) {
+    colorNameInput.value = colorObject.name_ar; // تعيين اسم اللون للعرض في combobox
+    attributeValue.value.color = colorObject.hex; // تعيين اللون السداسي العشري
+    attributeValue.value.name = colorObject.name_ar; // تعيين اسم اللون كقيمة فعلية للحفظ
+  }
+}
+
+// معالجة تحديث modelValue للـ v-combobox (عند الكتابة أو عند الضغط على عنصر)
+function handleColorSelection(val) {
+  // val قد تكون string (إذا كتب المستخدم) أو كائن (إذا تم اختيار عنصر)
+  if (typeof val === 'string') {
+    colorNameInput.value = val;
     const hex = getExactColorHexCode(val);
     attributeValue.value.color = hex || '';
+    attributeValue.value.name = val; // تأكيد تعيين الاسم
+  } else if (val && typeof val === 'object' && val.name_ar) {
+    // هذا الجزء قد لا يُستخدم إذا تم التعامل مع item-value و selectSuggestedColor بشكل صحيح
+    // لكن يظل احتياطيًا لمعالجة الكائنات غير المتوقعة
+    colorNameInput.value = val.name_ar;
+    attributeValue.value.color = val.hex || '';
+    attributeValue.value.name = val.name_ar;
+  } else {
+    attributeValue.value.color = '';
+    attributeValue.value.name = '';
   }
-});
+}
 
-// مزامنة الاسم واللون في حالة تعديل قيمة موجودة
+// مراقبة props.editValue لفتح نافذة التعديل
 watch(
   () => props.editValue,
   val => {
@@ -200,6 +262,17 @@ watch(
   },
   { immediate: true }
 );
+
+// مراقبة colorNameInput لتحديث اللون فقط في حالة عدم الاختيار المباشر
+// هذه المراقبة ستكمل عمل handleColorSelection في حالة الكتابة اليدوية فقط
+watch(colorNameInput, val => {
+  if (isCurrentAttributeColor.value && val && typeof val === 'string') {
+    const hex = getExactColorHexCode(val);
+    if (hex) {
+      attributeValue.value.color = hex;
+    }
+  }
+});
 </script>
 
 <style scoped>
@@ -210,4 +283,14 @@ watch(
 .forbidden-cursor {
   cursor: not-allowed !important;
 }
+
+/* حل مشكلة التمرير في الجوال */
+.color-suggestions-menu .v-overlay__content {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/* لإصلاح مشكلة الضغط المزدوج */
+/* تم تعديل منطق اختيار العناصر في القالب و handleColorSelection */
+/* إضافة @change على v-combobox يمكن أن يساعد في بعض السيناريوهات. */
 </style>

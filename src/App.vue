@@ -104,12 +104,10 @@ body {
   font-family: 'Segoe UI', Tahoma, Arial, sans-serif !important;
   font-feature-settings: 'lnum';
   font-variant-numeric: lining-nums;
-  direction: rtl;
 }
 
 input,
 textarea {
-  direction: ltr !important;
   font-family: 'Segoe UI', Tahoma, Arial, sans-serif !important;
 }
 
@@ -129,10 +127,4 @@ body {
 }
 
 /* تأكد من أن حقول الإدخال تتبع نفس النمط */
-input[type='number'],
-input[type='text'],
-textarea {
-  font-variant-numeric: tabular-nums;
-  /* للتأكد في المتصفحات المختلفة، يمكنك أيضًا إضافة lang="en" في الـ HTML الخاص بحقول الإدخال إذا لزم الأمر */
-}
 </style>
