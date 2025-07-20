@@ -17,7 +17,7 @@
               clearable
               :menu-props="{ maxHeight: '300px', class: 'color-suggestions-menu' }"
               no-filter
-              class="pa-3"
+              class="pa-4"
               @update:modelValue="handleColorSelection"
               @change="handleColorSelection"
             >
@@ -26,9 +26,9 @@
                   v-if="displayColorHex"
                   :style="{
                     backgroundColor: displayColorHex,
-                    width: '24px',
+                    width: '50px',
                     height: '24px',
-                    borderRadius: '50%',
+                    borderRadius: '5px',
                     border: '1px solid #ccc',
                     marginRight: '8px',
                   }"
@@ -46,17 +46,6 @@
                   }"
                   @click="selectSuggestedColor(item.raw)"
                 >
-                  <template #prepend>
-                    <div
-                      :style="{
-                        backgroundColor: item.raw.hex,
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '50%',
-                        border: '1px solid #ccc',
-                      }"
-                    ></div>
-                  </template>
                 </v-list-item>
               </template>
             </v-combobox>
@@ -125,7 +114,6 @@
 <script setup>
 import { ref, watch, defineExpose, computed } from 'vue';
 import { saveItem } from '@/services/api';
-import { toast } from 'vue3-toastify';
 import { isColorProperty, suggestClosestColors, getExactColorHexCode, normalizeText, colorDatabase } from '@/utils/color-utils';
 
 const props = defineProps({
@@ -219,7 +207,6 @@ async function saveValue() {
     closeDialog();
   } catch (e) {
     console.error('Error saving:', e);
-    toast.error('حدث خطأ أثناء الحفظ. يرجى المحاولة مرة أخرى.');
   }
 }
 
@@ -241,8 +228,6 @@ function handleColorSelection(val) {
     attributeValue.value.color = hex || '';
     attributeValue.value.name = val; // تأكيد تعيين الاسم
   } else if (val && typeof val === 'object' && val.name_ar) {
-    // هذا الجزء قد لا يُستخدم إذا تم التعامل مع item-value و selectSuggestedColor بشكل صحيح
-    // لكن يظل احتياطيًا لمعالجة الكائنات غير المتوقعة
     colorNameInput.value = val.name_ar;
     attributeValue.value.color = val.hex || '';
     attributeValue.value.name = val.name_ar;
@@ -265,14 +250,14 @@ watch(
 
 // مراقبة colorNameInput لتحديث اللون فقط في حالة عدم الاختيار المباشر
 // هذه المراقبة ستكمل عمل handleColorSelection في حالة الكتابة اليدوية فقط
-watch(colorNameInput, val => {
-  if (isCurrentAttributeColor.value && val && typeof val === 'string') {
-    const hex = getExactColorHexCode(val);
-    if (hex) {
-      attributeValue.value.color = hex;
-    }
-  }
-});
+// watch(colorNameInput, val => {
+//   if (isCurrentAttributeColor.value && val && typeof val === 'string') {
+//     const hex = getExactColorHexCode(val);
+//     if (hex) {
+//       attributeValue.value.color = hex;
+//     }
+//   }
+// });
 </script>
 
 <style scoped>
