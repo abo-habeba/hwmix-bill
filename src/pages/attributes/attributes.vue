@@ -86,7 +86,7 @@
           <span>قيم الخاصية : {{ selectedAttributeForValues?.name }}</span>
           <!-- استدعاء كمبوننت إضافة/تعديل قيمة -->
           <AddAttributeValues
-            :attributes="[selectedAttributeForValues]"
+            :attribute="selectedAttributeForValues"
             v-if="selectedAttributeForValues"
             :edit-value="editValueData"
             @value-added="onValueAdded"
