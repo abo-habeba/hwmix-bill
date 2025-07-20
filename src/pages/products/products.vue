@@ -280,10 +280,7 @@ function printMobileSticker() {
                     <td>{{ variant.wholesale_price }}</td>
                     <td>{{ variant.retail_price }}</td>
                     <td>{{ variant.discount }}</td>
-                    <td>
-                      <!-- استبدل هذا الجزء بمكون عرض الاتربيوت -->
-                      <AttributesDisplay :attributes="variant.attributes" font-size="10px" />
-                    </td>
+                    <td>= <AttributesDisplay :attributes="variant.attributes" font-size="10px" /></td>
                     <td>
                       <div>
                         <v-btn size="x-small" icon color="blue" title="تعديل" @click.stop="openVariantEditDialog(variant, item.id)"

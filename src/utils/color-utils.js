@@ -3,10 +3,12 @@
 export const EXPECTED_COLOR_PROPERTIES = [
   'لون',
   'ألوان',
+  'الالوان',
   'اللون',
   'الألوان',
   'لون المنتج',
   'ألوان المنتج',
+  'الالوان المنتج',
   'خاصية اللون',
   'color',
   'colors',
@@ -23,6 +25,7 @@ export const EXPECTED_COLOR_PROPERTIES = [
   'تدرجات',
   'لون_المنتج',
   'الوان_المنتج',
+  'الالوان_المنتج',
 ];
 
 export const colorDatabase = [

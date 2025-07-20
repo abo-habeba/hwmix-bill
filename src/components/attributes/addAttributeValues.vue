@@ -15,6 +15,7 @@
               item-value="name_ar"
               label="اختر أو اكتب اسم اللون"
               clearable
+              :color="displayColorHex"
               :menu-props="{ maxHeight: '300px', class: 'color-suggestions-menu' }"
               no-filter
               class="pa-4"
