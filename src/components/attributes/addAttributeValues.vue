@@ -21,7 +21,17 @@
               class="pa-3"
             >
               <template #item="{ props, item }">
-                <v-list-item v-bind="props" :style="{ backgroundColor: item.raw.hex, color: getContrastColor(item.raw.hex) }"> </v-list-item>
+                <v-list-item
+                  class="ma-1"
+                  v-bind="props"
+                  :style="{
+                    backgroundColor: item.raw.hex,
+                    color: getContrastColor(item.raw.hex),
+                    borderRadius: '10px !important',
+                    overflow: 'hidden',
+                  }"
+                >
+                </v-list-item>
               </template>
             </v-combobox>
 
@@ -113,7 +123,7 @@ const isCurrentAttributeColor = computed(() => {
 // اقتراحات الألوان
 const colorSuggestions = computed(() => {
   if (!colorNameInput.value) return [];
-  return suggestClosestColors(colorNameInput.value);
+  return suggestClosestColors(colorNameInput.value, 10);
 });
 
 // تحديد لون الخط حسب الخلفية

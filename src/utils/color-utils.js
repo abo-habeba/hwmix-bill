@@ -354,7 +354,7 @@ function stringSimilarityScore(str1, str2) {
   return (commonWords / words1.length + commonWords / words2.length) / 2 || 0;
 }
 
-export function suggestClosestColors(input, limit = 10) {
+export function suggestClosestColors(input, limit = 5, minSimilarityThreshold = 0.35) {
   const normalizedInput = normalizeText(input);
   if (!normalizedInput) return [];
 
@@ -365,6 +365,7 @@ export function suggestClosestColors(input, limit = 10) {
     let maxScore = 0;
     for (const name of normalizedNames) {
       maxScore = Math.max(maxScore, stringSimilarityScore(normalizedInput, name));
+
       if (name.includes(normalizedInput) && normalizedInput.length > 1) {
         maxScore = Math.max(maxScore, 0.8 + (normalizedInput.length / name.length) * 0.2);
       }
@@ -374,7 +375,7 @@ export function suggestClosestColors(input, limit = 10) {
   });
 
   return scoredColors
-    .filter(c => c.score > 0.02)
+    .filter(c => c.score >= minSimilarityThreshold)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 }
