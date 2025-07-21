@@ -87,6 +87,7 @@ declare module 'vue' {
     UserSearchInput: typeof import('./src/components/users/UserSearchInput.vue')['default']
     UsersEditUserRolse: typeof import('./src/components/users/UsersEditUserRolse.vue')['default']
     VariantEditDialog: typeof import('./src/components/products/VariantEditDialog.vue')['default']
+    VueApexCharts: typeof import('vue3-apexcharts')['default']
     Warehouses: typeof import('./src/components/warehouses/warehouses.vue')['default']
   }
 }

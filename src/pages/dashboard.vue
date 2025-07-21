@@ -31,10 +31,12 @@ const newProject = {
 
 <template>
   <v-card class="d-flex justify-center align-center h-screen">
-    <v-card class="mb-6" outlined>
-      <v-card-title class="text-h5">لوحة التحكم</v-card-title>
-      <v-card-text class="d-flex justify-center align-center">
-        <v-icon class="mr-2" size="32">ri-view-dashboard</v-icon>
+    <v-card class="text-center pa-5" width="450" elevation="10" rounded="lg">
+      <v-card-text class="pb-0">
+        <v-icon size="64" color="primary">ri-dashboard-line</v-icon>
+      </v-card-text>
+      <v-card-title class="justify-center text-h5 font-weight-bold pb-2"> لوحة التحكم </v-card-title>
+      <v-card-text class="text-subtitle-1 text-medium-emphasis">
         <p>
           مرحبًا بك في لوحة التحكم الخاصة بك!<br />
           هنا يمكنك العثور على نظرة عامة على تحليلاتك وإحصائياتك.
