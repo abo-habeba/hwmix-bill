@@ -161,7 +161,7 @@ async function deleteConfirmed() {
     closeDeleteDialog();
     selected.value = []; // مسح التحديد بعد الحذف
     // إعادة تحميل البيانات لتحديث الجدول
-    loadItems({ page: 1, itemsPerPage: 10, sortBy: [] }); // يمكنك ضبط القيم الافتراضية هنا
+    loadItems({ page: 1, itemsPerPage: 10, sortBy: [] });
   } catch (error) {
     console.error('Error deleting product variants:', error);
   }

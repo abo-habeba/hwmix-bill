@@ -1,14 +1,14 @@
 <script setup>
-import AnalyticsAward from '@/views/dashboard/AnalyticsAward.vue'
-import AnalyticsBarCharts from '@/views/dashboard/AnalyticsBarCharts.vue'
-import AnalyticsDepositWithdraw from '@/views/dashboard/AnalyticsDepositWithdraw.vue'
-import AnalyticsSalesByCountries from '@/views/dashboard/AnalyticsSalesByCountries.vue'
-import AnalyticsTotalEarning from '@/views/dashboard/AnalyticsTotalEarning.vue'
-import AnalyticsTotalProfitLineCharts from '@/views/dashboard/AnalyticsTotalProfitLineCharts.vue'
-import AnalyticsTransactions from '@/views/dashboard/AnalyticsTransactions.vue'
-import AnalyticsUserTable from '@/views/dashboard/AnalyticsUserTable.vue'
-import AnalyticsWeeklyOverview from '@/views/dashboard/AnalyticsWeeklyOverview.vue'
-import CardStatisticsVertical from '@core/components/cards/CardStatisticsVertical.vue'
+import AnalyticsAward from '@/views/dashboard/AnalyticsAward.vue';
+import AnalyticsBarCharts from '@/views/dashboard/AnalyticsBarCharts.vue';
+import AnalyticsDepositWithdraw from '@/views/dashboard/AnalyticsDepositWithdraw.vue';
+import AnalyticsSalesByCountries from '@/views/dashboard/AnalyticsSalesByCountries.vue';
+import AnalyticsTotalEarning from '@/views/dashboard/AnalyticsTotalEarning.vue';
+import AnalyticsTotalProfitLineCharts from '@/views/dashboard/AnalyticsTotalProfitLineCharts.vue';
+import AnalyticsTransactions from '@/views/dashboard/AnalyticsTransactions.vue';
+import AnalyticsUserTable from '@/views/dashboard/AnalyticsUserTable.vue';
+import AnalyticsWeeklyOverview from '@/views/dashboard/AnalyticsWeeklyOverview.vue';
+import CardStatisticsVertical from '@core/components/cards/CardStatisticsVertical.vue';
 
 const totalProfit = {
   title: 'Total Profit',
@@ -17,7 +17,7 @@ const totalProfit = {
   stats: '$25.6k',
   change: 42,
   subtitle: 'Weekly Project',
-}
+};
 
 const newProject = {
   title: 'New Project',
@@ -26,11 +26,23 @@ const newProject = {
   stats: '862',
   change: -18,
   subtitle: 'Yearly Project',
-}
+};
 </script>
 
 <template>
-  <VRow class="match-height">
+  <v-card class="d-flex justify-center align-center h-screen">
+    <v-card class="mb-6" outlined>
+      <v-card-title class="text-h5">لوحة التحكم</v-card-title>
+      <v-card-text class="d-flex justify-center align-center">
+        <v-icon class="mr-2" size="32">ri-view-dashboard</v-icon>
+        <p>
+          مرحبًا بك في لوحة التحكم الخاصة بك!<br />
+          هنا يمكنك العثور على نظرة عامة على تحليلاتك وإحصائياتك.
+        </p>
+      </v-card-text>
+    </v-card>
+  </v-card>
+  <!-- <VRow class="match-height">
     <VCol
       cols="12"
       md="4"
@@ -111,5 +123,5 @@ const newProject = {
     <VCol cols="12">
       <AnalyticsUserTable />
     </VCol>
-  </VRow>
+  </VRow> -->
 </template>
