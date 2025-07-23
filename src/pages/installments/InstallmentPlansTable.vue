@@ -50,11 +50,11 @@
   <!-- Dialog الأقساط الخاصة بالخطة -->
   <v-dialog v-model="installmentsDialog" max-width="900px" scrollable>
     <v-card>
-      <v-card-title class="bg-primary text-white">تفاصيل خطة التقسيط</v-card-title>
-      <v-card-text>
+      <v-card-title class="bg-primary text-white"> تفاصيل خطة التقسيط </v-card-title>
+
+      <v-card-text style="max-height: 70vh; overflow-y: auto">
         <!-- ملخص الخطة -->
         <v-row class="px-4 pt-4" dense>
-          <!-- تم تعديل cols إلى cols="12" sm="6" -->
           <v-col cols="12" sm="6">
             <InfoDisplay icon="ri-user-line" label="المستخدم" :text="currentPlan.user?.nickname || 'غير متوفر'" />
           </v-col>
@@ -81,7 +81,7 @@
           </v-col>
         </v-row>
 
-        <!-- جدول الأقساط بدون ترقيم صفحات -->
+        <!-- جدول الأقساط -->
         <v-data-table
           :row-props="getInstallmentRowProps"
           :headers="installmentsHeaders"
@@ -93,7 +93,9 @@
           hide-default-footer
         >
           <template #item.status="{ item }">
-            <v-chip :color="item.status === 'paid' ? 'success' : 'error'" dark>{{ item.status }}</v-chip>
+            <v-chip :color="item.status === 'paid' ? 'success' : 'error'" dark>
+              {{ item.status }}
+            </v-chip>
           </template>
 
           <template #item.actions="{ item }">
@@ -104,29 +106,37 @@
               density="compact"
               class="me-1"
               @click.stop="openPayDialog(item, true)"
-              >دفع القسط</v-btn
             >
+              دفع القسط
+            </v-btn>
             <v-btn
               v-if="item.status !== 'paid'"
               :color="item.status === 'paid' ? 'grey' : 'warning'"
               :disabled="item.status === 'paid'"
               density="compact"
               @click.stop="openPayDialog(item, false)"
-              >مبلغ مختلف</v-btn
             >
+              مبلغ مختلف
+            </v-btn>
           </template>
 
           <template #no-data>
             <v-row class="pa-4">
-              <v-col class="text-center text-grey">لا توجد أقساط لهذه الخطة</v-col>
+              <v-col class="text-center text-grey"> لا توجد أقساط لهذه الخطة </v-col>
             </v-row>
           </template>
         </v-data-table>
       </v-card-text>
 
-      <v-card-actions>
+      <!-- Footer actions (sticky) -->
+      <v-card-actions class="bg-grey-lighten-4" style="position: sticky; bottom: 0; z-index: 1">
         <v-spacer></v-spacer>
-        <v-btn text @click="installmentsDialog = false">إغلاق</v-btn>
+        <v-btn prepend-icon="ri-close-line" text @click="installmentsDialog = false">إغلاق</v-btn>
+
+        <!-- زر الطباعة تحت البيانات -->
+        <div class="text-end mt-2 me-4">
+          <v-btn prepend-icon="ri-printer-line" color="primary" @click="printInstallmentPlan(currentPlan)"> طباعة الخطة </v-btn>
+        </div>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -139,7 +149,7 @@
 import { ref, computed, onMounted } from 'vue';
 import PayInstallmentDialog from '@/components/Installments/PayInstallmentDialog.vue';
 import { getAll } from '@/services/api';
-
+import { useUserStore } from '@/stores/user';
 // رؤوس جدول الخطط
 const headers = [
   { title: 'رقم الخطة', key: 'id' },
@@ -170,6 +180,61 @@ const installmentsHeaders = [
   { title: 'الحالة', key: 'status_label' },
   { title: 'الإجراءات', key: 'actions', sortable: false },
 ];
+
+/**
+ * دالة لطباعة خطة أقساط حرارية مباشرة.
+ * تنشئ مكون طباعة مؤقت، تقوم بالطباعة، ثم تزيله.
+ * @param {Object} item - بيانات خطة الأقساط المراد طباعتها.
+ */
+function printInstallmentPlan(item) {
+  // التحقق من وجود بيانات العنصر ومعرف العنصر
+  if (item && item.id) {
+    // جلب بيانات الشركة من متجر المستخدم
+    const userStore = useUserStore();
+    let companyName = 'اسم الشركة'; // قيمة افتراضية لاسم الشركة
+    if (userStore.user && userStore.user.companies && userStore.user.company_id) {
+      // البحث عن الشركة المطابقة لمعرف الشركة الحالي للمستخدم
+      const company = userStore.user.companies.find(c => c.id === userStore.user.company_id);
+      if (company) companyName = company.name; // تحديث اسم الشركة إذا وجدت
+    }
+
+    const installmentData = item; // بيانات خطة الأقساط المراد تمريرها
+
+    // إنشاء عنصر div مؤقت لتركيب مكون الطباعة فيه
+    const container = document.createElement('div');
+    document.body.appendChild(container); // إضافة العنصر إلى جسم المستند
+
+    // استيراد مكون طباعة خطة الأقساط حرارياً بشكل ديناميكي
+    import('@/pages/installments/print/ThermalInstallmentPrint.vue').then(module => {
+      const ThermalInstallmentPrint = module.default; // الحصول على المكون الافتراضي
+
+      // إنشاء تطبيق Vue جديد لتركيب مكون الطباعة
+      const app = createApp({
+        render() {
+          // عرض مكون ThermalInstallmentPrint مع تمرير البيانات واسم الشركة
+          return h(ThermalInstallmentPrint, {
+            installment: installmentData, // تمرير بيانات خطة الأقساط
+            companyName, // تمرير اسم الشركة
+            ref: 'thermalRef', // مرجع للوصول إلى المكون بعد التركيب
+          });
+        },
+        mounted() {
+          // الانتظار حتى يتم تحديث DOM بالكامل
+          nextTick(() => {
+            // استدعاء دالة الطباعة في المكون إذا كانت موجودة
+            this.$refs.thermalRef.printThermal && this.$refs.thermalRef.printThermal();
+            // تعيين مؤقت لإلغاء تركيب التطبيق وإزالة الحاوية بعد الطباعة
+            setTimeout(() => {
+              app.unmount(); // إلغاء تركيب التطبيق
+              document.body.removeChild(container); // إزالة الحاوية من DOM
+            }, 500); // تأخير قصير للسماح بعملية الطباعة
+          });
+        },
+      });
+      app.mount(container); // تركيب التطبيق في الحاوية المؤقتة
+    });
+  }
+}
 
 // بيانات الريأكتيف
 const installmentPlans = ref([]);
