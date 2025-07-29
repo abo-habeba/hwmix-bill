@@ -2,7 +2,7 @@
   <v-data-table-server
     item-value="id"
     v-model:options="options"
-    :headers="headers"
+    :headers="displayedHeaders"
     :items="installments"
     :items-length="totalItems"
     :loading="loading"
@@ -13,6 +13,7 @@
     loading-text="جاري تحميل البيانات"
     no-data-text="لا توجد بيانات"
     items-per-page-text="عدد الصفوف في الصفحة"
+    :hide-default-footer="!pagination"
   >
     <template #item.index="{ index }">
       {{ index + 1 }}
@@ -31,6 +32,7 @@
   </v-data-table-server>
 
   <v-pagination
+    v-if="pagination"
     v-model="currentPage"
     :length="Math.ceil(totalItems / itemsPerPage)"
     class="mt-4"
@@ -38,16 +40,33 @@
     :total-visible="5"
   ></v-pagination>
 
-  <!-- Dialog دفع القسط -->
   <PayInstallmentDialog v-model="payDialog" :installment="currentInstallment" @update:installment="updateInstallment" />
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, defineProps, computed } from 'vue'; // إضافة computed
 import { getAll } from '@/services/api';
 import PayInstallmentDialog from './PayInstallmentDialog.vue';
 
-const headers = [
+const props = defineProps({
+  filters: {
+    type: Object,
+    default: () => ({}),
+  },
+  pagination: {
+    type: Boolean,
+    default: true,
+  },
+  // خاصية جديدة لتحديد الأعمدة المراد عرضها
+  // إذا كانت فارغة، سيتم عرض جميع الأعمدة الافتراضية
+  selectedHeaders: {
+    type: Array,
+    default: () => [], // قيمة افتراضية: مصفوفة فارغة
+  },
+});
+
+// تعريف جميع الأعمدة المتاحة
+const allHeaders = [
   { title: 'رقم القسط', key: 'installment_number' },
   { title: 'العميل', key: 'user.nickname', sortable: false },
   { title: 'تاريخ الاستحقاق', key: 'due_date' },
@@ -56,6 +75,16 @@ const headers = [
   { title: 'المتبقي', key: 'remaining' },
   { title: 'الإجراءات', key: 'actions', sortable: false },
 ];
+
+// Computed property لتحديد الأعمدة التي ستظهر فعليًا
+const displayedHeaders = computed(() => {
+  if (props.selectedHeaders && props.selectedHeaders.length > 0) {
+    // إذا تم تمرير selectedHeaders، قم بتصفية allHeaders بناءً على الـ key
+    return allHeaders.filter(header => props.selectedHeaders.includes(header.key));
+  }
+  // إذا لم يتم تمرير selectedHeaders أو كانت فارغة، اعرض كل الأعمدة
+  return allHeaders;
+});
 
 const installments = ref([]);
 const payDialog = ref(false);
@@ -77,38 +106,39 @@ function openPayDialog(item) {
   payDialog.value = true;
 }
 
-// دالة لتنسيق صف جدول الأقساط بناءً على حالة القسط
 function getInstallmentRowProps({ item }) {
   const remainingAmount = parseFloat(item.remaining) || 0;
   const dueDate = new Date(item.due_date);
   const today = new Date();
-  // لضمان مقارنة التواريخ فقط (تجاهل الوقت)
   dueDate.setHours(0, 0, 0, 0);
   today.setHours(0, 0, 0, 0);
 
   if (item.status === 'paid') {
-    return { style: { backgroundColor: '#A5D6A7' } }; // أخضر (مدفوع بالكامل)
+    return { style: { backgroundColor: '#A5D6A7' } };
   } else if (item.status === 'canceled') {
-    return { style: { backgroundColor: '#CFD8DC' } }; // رمادي (ملغى)
+    return { style: { backgroundColor: '#CFD8DC' } };
   } else if (item.status === 'partially_paid') {
-    return { style: { backgroundColor: '#FFECB3' } }; // أصفر فاتح (مدفوع جزئياً)
+    return { style: { backgroundColor: '#FFECB3' } };
   } else if (remainingAmount > 0 && dueDate < today) {
-    return { style: { backgroundColor: '#EF9A9A' } }; // أحمر (متأخر)
+    return { style: { backgroundColor: '#EF9A9A' } };
   } else if (remainingAmount > 0) {
-    return { style: { backgroundColor: '#E0F2F7' } }; // أزرق فاتح (في الانتظار / مستحق)
+    return { style: { backgroundColor: '#E0F2F7' } };
   }
-  return {}; // لا يوجد تنسيق خاص
+  return {};
 }
 
 function updateInstallment() {
   fetchInstallments();
-  // newInstallments.forEach(newInstallment => {
-  //   const index = installments.value.findIndex(i => i.id === newInstallment.id);
-  //   if (index !== -1) {
-  //     installments.value[index] = newInstallment;
-  //   }
-  // });
 }
+
+watch(
+  () => props.filters,
+  () => {
+    options.value.page = 1;
+    fetchInstallments();
+  },
+  { deep: true }
+);
 
 async function fetchInstallments() {
   loading.value = true;
@@ -123,6 +153,7 @@ async function fetchInstallments() {
     limit: itemsPerPage || 10,
     sort_by: sortField,
     sort_order: sortOrder,
+    ...props.filters,
   };
 
   try {
@@ -148,7 +179,6 @@ watch(
 );
 
 function getRowProps({ item, index }) {
-  // استخدام status_label للعرض في الصفوف إذا لزم الأمر، ولكن الشروط تعتمد على item.status
   return {
     class: item.status === 'paid' ? 'paid-row' : item.status === 'canceled' ? 'canceled-row' : 'unpaid-row',
     'data-index': index,
@@ -158,14 +188,12 @@ function getRowProps({ item, index }) {
 
 <style scoped>
 .paid-row {
-  background-color: #d4edda; /* أخضر فاتح */
+  background-color: #d4edda;
 }
-
 .unpaid-row {
-  background-color: #f8d7da; /* أحمر فاتح (لغير المدفوع/المتأخر) */
+  background-color: #f8d7da;
 }
-
 .canceled-row {
-  background-color: #e0e0e0; /* رمادي فاتح (للملغاة) */
+  background-color: #e0e0e0;
 }
 </style>

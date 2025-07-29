@@ -1,7 +1,7 @@
 <script setup>
-import logo from '@images/logo.svg?raw'
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-import { useDisplay } from 'vuetify'
+import logo from '@images/logo.svg?raw';
+import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
+import { useDisplay } from 'vuetify';
 
 const props = defineProps({
   tag: {
@@ -17,29 +17,29 @@ const props = defineProps({
     type: Function,
     required: true,
   },
-})
+});
 
-const { smAndDown } = useDisplay()
-const refNav = ref()
+const { smAndDown } = useDisplay();
+const refNav = ref();
 
 /*ℹ️ Close overlay side when route is changed
 Close overlay vertical nav when link is clicked
 */
-const route = useRoute()
+const route = useRoute();
 
 watch(
   () => route.path,
   () => {
-    props.toggleIsOverlayNavActive(false)
-  },
-)
+    props.toggleIsOverlayNavActive(false);
+  }
+);
 
-const isVerticalNavScrolled = ref(false)
-const updateIsVerticalNavScrolled = val => (isVerticalNavScrolled.value = val)
+const isVerticalNavScrolled = ref(false);
+const updateIsVerticalNavScrolled = val => (isVerticalNavScrolled.value = val);
 
 const handleNavScroll = evt => {
-  isVerticalNavScrolled.value = evt.target.scrollTop > 0
-}
+  isVerticalNavScrolled.value = evt.target.scrollTop > 0;
+};
 </script>
 
 <template>
@@ -59,30 +59,16 @@ const handleNavScroll = evt => {
     <!-- 👉 Header -->
     <div class="nav-header">
       <slot name="nav-header">
-        <RouterLink
-          to="/"
-          class="app-logo app-title-wrapper"
-        >
-          <div
-            class="d-flex"
-            v-html="logo"
-          />
+        <RouterLink to="/" class="app-logo app-title-wrapper">
+          <div class="d-flex" v-html="logo" />
         </RouterLink>
       </slot>
     </div>
     <slot name="before-nav-items">
       <div class="vertical-nav-items-shadow" />
     </slot>
-    <slot
-      name="nav-items"
-      :update-is-vertical-nav-scrolled="updateIsVerticalNavScrolled"
-    >
-      <PerfectScrollbar
-        tag="ul"
-        class="nav-items"
-        :options="{ wheelPropagation: false }"
-        @ps-scroll-y="handleNavScroll"
-      >
+    <slot name="nav-items" :update-is-vertical-nav-scrolled="updateIsVerticalNavScrolled">
+      <PerfectScrollbar tag="ul" class="nav-items" :options="{ wheelPropagation: false }" @ps-scroll-y="handleNavScroll">
         <slot />
       </PerfectScrollbar>
     </slot>

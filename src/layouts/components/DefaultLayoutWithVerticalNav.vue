@@ -1,6 +1,6 @@
 <script setup>
 import Footer from '@/layouts/components/Footer.vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue';
 import NavItems from '@/layouts/components/NavItems.vue';
 import UserProfile from '@/layouts/components/UserProfile.vue';
@@ -15,6 +15,7 @@ const { smAndDown } = useDisplay();
 const userStore = useUserStore(); // ✅ بدون ref
 const companiesDialog = ref(false);
 const router = useRouter();
+const route = useRoute();
 const companyId = ref(null);
 const errorResponse = ref(null);
 
@@ -22,7 +23,10 @@ function setCompanies(id) {
   companyId.value = id;
   saveItem('change-company', { company_id: companyId.value }, userStore.user.id)
     .then(res => {
-      userStore.user = res; // ✅ بيتم استبدال الكائن بالكامل
+      // userStore.user = res;
+      router.go(0);
+      // router.replace({ path: route.path, query: { ...route.query, t: Date.now() } });
+
       companiesDialog.value = false;
     })
     .catch(e => {

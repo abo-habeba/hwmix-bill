@@ -6,7 +6,20 @@
       <div class="row col-12 row-inline">
         <div class="col-6 text-left">تاريخ الخطة: {{ formatDate(installment.updated_at || installment.created_at) }}</div>
       </div>
-      <div class="row customer col-12">العميل: {{ installment.user.full_name }}</div>
+      <div class="row customer col-12">العميل: {{ installment.user.nickname }}</div>
+
+      <div class="row col-12">
+        <div class="col-6 text-right">إجمالي الخطة: {{ formatCurrency(installment.total_amount) }}</div>
+        <div class="col-6 text-left">المقدم : {{ formatCurrency(installment.down_payment) }}</div>
+      </div>
+      <div class="row col-12">
+        <div class="col-6 text-right">المتبقي: {{ formatCurrency(installment.remaining_amount) }}</div>
+        <div class="col-6 text-left" v-if="installment.notes">ملاحظات: {{ installment.notes }}</div>
+      </div>
+      <div class="row col-12">
+        <div class="col-6 text-right">عدد الأقساط: {{ installment.number_of_installments }}</div>
+        <div class="col-6 text-left">إجمالي الأقساط: {{ formatCurrency(installment.total_installments_amount) }}</div>
+      </div>
       <div class="row col-12 product-header">المنتجات:</div>
       <div class="row product-item" v-for="product in installment.invoice_items" :key="product.id">
         <div class="col-12 product-name">- {{ product.name }}</div>
@@ -18,7 +31,7 @@
       <thead>
         <tr>
           <th>الرقم</th>
-          <th>تاريخ الاستحقاق</th>
+          <th>تاريخ القسط</th>
           <th>الحالة</th>
         </tr>
       </thead>
@@ -32,20 +45,6 @@
     </table>
     <hr />
     <!-- Footer -->
-    <div class="footer flex-col">
-      <div class="row col-12">
-        <div class="col-6 text-right">إجمالي الخطة: {{ formatCurrency(installment.total_amount) }}</div>
-        <div class="col-6 text-left">الدفعة الأولى: {{ formatCurrency(installment.down_payment) }}</div>
-      </div>
-      <div class="row col-12">
-        <div class="col-6 text-right">المتبقي: {{ formatCurrency(installment.remaining_amount) }}</div>
-        <div class="col-6 text-left" v-if="installment.notes">ملاحظات: {{ installment.notes }}</div>
-      </div>
-      <div class="row col-12">
-        <div class="col-6 text-right">عدد الأقساط: {{ installment.number_of_installments }}</div>
-        <div class="col-6 text-left">إجمالي الأقساط: {{ formatCurrency(installment.total_installments_amount) }}</div>
-      </div>
-    </div>
   </div>
 </template>
 

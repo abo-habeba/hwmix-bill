@@ -62,7 +62,7 @@
             <InfoDisplay icon="ri-file-text-line" label="الفاتورة" :text="currentPlan.invoice?.invoice_number || '—'" />
           </v-col>
           <v-col cols="12" sm="6">
-            <InfoDisplay icon="ri-calendar-line" label="تاريخ البدء" :text="formattedStartDate" />
+            <InfoDisplay icon="ri-calendar-line" label="تاريخ الخطة" :text="formattedStartDate" />
           </v-col>
           <v-col cols="12" sm="6">
             <InfoDisplay icon="ri-money-dollar-box-line" label="إجمالي الفاتورة" :text="currentPlan.total_amount" />
