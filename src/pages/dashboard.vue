@@ -37,6 +37,15 @@ const installmentFilters = computed(() => {
   };
 });
 
+const hasInstallments = ref(true);
+const hasShowInstallments = ref(false);
+
+// دالة لمعالجة الحدث الصادر من InstallmentsDataTable
+const handleTotalItemsUpdate = total => {
+  hasInstallments.value = total > 0;
+  hasShowInstallments.value = total > 0;
+};
+
 const totalProfit = {
   title: 'Total Profit',
   color: 'secondary',
@@ -116,12 +125,13 @@ const newProject = {
       <AnalyticsDepositWithdraw />
     </VCol> -->
 
-    <VCol cols="12">
+    <VCol cols="12" v-show="hasShowInstallments" v-if="hasInstallments">
       <VCard class="pa-0" title="الأقساط المستحقة قريباً">
         <InstallmentsDataTable
           :pagination="false"
           :filters="installmentFilters"
           :selected-headers="['installment_number', 'user.nickname', 'due_date', 'actions']"
+          @update:totalItems="handleTotalItemsUpdate"
         />
       </VCard>
     </VCol>

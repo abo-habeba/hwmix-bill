@@ -44,9 +44,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, defineProps, computed } from 'vue'; // إضافة computed
+import { ref, onMounted, watch, defineProps, computed, defineEmits } from 'vue'; // إضافة defineEmits
 import { getAll } from '@/services/api';
 import PayInstallmentDialog from './PayInstallmentDialog.vue';
+
+// 1. تعريف الأحداث التي يصدرها المكون
+const emits = defineEmits(['update:totalItems']); // تعريف حدث جديد باسم 'update:totalItems'
 
 const props = defineProps({
   filters: {
@@ -57,15 +60,12 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  // خاصية جديدة لتحديد الأعمدة المراد عرضها
-  // إذا كانت فارغة، سيتم عرض جميع الأعمدة الافتراضية
   selectedHeaders: {
     type: Array,
-    default: () => [], // قيمة افتراضية: مصفوفة فارغة
+    default: () => [],
   },
 });
 
-// تعريف جميع الأعمدة المتاحة
 const allHeaders = [
   { title: 'رقم القسط', key: 'installment_number' },
   { title: 'العميل', key: 'user.nickname', sortable: false },
@@ -76,13 +76,10 @@ const allHeaders = [
   { title: 'الإجراءات', key: 'actions', sortable: false },
 ];
 
-// Computed property لتحديد الأعمدة التي ستظهر فعليًا
 const displayedHeaders = computed(() => {
   if (props.selectedHeaders && props.selectedHeaders.length > 0) {
-    // إذا تم تمرير selectedHeaders، قم بتصفية allHeaders بناءً على الـ key
     return allHeaders.filter(header => props.selectedHeaders.includes(header.key));
   }
-  // إذا لم يتم تمرير selectedHeaders أو كانت فارغة، اعرض كل الأعمدة
   return allHeaders;
 });
 
@@ -160,15 +157,18 @@ async function fetchInstallments() {
     const res = await getAll('installments', params, true, true, true);
     installments.value = res.data;
     totalItems.value = res.total;
+    // 2. إصدار الحدث بعد تحديث totalItems
+    emits('update:totalItems', totalItems.value); // إصدار قيمة totalItems
   } catch (error) {
-    console.error('فشل في جلب الأقساط:', error);
   } finally {
     loading.value = false;
   }
 }
 
 onMounted(() => {
-  // fetchInstallments(); // يمكن تفعيلها إذا أردت جلب البيانات عند تحميل المكون لأول مرة
+  // 3. جلب البيانات عند تحميل المكون لأول مرة
+  // هذا مهم جدًا ليتم إصدار الحدث بقيمة totalItems الأولية
+  fetchInstallments();
 });
 
 watch(
