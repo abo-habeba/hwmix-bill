@@ -22,7 +22,7 @@ const user = ref({
 onMounted(() => {
   if (route.params.id) {
     loading.value = true;
-    getOne('user', userId.value, true)
+    getOne('user', userId.value)
       .then(res => {
         user.value = res;
         userCompanies.value = res.companies;

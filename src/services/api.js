@@ -114,12 +114,15 @@ export const getAll = async (apiEndpoint, params = null, loading = true, showToa
   }
 };
 
-export const getOne = async (apiEndpoint, id, loading = true, showToast = false, log = false) => {
+export const getOne = async (apiEndpoint, id, options = {}) => {
+  // استخدام التفكيك لتعيين قيم افتراضية للخيارات
+  const { basic = true, loading = true, showToast = false, log = false } = options;
+
   const userStore = useUserStore();
   try {
     loading ? (userStore.loadingApi = true) : '';
-    const response = await apiClient.get(`${apiEndpoint}/${id}`);
-    loading ? (userStore.loadingApi = true) : '';
+    const response = await apiClient.get(`${apiEndpoint}/${id}?basic=${basic}`);
+    loading ? (userStore.loadingApi = true) : ''; // ملاحظة: هذا السطر مكرر، قد تحتاج لمراجعته
     return handleSuccess(response, log, userStore, loading, apiEndpoint, showToast);
   } catch (error) {
     return handleError(error, log, userStore, loading, apiEndpoint, showToast);

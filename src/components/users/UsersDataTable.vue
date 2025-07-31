@@ -21,7 +21,6 @@
       :items="users"
       :items-length="total"
       :loading="loading"
-      :search="searchQuery"
       hover
       show-current-page
       :row-props="getRowProps"
@@ -233,14 +232,8 @@ const colsContextMenu = () => {
 // مراقبة حقل البحث لتأخير الطلب حتى كتابة 3 أحرف
 watch(searchQuery, newVal => {
   if (newVal && newVal.length >= 3) {
-    // تحديث الفلاتر وإعادة جلب البيانات
-    filters.value.nickname = newVal;
-    filters.value.phone = newVal; // يمكن البحث بالاسم أو الهاتف
     fetchUsers();
-  } else if (!newVal && (filters.value.nickname || filters.value.phone)) {
-    // مسح الفلاتر وإعادة جلب البيانات عند مسح حقل البحث
-    filters.value.nickname = '';
-    filters.value.phone = '';
+  } else if (newVal.length === 0) {
     fetchUsers();
   }
 });
@@ -253,14 +246,14 @@ async function fetchUsers() {
   const perPage = itemsPerPage === -1 ? total.value : itemsPerPage;
   try {
     const response = await getAll(
-      'users',
+      'users/search',
       {
         page,
         per_page: perPage,
         sort_by: sortField,
         sort_order: sortOrder,
         ...filters.value,
-        search: searchQuery.value.length >= 3 ? searchQuery.value : '', // إرسال قيمة البحث فقط إذا كانت 3 أحرف أو أكثر
+        search: searchQuery.value.length >= 3 ? searchQuery.value : '',
       },
       false,
       false,
@@ -277,7 +270,7 @@ async function fetchUsers() {
 
 function getRowProps({ item, index }) {
   return {
-    class: item.status === '1' ? 'active-row' : 'inactive-row',
+    class: item.status === 'active' ? 'active-row' : 'inactive-row',
     'data-index': index,
   };
 }

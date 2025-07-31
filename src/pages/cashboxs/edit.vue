@@ -32,7 +32,7 @@ const company = ref({});
 onMounted(() => {
   if (route.params.id) {
     loading.value = true;
-    getOne('company', userId.value, true)
+    getOne('company', userId.value)
       .then(res => {
         company.value = res;
         console.log(' company.value.logo', res.logo);

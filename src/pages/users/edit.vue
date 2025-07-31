@@ -88,7 +88,7 @@ function loadUserData() {
       roles.value = [];
     });
 
-  getOne('user', userId.value, false, false, false)
+  getOne('user', userId.value)
     .then(res => {
       user.value = res;
       console.log('user ', res);
