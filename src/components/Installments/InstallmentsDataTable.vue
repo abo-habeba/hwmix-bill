@@ -158,18 +158,18 @@ async function fetchInstallments() {
     installments.value = res.data;
     totalItems.value = res.total;
     // 2. إصدار الحدث بعد تحديث totalItems
-    emits('update:totalItems', totalItems.value); // إصدار قيمة totalItems
+    emits('update:totalItems', totalItems.value);
   } catch (error) {
   } finally {
     loading.value = false;
   }
 }
 
-onMounted(() => {
-  // 3. جلب البيانات عند تحميل المكون لأول مرة
-  // هذا مهم جدًا ليتم إصدار الحدث بقيمة totalItems الأولية
-  fetchInstallments();
-});
+// onMounted(() => {
+//   // 3. جلب البيانات عند تحميل المكون لأول مرة
+//   // هذا مهم جدًا ليتم إصدار الحدث بقيمة totalItems الأولية
+//   fetchInstallments();
+// });
 
 watch(
   () => options.value.page,
