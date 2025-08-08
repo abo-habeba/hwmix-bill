@@ -8,17 +8,28 @@
       <v-card-title> العلامات التجارية</v-card-title>
       <v-divider class="ma-1"></v-divider>
       <v-row class="flex-wrap ma-2" style="gap: 16px">
-        <v-col v-for="brand in brands" :key="brand.id" cols="12" sm="auto"
-          class="d-flex align-center elevation-2 pa-1 rounded" style="background: white; min-width: 280px">
+        <v-col
+          v-for="brand in brands"
+          :key="brand.id"
+          cols="12"
+          sm="auto"
+          class="d-flex align-center elevation-2 pa-1 rounded"
+          style="background: white; min-width: 280px"
+        >
           <v-avatar variant="text" icon="ri-price-tag-3-line" color="primary" size="32" class="me-3" />
           <div class="text-lg fw-medium">
             {{ brand.name }}
           </div>
           <v-spacer />
-          <v-btn icon="ri-edit-line" variant="text" color="success" @click.stop="editBrand(brand)"
-            title="تعديل العلامة التجارية" class="mx-1" />
-          <v-btn icon="ri-delete-bin-line" variant="text" color="error" @click.stop="confirmDelete(brand.id)"
-            title="حذف العلامة التجارية" class="mx-1" />
+          <v-btn icon="ri-edit-line" variant="text" color="success" @click.stop="editBrand(brand)" title="تعديل العلامة التجارية" class="mx-1" />
+          <v-btn
+            icon="ri-delete-bin-line"
+            variant="text"
+            color="error"
+            @click.stop="confirmDelete(brand.id)"
+            title="حذف العلامة التجارية"
+            class="mx-1"
+          />
         </v-col>
 
         <v-col v-if="brands.length === 0" cols="12">
@@ -27,7 +38,7 @@
       </v-row>
     </v-card>
     <!-- Add/Edit Brand Dialog -->
-    <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog v-model="dialog" max-width="500px" persistent>
       <v-card>
         <v-card-title>{{ brand?.id ? 'تعديل العلامة التجارية' : 'اضافة علامة تجارية جديدة' }}</v-card-title>
         <v-card-text>
@@ -42,7 +53,7 @@
     </v-dialog>
 
     <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="deleteDialog" max-width="400px">
+    <v-dialog v-model="deleteDialog" max-width="400px" persistent>
       <v-card>
         <v-card-title>تأكيد الحذف</v-card-title>
         <v-card-text>هل أنت متأكد من حذف هذه العلامة التجارية؟</v-card-text>

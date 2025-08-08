@@ -198,7 +198,7 @@ onMounted(fetchItems);
       </template>
     </v-data-table>
 
-    <v-dialog v-model="dialog" max-width="700">
+    <v-dialog v-model="dialog" max-width="700" persistent>
       <InvoiceForm :model-value="editedItem" :isEdit="true" :invoiceContext="editedItem.invoice_type" @saved="onSaved" @close="dialog = false" />
     </v-dialog>
   </v-card>

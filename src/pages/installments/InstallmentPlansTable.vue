@@ -48,7 +48,7 @@
   </v-data-table>
 
   <!-- Dialog الأقساط الخاصة بالخطة -->
-  <v-dialog v-model="installmentsDialog" max-width="900px" scrollable>
+  <v-dialog v-model="installmentsDialog" max-width="900px" scrollable persistent>
     <v-card>
       <v-card-title class="bg-primary text-white"> تفاصيل خطة التقسيط </v-card-title>
 

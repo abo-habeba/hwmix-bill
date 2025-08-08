@@ -35,7 +35,10 @@ function cleanPhoneNumber(num) {
   // حذف جميع المسافات وعلامة + وأي بادئة دولية تبدأ بـ 2 أو أكثر من الأرقام بعد +
   let cleaned = num.replace(/\s+/g, '').replace(/^\+/, '');
   // إذا الرقم يبدأ بـ 20 أو 966 أو أي كود دولي معروف، احذف البادئة
-  cleaned = cleaned.replace(/^(2|966|971|962|965|968|973|974|21|212|218|249|963|90|1|44|33|49|7|380|39|34|351|355|357|358|359|36|420|421|43|45|46|47|48|52|53|54|55|56|57|58|60|61|62|63|64|65|66|81|82|84|86|7|27|234|237|254|255|256|260|263|264|265|266|267|268|20)/, '');
+  cleaned = cleaned.replace(
+    /^(2|966|971|962|965|968|973|974|21|212|218|249|963|90|1|44|33|49|7|380|39|34|351|355|357|358|359|36|420|421|43|45|46|47|48|52|53|54|55|56|57|58|60|61|62|63|64|65|66|81|82|84|86|7|27|234|237|254|255|256|260|263|264|265|266|267|268|20)/,
+    ''
+  );
   return cleaned;
 }
 
@@ -69,10 +72,7 @@ function selectNumberFromDialog(number) {
   showNumbersDialog.value = false;
 }
 
-const isContactSupported =
-  typeof window !== 'undefined' &&
-  'contacts' in navigator &&
-  typeof navigator.contacts.select === 'function';
+const isContactSupported = typeof window !== 'undefined' && 'contacts' in navigator && typeof navigator.contacts.select === 'function';
 </script>
 
 <template>
@@ -112,12 +112,14 @@ const isContactSupported =
       </template>
     </VTextField>
     <!-- Dialog لاختيار رقم من عدة أرقام -->
-    <v-dialog v-model="showNumbersDialog" max-width="400">
+    <v-dialog v-model="showNumbersDialog" max-width="400" persistent>
       <v-card>
-        <v-card-title class="text-h6">اختر رقم الهاتف <span v-if="contactName">({{ contactName }})</span></v-card-title>
+        <v-card-title class="text-h6"
+          >اختر رقم الهاتف <span v-if="contactName">({{ contactName }})</span></v-card-title
+        >
         <v-divider></v-divider>
         <v-list>
-          <v-list-item v-for="(num, idx) in contactNumbers" :key="idx" @click="selectNumberFromDialog(num)" style="cursor:pointer">
+          <v-list-item v-for="(num, idx) in contactNumbers" :key="idx" @click="selectNumberFromDialog(num)" style="cursor: pointer">
             <v-list-item-title>{{ num }}</v-list-item-title>
           </v-list-item>
         </v-list>

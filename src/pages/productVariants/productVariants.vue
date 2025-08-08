@@ -43,7 +43,7 @@
       </template>
     </v-data-table-server>
 
-    <v-dialog v-model="deleteDialog" max-width="500px">
+    <v-dialog v-model="deleteDialog" max-width="500px" persistent>
       <v-card>
         <v-card-title class="headline">تأكيد الحذف</v-card-title>
         <v-card-text>

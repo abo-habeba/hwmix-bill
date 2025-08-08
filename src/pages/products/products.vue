@@ -301,7 +301,7 @@ function printMobileSticker() {
       </v-data-table>
     </v-card>
 
-    <v-dialog v-model="confirmDelete" max-width="340">
+    <v-dialog v-model="confirmDelete" max-width="340" persistent>
       <v-card>
         <v-card-title>تأكيد الحذف</v-card-title>
         <v-card-text>هل أنت متأكد أنك تريد حذف هذا المنتج؟</v-card-text>
@@ -313,7 +313,7 @@ function printMobileSticker() {
     </v-dialog>
 
     <!-- Dialog خاص بطباعة الاستيكر على الموبايل -->
-    <v-dialog v-model="showMobileStickerDialog" max-width="350">
+    <v-dialog v-model="showMobileStickerDialog" max-width="350" persistent>
       <v-card>
         <v-card-title class="text-center">معاينة استيكر المنتج</v-card-title>
         <v-card-text>

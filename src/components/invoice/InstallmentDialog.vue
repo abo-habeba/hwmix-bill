@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :model-value="visible" @update:model-value="updateVisible" max-width="600">
+  <v-dialog :model-value="visible" @update:model-value="updateVisible" max-width="600" persistent>
     <v-card>
       <v-card-title>
         <span class="text-h5">إكمال بيانات التقسيط</span>

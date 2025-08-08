@@ -6,7 +6,7 @@ const props = defineProps({
 });
 </script>
 <template>
-  <v-dialog v-model="props.visible" max-width="700">
+  <v-dialog v-model="props.visible" max-width="700" persistent>
     <v-card v-if="props.invoice">
       <v-card-title>تفاصيل الفاتورة رقم {{ props.invoice.invoice_number }}</v-card-title>
       <v-card-text>

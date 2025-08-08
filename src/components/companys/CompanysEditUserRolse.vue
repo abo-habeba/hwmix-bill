@@ -48,7 +48,7 @@ function assignRole() {
   >
     تعديل الادوار
   </v-btn>
-  <v-dialog :fullscreen="xs" v-model="dialogRolesEdit" max-width="900">
+  <v-dialog :fullscreen="xs" v-model="dialogRolesEdit" max-width="900" persistent>
     <v-card class="pa-4">
       <v-card-title class="text-subtitle-1 py-1 px-4 bg-grey-lighten-4">تعديل ادوار المستخدم </v-card-title>
       <v-row class="mb-10" v-if="roles">

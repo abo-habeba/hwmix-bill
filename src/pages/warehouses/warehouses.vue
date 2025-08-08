@@ -36,7 +36,7 @@
       </v-row>
     </v-card>
 
-    <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog v-model="dialog" max-width="500px" persistent>
       <v-card>
         <v-card-title>{{ warehouse.id ? 'تعديل المخزن' : 'اضافة مخزن جديد' }}</v-card-title>
         <v-card-text>
@@ -66,7 +66,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="deleteDialog" max-width="400px">
+    <v-dialog v-model="deleteDialog" max-width="400px" persistent>
       <v-card>
         <v-card-title>تأكيد الحذف</v-card-title>
         <v-card-text>هل أنت متأكد من حذف هذا المخزن؟</v-card-text>

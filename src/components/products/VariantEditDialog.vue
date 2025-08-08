@@ -54,7 +54,7 @@ function save() {
 </script>
 
 <template>
-  <v-dialog v-model="dialog" max-width="600">
+  <v-dialog v-model="dialog" max-width="600" persistent>
     <v-card class="bg-grey-lighten-4 pa-2">
       <v-card-title>تعديل متغير المنتج</v-card-title>
       <v-row class="bg-grey-lighten-4 pa-2">

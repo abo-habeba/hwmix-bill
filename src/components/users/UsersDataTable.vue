@@ -93,10 +93,12 @@ const options = ref({
   sortBy: [],
   itemsPerPage: 10,
 });
+const canViewCompany = await userStore.can(['admin.super', 'admin.company']);
 
 const headers = ref([
   { title: '#', key: 'index', sortable: false },
   { title: 'اسم الشهره', key: 'nickname', align: 'start' },
+  ...(canViewCompany ? [{ title: 'اسم الشركة', key: 'company_name', align: 'start' }] : []),
   { title: 'الهاتف', key: 'phone', align: 'start' },
   { title: 'الرصيد', key: 'balance', align: 'start' },
   { title: 'تاريخ الإنشاء', key: 'created_at', align: 'start' },

@@ -1,6 +1,6 @@
 <template>
   <!-- <v-btn class="ma-2" variant="text" @click="operationDialogd = true"> التحويل بين خزائنك </v-btn> -->
-  <v-dialog v-model="operationDialogd" max-width="500px">
+  <v-dialog v-model="operationDialogd" max-width="500px" persistent>
     <v-card class="pa-5">
       <!-- <div class="container"> -->
       <h2>تفاصيل العملية</h2>

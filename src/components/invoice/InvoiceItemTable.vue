@@ -57,7 +57,7 @@ function onSaved() {
         <v-btn icon color="error" @click="removeItem(item)"><v-icon>mdi-delete</v-icon></v-btn>
       </template>
     </v-data-table>
-    <v-dialog v-model="dialog" max-width="600">
+    <v-dialog v-model="dialog" max-width="600" persistent>
       <InvoiceItemForm :model-value="editedItem" :invoice-id="props.invoiceId" @saved="onSaved" @close="dialog = false" />
     </v-dialog>
   </v-card>

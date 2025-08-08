@@ -64,7 +64,7 @@ onMounted(fetchItems);
         <v-btn icon color="error" @click="removeItem(item)"><v-icon>ri-delete-bin-line</v-icon></v-btn>
       </template>
     </v-data-table>
-    <v-dialog v-model="dialog" max-width="500">
+    <v-dialog v-model="dialog" max-width="500" persistent>
       <InvoiceTypeForm :model-value="editedItem" @saved="onSaved" @close="dialog = false" />
     </v-dialog>
   </v-card>

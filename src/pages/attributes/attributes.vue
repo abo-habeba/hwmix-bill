@@ -67,7 +67,7 @@
     />
 
     <!-- حوار الحذف -->
-    <v-dialog v-model="deleteDialog" max-width="400px">
+    <v-dialog v-model="deleteDialog" max-width="400px" persistent>
       <v-card>
         <v-card-title>تأكيد الحذف</v-card-title>
         <v-card-text>هل أنت متأكد من حذف هذه الخاصية؟</v-card-text>
@@ -80,7 +80,7 @@
     </v-dialog>
 
     <!-- Dialog لعرض القيم الخاصة بالخاصية -->
-    <v-dialog v-model="valuesDialog" max-width="600px">
+    <v-dialog v-model="valuesDialog" max-width="600px" persistent>
       <v-card>
         <v-card-title class="d-flex align-center justify-space-between">
           <span>قيم الخاصية : {{ selectedAttributeForValues?.name }}</span>
@@ -151,7 +151,7 @@
     </v-dialog>
 
     <!-- Dialog تأكيد حذف قيمة -->
-    <v-dialog v-model="deleteValueDialog" max-width="350px">
+    <v-dialog v-model="deleteValueDialog" max-width="350px" persistent>
       <v-card>
         <v-card-title>تأكيد حذف القيمة</v-card-title>
         <v-card-text>هل أنت متأكد من حذف هذه القيمة؟</v-card-text>

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="localAddDialog" max-width="500px">
+  <v-dialog v-model="localAddDialog" max-width="500px" persistent>
     <v-card>
       <v-card-title>{{ isEditMode ? 'تعديل خاصية' : 'اضافة خاصية جديدة' }}</v-card-title>
       <v-card-text>

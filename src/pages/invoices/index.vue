@@ -34,7 +34,7 @@
       <InvoiceTable :model-value="invoice" @show="handleShow" />
     </v-card>
     <!-- نموذج إضافة / تعديل الفاتورة -->
-    <v-dialog v-model="showForm" max-width="900">
+    <v-dialog v-model="showForm" max-width="900" persistent>
       <InvoiceForm v-if="showForm" :model-value="formModel" :invoiceContext="dialogContext" @saved="onFormSaved" @close="closeForm" />
     </v-dialog>
 

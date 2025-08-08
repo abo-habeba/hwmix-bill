@@ -2,7 +2,7 @@
   <div>
     <v-btn class="ma-1" color="primary" @click="openAddDialog">اضافة قيمة</v-btn>
 
-    <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog v-model="dialog" max-width="500px" persistent>
       <v-card>
         <v-card-title>{{ isEditMode ? 'تعديل قيمة' : 'اضافة قيمة جديدة' }}</v-card-title>
         <v-card-text>
@@ -84,7 +84,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="colorPickerDialog" max-width="500px">
+    <v-dialog v-model="colorPickerDialog" max-width="500px" persistent>
       <v-card>
         <v-card-title
           :style="{

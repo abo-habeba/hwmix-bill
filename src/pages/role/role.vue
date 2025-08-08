@@ -7,29 +7,41 @@
           <p class="text-subtitle-1 text-medium-emphasis mt-1">قم بإدارة أدوار المستخدمين وصلاحياتهم في النظام</p>
         </div>
         <v-spacer />
-        <v-btn v-if="userStore.can(['roles.create', 'admin.super', 'admin.company'])" color="primary"
-          prepend-icon="ri-add-line" @click="openDialog()" elevation="2" size="large">
+        <v-btn
+          v-if="userStore.can(['roles.create', 'admin.super', 'admin.company'])"
+          color="primary"
+          prepend-icon="ri-add-line"
+          @click="openDialog()"
+          elevation="2"
+          size="large"
+        >
           دور جديد
         </v-btn>
       </v-col>
     </v-row>
     <v-card elevation="2">
-      <v-data-table :headers="headers" :items="roles" :search="search" :loading="loading"
-        loading-text="جاري تحميل البيانات" no-data-text="لا توجد بيانات" items-per-page-text="عدد الصفوف في الصفحة"
-        items-per-page="10" class="elevation-1" hover>
-
+      <v-data-table
+        :headers="headers"
+        :items="roles"
+        :search="search"
+        :loading="loading"
+        loading-text="جاري تحميل البيانات"
+        no-data-text="لا توجد بيانات"
+        items-per-page-text="عدد الصفوف في الصفحة"
+        items-per-page="10"
+        class="elevation-1"
+        hover
+      >
         <template v-slot:top>
           <v-toolbar color="transparent">
-            <v-text-field class="ma-10" v-model="search" prepend-icon="ri-search-line" label="بحث..."
-              hide-details></v-text-field>
+            <v-text-field class="ma-10" v-model="search" prepend-icon="ri-search-line" label="بحث..." hide-details></v-text-field>
           </v-toolbar>
         </template>
 
         <template v-slot:item.actions="{ item }">
           <div class="d-flex gap-2">
             <v-btn icon="ri-pencil-line" color="primary" size="small" variant="text" @click="editRole(item)"> </v-btn>
-            <v-btn icon="ri-delete-bin-line" color="error" size="small" variant="text" @click="confirmDelete(item)">
-            </v-btn>
+            <v-btn icon="ri-delete-bin-line" color="error" size="small" variant="text" @click="confirmDelete(item)"> </v-btn>
           </div>
         </template>
       </v-data-table>
@@ -47,14 +59,11 @@
 
         <v-divider class="my-4" />
 
-
         <v-card-text>
           <v-form ref="form" v-model="valid">
             <v-row dense>
               <v-col cols="12" xs="6">
-                <v-text-field v-model="editedItem.name" label="اسم الدور" :rules="nameRules" required variant="outlined"
-                  hide-details>
-                </v-text-field>
+                <v-text-field v-model="editedItem.name" label="اسم الدور" :rules="nameRules" required variant="outlined" hide-details> </v-text-field>
               </v-col>
             </v-row>
 
@@ -64,31 +73,39 @@
                 <div class="text-subtitle-1 mb-3">الصلاحيات</div>
               </v-col>
               <v-col cols="8">
-                <v-text-field v-model="search" prepend-icon="ri-search-line" label="بحث..." hide-details>
-                </v-text-field>
+                <v-text-field v-model="search" prepend-icon="ri-search-line" label="بحث..." hide-details> </v-text-field>
               </v-col>
               <v-expansion-panels v-model="openPanels" class="my-4" variant="popout" multiple>
                 <v-expansion-panel class="pa-0" v-for="group in filteredPermissionGroups" :key="group.name">
-                  <v-expansion-panel-title style="background-color: #f0f4f8;" class="text-subtitle">
+                  <v-expansion-panel-title style="background-color: #f0f4f8" class="text-subtitle">
                     {{ group.name }}
                   </v-expansion-panel-title>
                   <v-expansion-panel-text>
                     <v-card class="mt-3" variant="outlined">
                       <v-card-title class="py-2 px-2 bg-grey-lighten-4 d-flex align-center">
-                        <v-checkbox :model-value="isGroupSelected(group)"
+                        <v-checkbox
+                          :model-value="isGroupSelected(group)"
                           :label="isGroupSelected(group) ? 'إلغاء تحديد الكل' : 'تحديد الكل'"
-                          @update:model-value="val => toggleGroupSelection(group, val)" hide-details color="primary"
-                          class="ma-0 pa-0"></v-checkbox>
+                          @update:model-value="val => toggleGroupSelection(group, val)"
+                          hide-details
+                          color="primary"
+                          class="ma-0 pa-0"
+                        ></v-checkbox>
                         <v-spacer></v-spacer>
                       </v-card-title>
                       <v-card-text>
                         <v-row>
-                          <v-col class="py-0 px-3" cols="12" xs="6" sm="6" md="4" lg="3"
-                            v-for="(permission, i) in group.permissions" :key="i">
-                            <v-checkbox v-model="editedItem.permissions" :label="permission.label"
-                              :value="permission.value" density="comfortable" color="primary"
-                              class="permission-checkbox py-0 px-3" hide-details
-                              @update:model-value="() => updateGroupSelection(group)"></v-checkbox>
+                          <v-col class="py-0 px-3" cols="12" xs="6" sm="6" md="4" lg="3" v-for="(permission, i) in group.permissions" :key="i">
+                            <v-checkbox
+                              v-model="editedItem.permissions"
+                              :label="permission.label"
+                              :value="permission.value"
+                              density="comfortable"
+                              color="primary"
+                              class="permission-checkbox py-0 px-3"
+                              hide-details
+                              @update:model-value="() => updateGroupSelection(group)"
+                            ></v-checkbox>
                           </v-col>
                         </v-row>
                       </v-card-text>
@@ -100,17 +117,14 @@
           </v-form>
         </v-card-text>
         <v-divider></v-divider>
-        <v-card-actions style="position: sticky; bottom: 0; background-color: white; z-index: 5"
-          class="pa-4 d-flex justify-center">
-          <v-btn append-icon="ri-close-line" color="error" variant="text" @click="closeDialog" class="mx-2"> إلغاء
-          </v-btn>
-          <v-btn append-icon="ri-save-line" color="primary" :loading="saving" @click="saveRole" class="mx-2"> حفظ
-          </v-btn>
+        <v-card-actions style="position: sticky; bottom: 0; background-color: white; z-index: 5" class="pa-4 d-flex justify-center">
+          <v-btn append-icon="ri-close-line" color="error" variant="text" @click="closeDialog" class="mx-2"> إلغاء </v-btn>
+          <v-btn append-icon="ri-save-line" color="primary" :loading="saving" @click="saveRole" class="mx-2"> حفظ </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="deleteDialog" max-width="400">
+    <v-dialog v-model="deleteDialog" max-width="400" persistent>
       <v-card>
         <v-card-title class="text-h5 pa-4"> تأكيد الحذف </v-card-title>
         <v-card-text class="pa-4"> هل أنت متأكد من حذف هذا الدور؟ لا يمكن التراجع عن هذا الإجراء. </v-card-text>
@@ -153,10 +167,7 @@ const editedItem = ref({
   permissions: [],
 });
 
-const nameRules = [
-  v => !!v || 'اسم الدور مطلوب',
-  v => v.length >= 3 || 'يجب أن يكون الاسم 3 أحرف على الأقل'
-];
+const nameRules = [v => !!v || 'اسم الدور مطلوب', v => v.length >= 3 || 'يجب أن يكون الاسم 3 أحرف على الأقل'];
 
 const headers = ref([
   { title: 'اسم الدور', key: 'name', align: 'start' },
@@ -178,7 +189,7 @@ const toggleGroupSelection = (group, isChecked) => {
   editedItem.value.permissions = Array.from(currentPermissions);
 };
 
-const updateGroupSelection = () => { };
+const updateGroupSelection = () => {};
 
 const filteredPermissionGroups = computed(() => {
   if (!search.value) return permissionGroups.value;
@@ -186,9 +197,7 @@ const filteredPermissionGroups = computed(() => {
   return permissionGroups.value.filter(group => {
     const groupNameMatches = group.name.toLowerCase().includes(lowerCaseSearch);
     const permissionMatches = group.permissions.some(
-      permission =>
-        permission.label.toLowerCase().includes(lowerCaseSearch) ||
-        permission.value.toLowerCase().includes(lowerCaseSearch)
+      permission => permission.label.toLowerCase().includes(lowerCaseSearch) || permission.value.toLowerCase().includes(lowerCaseSearch)
     );
     return groupNameMatches || permissionMatches;
   });
@@ -304,7 +313,7 @@ const deleteRole = async () => {
 };
 </script>
 <style scoped>
-.d-flex.gap-2>.v-btn {
+.d-flex.gap-2 > .v-btn {
   margin-right: 8px;
   /* For `gap-2` equivalent in Vuetify */
 }

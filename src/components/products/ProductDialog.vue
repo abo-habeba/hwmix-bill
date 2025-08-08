@@ -320,7 +320,7 @@ function closeDialog() {
 </script>
 
 <template>
-  <v-dialog v-model="dialog" max-width="900px">
+  <v-dialog v-model="dialog" max-width="900px" persistent>
     <v-card>
       <v-btn color="error" style="position: fixed; z-index: 10" class="ma-2" icon="ri-close-line" @click="closeDialog"></v-btn>
       <v-card-title class="ma-3 text-center">

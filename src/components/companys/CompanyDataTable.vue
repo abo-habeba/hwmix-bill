@@ -75,7 +75,7 @@
           </v-col>
         </v-row>
         <!-- show Scanner barcode Video -->
-        <v-dialog v-model="showScanner" max-width="400">
+        <v-dialog v-model="showScanner" max-width="400" persistent>
           <v-card class="pa-2">
             <video ref="barcodeVideo" id="barcodeVideo" style="width: 100%; height: 240px; object-fit: cover" autoplay muted playsinline></video>
             <v-alert v-if="scannerError" type="error" class="mt-2" dense border="start" border-color="error">

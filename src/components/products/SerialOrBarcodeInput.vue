@@ -9,7 +9,7 @@
     </template>
   </v-text-field>
 
-  <v-dialog v-model="showScanner" max-width="400">
+  <v-dialog v-model="showScanner" max-width="400" persistent>
     <v-card>
       <v-alert v-if="scannerError" type="warning" dense border="start" border-color="error">
         {{ scannerError }}
