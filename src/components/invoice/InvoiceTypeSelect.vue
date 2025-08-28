@@ -51,7 +51,7 @@ onMounted(() => {
 async function fetchTypes() {
   loading.value = true;
   try {
-    const data = await getAll('invoice-types', {
+    const { data } = await getAll('invoice-types', {
       context: props.invoiceContext?.context,
       per_page: -1,
     });

@@ -1,52 +1,80 @@
 <template>
   <!-- جدول خطط التقسيط -->
-  <v-data-table
-    fixed-header
-    :headers="headers"
-    :items="installmentPlans"
-    item-value="id"
-    :row-props="getInstallmentRowProps"
-    class="elevation-1"
-    density="compact"
-    hide-default-footer
-    hover
-    @click:row="handleRowClick"
-  >
-    <template #item.actions="{ item }">
-      <v-btn color="primary" density="compact" @click.stop="openInstallmentsDialog(item)">عرض الأقساط</v-btn>
-    </template>
-    <!-- قالب لعمود "النسبة المدفوعة" كشريط تقدم -->
-    <template #item.paid_percentage="{ item }">
-      <div class="progress-bar-container">
-        <div
-          class="progress-bar-fill"
-          :style="{
-            width: calculatePaidPercentage(item) + '%',
-            backgroundColor: getPercentageBarColor(item),
-          }"
-        >
-          {{ calculatePaidPercentage(item) }}%
+  <v-card class="pa-2">
+    <v-data-table-server
+      fixed-header
+      v-model:items-per-page="itemsPerPage"
+      v-model:options="options"
+      :headers="headers"
+      :items="installmentPlans"
+      :items-length="total"
+      :loading="loading"
+      hover
+      show-current-page
+      show-select
+      item-selectable
+      item-value="id"
+      :row-props="getInstallmentRowProps"
+      class="elevation-1"
+      density="compact"
+      loading-text="جاري تحميل البيانات..."
+      no-data-text="لا توجد بيانات"
+      items-per-page-text="عدد الصفوف في الصفحة"
+      :items-per-page-options="[10, 25, 50, 100, 500, { value: -1, title: 'الكل' }]"
+      @update:options="fetchInstallmentPlans"
+      @click:row="handleRowClick"
+    >
+      <template #top>
+        <v-toolbar>
+          <v-text-field
+            v-model="searchUser"
+            label="ابحث باسم المستخدم"
+            prepend-inner-icon="ri-search-line"
+            hide-details
+            clearable
+            class="ma-10"
+            max-width="200"
+            rounded
+            @input="onSearch"
+            :rules="[v => (v && v.length >= 3) || 'ادخل 3 حروف على الاقل']"
+          ></v-text-field>
+        </v-toolbar>
+      </template>
+      <template #item.actions="{ item }">
+        <v-btn color="primary" density="compact" @click.stop="openInstallmentsDialog(item)">عرض الأقساط</v-btn>
+      </template>
+      <!-- قالب لعمود "النسبة المدفوعة" كشريط تقدم -->
+      <template #item.paid_percentage="{ item }">
+        <div class="progress-bar-container">
+          <div
+            class="progress-bar-fill"
+            :style="{
+              width: calculatePaidPercentage(item) + '%',
+              backgroundColor: getPercentageBarColor(item),
+            }"
+          >
+            {{ calculatePaidPercentage(item) }}%
+          </div>
         </div>
-      </div>
-    </template>
-    <template #item.plan_products="{ item }">
-      <v-chip-group column>
-        <div class="d-flex flex-wrap">
-          <v-chip v-for="product in item.invoice_items.slice(0, 2)" :key="product.id" size="small" color="info" variant="outlined">
-            {{ product.name }}
-          </v-chip>
-          <v-chip class="text-grey px-1" v-if="item.invoice_items.length > 2">منتجات {{ item.invoice_items.length - 2 }} اخرين </v-chip>
-        </div>
-        <span v-if="!item.invoice_items || item.invoice_items.length === 0" class="text-grey-darken-1">لا توجد منتجات</span>
-      </v-chip-group>
-    </template>
-    <template #no-data>
-      <v-row class="pa-4">
-        <v-col class="text-center text-grey">لا توجد بيانات خطط أقساط</v-col>
-      </v-row>
-    </template>
-  </v-data-table>
-
+      </template>
+      <template #item.plan_products="{ item }">
+        <v-chip-group column>
+          <div class="d-flex flex-wrap">
+            <v-chip v-for="product in item.invoice_items.slice(0, 2)" :key="product.id" size="small" color="info" variant="outlined">
+              {{ product.name }}
+            </v-chip>
+            <v-chip class="text-grey px-1" v-if="item.invoice_items.length > 2">منتجات {{ item.invoice_items.length - 2 }} اخرين </v-chip>
+          </div>
+          <span v-if="!item.invoice_items || item.invoice_items.length === 0" class="text-grey-darken-1">لا توجد منتجات</span>
+        </v-chip-group>
+      </template>
+      <template #no-data>
+        <v-row class="pa-4">
+          <v-col class="text-center text-grey">لا توجد بيانات خطط أقساط</v-col>
+        </v-row>
+      </template>
+    </v-data-table-server>
+  </v-card>
   <!-- Dialog الأقساط الخاصة بالخطة -->
   <v-dialog v-model="installmentsDialog" max-width="900px" scrollable persistent>
     <v-card>
@@ -146,11 +174,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick, h } from 'vue';
+import { createApp } from 'vue';
 import PayInstallmentDialog from '@/components/Installments/PayInstallmentDialog.vue';
 import { getAll } from '@/services/api';
 import { useUserStore } from '@/stores/user';
-// رؤوس جدول الخطط
+
+// ✅ رؤوس جدول الخطط
 const headers = [
   { title: 'رقم الخطة', key: 'id' },
   { title: 'نسبه مئوية %', key: 'paid_percentage', sortable: false },
@@ -160,18 +190,17 @@ const headers = [
   { title: 'الدفعة الأولى', key: 'down_payment' },
   { title: 'الإجراءات', key: 'actions', sortable: false },
 ];
-const selectedRowId = ref(null);
 
+const selectedRowId = ref(null);
 function handleRowClick(event, row) {
   selectedRowId.value = row?.item?.id;
   console.log('Selected Row ID:', selectedRowId.value);
 }
-
 function getRowClass(item) {
   return item.id === selectedRowId.value ? 'active-row' : '';
 }
 
-// رؤوس جدول الأقساط
+// ✅ رؤوس جدول الأقساط
 const installmentsHeaders = [
   { title: 'رقم القسط', key: 'installment_number' },
   { title: 'تاريخ الاستحقاق', key: 'due_date' },
@@ -182,140 +211,151 @@ const installmentsHeaders = [
 ];
 
 /**
- * دالة لطباعة خطة أقساط حرارية مباشرة.
- * تنشئ مكون طباعة مؤقت، تقوم بالطباعة، ثم تزيله.
- * @param {Object} item - بيانات خطة الأقساط المراد طباعتها.
+ * ✅ طباعة خطة أقساط حرارية
  */
 function printInstallmentPlan(item) {
-  // التحقق من وجود بيانات العنصر ومعرف العنصر
   if (item && item.id) {
-    // جلب بيانات الشركة من متجر المستخدم
     const userStore = useUserStore();
-    let companyName = 'اسم الشركة'; // قيمة افتراضية لاسم الشركة
+    let companyName = 'اسم الشركة';
     if (userStore.user && userStore.user.companies && userStore.user.company_id) {
-      // البحث عن الشركة المطابقة لمعرف الشركة الحالي للمستخدم
       const company = userStore.user.companies.find(c => c.id === userStore.user.company_id);
-      if (company) companyName = company.name; // تحديث اسم الشركة إذا وجدت
+      if (company) companyName = company.name;
     }
 
-    const installmentData = item; // بيانات خطة الأقساط المراد تمريرها
-
-    // إنشاء عنصر div مؤقت لتركيب مكون الطباعة فيه
+    const installmentData = item;
     const container = document.createElement('div');
-    document.body.appendChild(container); // إضافة العنصر إلى جسم المستند
+    document.body.appendChild(container);
 
-    // استيراد مكون طباعة خطة الأقساط حرارياً بشكل ديناميكي
     import('@/pages/installments/print/ThermalInstallmentPrint.vue').then(module => {
-      const ThermalInstallmentPrint = module.default; // الحصول على المكون الافتراضي
-
-      // إنشاء تطبيق Vue جديد لتركيب مكون الطباعة
+      const ThermalInstallmentPrint = module.default;
       const app = createApp({
         render() {
-          // عرض مكون ThermalInstallmentPrint مع تمرير البيانات واسم الشركة
           return h(ThermalInstallmentPrint, {
-            installment: installmentData, // تمرير بيانات خطة الأقساط
-            companyName, // تمرير اسم الشركة
-            ref: 'thermalRef', // مرجع للوصول إلى المكون بعد التركيب
+            installment: installmentData,
+            companyName,
+            ref: 'thermalRef',
           });
         },
         mounted() {
-          // الانتظار حتى يتم تحديث DOM بالكامل
           nextTick(() => {
-            // استدعاء دالة الطباعة في المكون إذا كانت موجودة
             this.$refs.thermalRef.printThermal && this.$refs.thermalRef.printThermal();
-            // تعيين مؤقت لإلغاء تركيب التطبيق وإزالة الحاوية بعد الطباعة
             setTimeout(() => {
-              app.unmount(); // إلغاء تركيب التطبيق
-              document.body.removeChild(container); // إزالة الحاوية من DOM
-            }, 500); // تأخير قصير للسماح بعملية الطباعة
+              app.unmount();
+              document.body.removeChild(container);
+            }, 500);
           });
         },
       });
-      app.mount(container); // تركيب التطبيق في الحاوية المؤقتة
+      app.mount(container);
     });
   }
 }
 
-// بيانات الريأكتيف
+// ✅ بيانات الريأكتيف
 const installmentPlans = ref([]);
 const currentInstallments = ref([]);
 const currentPlan = ref({});
 const installmentsDialog = ref(false);
-
-// بيانات حوار الدفع
 const selectedInstallment = ref(null);
 const payDialog = ref(false);
 const directPay = ref(true);
-// دالة لتنسيق صف الجدول بناءً على حالة الدفع
-// تستخدم في الجدول كده :row-props="getRowProps"
+
+// ✅ الباجينيشن والـ options
+const itemsPerPage = ref(10);
+const options = ref({
+  page: 1,
+  itemsPerPage: 10,
+  sortBy: [],
+  sortDesc: [],
+});
+const total = ref(0);
+const loading = ref(false);
+
+const searchUser = ref(null);
+const onSearch = () => {
+  if (!searchUser.value || searchUser.value.length < 3) {
+    return;
+  }
+  options.value.page = 1; // نرجع لأول صفحة عند البحث
+  fetchInstallmentPlans();
+};
+// ✅ دالة تنسيق صف الجدول الرئيسي
 function getRowProps({ item }) {
   const paid = item.total_pay || 0;
-  const total = item.total_amount || 1; // تجنب القسمة على صفر
-  const percent = Math.min(Math.round((paid / total) * 100), 100); // تقريب النسبة المئوية
+  const totalAmount = item.total_amount || 1;
+  const percent = Math.min(Math.round((paid / totalAmount) * 100), 100);
 
-  let color = '#4caf50'; // أخضر - جيد (50% أو أكثر)
-  if (percent < 50) color = '#ff9800'; // برتقالي - متوسط (20% إلى 49%)
-  if (percent < 20) color = '#f44336'; // أحمر - منخفض (أقل من 20%)
+  let color = '#4caf50';
+  if (percent < 50) color = '#ff9800';
+  if (percent < 20) color = '#f44336';
 
-  // إرجاع كائن يحتوي على خاصية style مباشرة
   return {
     style: {
-      // هنا نقوم بإنشاء سلسلة الـ linear-gradient وتطبيقها كخلفية مضمنة
       background: `linear-gradient(to right, ${color} ${percent}%, transparent ${percent}%)`,
     },
   };
 }
 
-// دالة لحساب النسبة المئوية المدفوعة
+// ✅ حساب النسبة المئوية المدفوعة
 function calculatePaidPercentage(item) {
   const paid = parseFloat(item.total_installments_pay) || 0;
-  const total = parseFloat(item.total_installments_amount) || 1; // تجنب القسمة على صفر
-  return Math.min(Math.round((paid / total) * 100), 100);
+  const totalAmount = parseFloat(item.total_installments_amount) || 1;
+  return Math.min(Math.round((paid / totalAmount) * 100), 100);
 }
 
-// دالة لتحديد لون شريط التقدم بناءً على النسبة المئوية (ألوان Hex)
+// ✅ لون شريط التقدم
 function getPercentageBarColor(item) {
   const percent = calculatePaidPercentage(item);
-  if (percent === 100) return '#4CAF50'; // أخضر (Success)
-  if (percent >= 50) return '#2196F3'; // أزرق (Info)
-  if (percent >= 20) return '#FFC107'; // أصفر/برتقالي (Warning)
-  return '#F44336'; // أحمر (Error)
+  if (percent === 100) return '#4CAF50';
+  if (percent >= 50) return '#2196F3';
+  if (percent >= 20) return '#FFC107';
+  return '#F44336';
 }
 
-// computed: تنسيق التاريخ وحساب الإجماليات
+// ✅ تنسيق التاريخ
 const formattedStartDate = computed(() => {
   return currentPlan.value.start_date ? new Date(currentPlan.value.start_date).toLocaleDateString('ar-EG') : '—';
 });
 
-// دالة لتنسيق صف جدول الأقساط بناءً على حالة القسط
+// ✅ تنسيق صف جدول الأقساط
 function getInstallmentRowProps({ item }) {
   const remainingAmount = parseFloat(item.remaining) || 0;
   const dueDate = new Date(item.due_date);
   const today = new Date();
-  // لضمان مقارنة التواريخ فقط (تجاهل الوقت)
   dueDate.setHours(0, 0, 0, 0);
   today.setHours(0, 0, 0, 0);
 
   if (item.status === 'paid') {
-    return { style: { backgroundColor: '#A5D6A7' } }; // أخضر أغمق قليلاً (Material Design Light Green 300)
+    return { style: { backgroundColor: '#A5D6A7' } };
   } else if (remainingAmount > 0 && dueDate < today) {
-    return { style: { backgroundColor: '#EF9A9A' } }; // أحمر أغمق قليلاً (Material Design Red 200)
+    return { style: { backgroundColor: '#EF9A9A' } };
   } else if (remainingAmount > 0) {
-    return { style: { backgroundColor: '#FFE082' } }; // أصفر/برتقالي أغمق قليلاً (Material Design Amber 200)
+    return { style: { backgroundColor: '#FFE082' } };
   } else if (calculatePaidPercentage(item) == '100') {
     return { style: { backgroundColor: '#E8F5E9' } };
   }
-
-  return {}; // لا يوجد تنسيق خاص
+  return {};
 }
 
-// جلب الخطط
-function fetchInstallmentPlans() {
-  getAll('installment-plans', { per_page: -1 }, true, true, false).then(res => {
-    installmentPlans.value = res || [];
-  });
+// ✅ جلب الخطط مع دعم الباجينيشن
+async function fetchInstallmentPlans() {
+  loading.value = true;
+  try {
+    const res = await getAll('installment-plans', {
+      page: options.value.page,
+      per_page: options.value.itemsPerPage,
+      search: searchUser.value,
+    });
+    installmentPlans.value = res.data || [];
+    total.value = res.total || 0;
+  } catch (error) {
+    console.error('حدث خطأ أثناء جلب الخطط', error);
+  } finally {
+    loading.value = false;
+  }
 }
 
+// ✅ تحديث الأقساط بعد الدفع
 function updateInstallments(data) {
   data.paid_installments.forEach(updated => {
     const index = currentInstallments.value.findIndex(i => i.id === updated.id);
@@ -325,23 +365,22 @@ function updateInstallments(data) {
   });
 }
 
-// فتح/إغلاق حوار الأقساط
+// ✅ فتح حوار الأقساط
 function openInstallmentsDialog(plan) {
   if (!plan || !Array.isArray(plan.installments)) return;
   currentPlan.value = plan;
-  console.log('currentPlan.value', currentPlan.value);
-
   currentInstallments.value = plan.installments;
   installmentsDialog.value = true;
 }
 
-// فتح حوار الدفع
+// ✅ فتح حوار الدفع
 function openPayDialog(inst, isDirect) {
   selectedInstallment.value = inst;
   directPay.value = isDirect;
   payDialog.value = true;
 }
 
+// ✅ جلب البيانات عند التثبيت
 onMounted(fetchInstallmentPlans);
 </script>
 

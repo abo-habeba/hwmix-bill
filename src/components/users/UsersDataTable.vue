@@ -40,11 +40,11 @@
             clearable
             class="ma-10"
             max-width="200"
+            rounded
             v-model="searchQuery"
             prepend-inner-icon="ri-search-line"
             label="بحث..."
             hide-details
-            rounded
           ></v-text-field>
         </v-toolbar>
       </template>

@@ -130,10 +130,10 @@ const payForm = ref(null);
 
 onMounted(async () => {
   try {
-    const methods = await getAll('payment-methods', { per_page: -1 }, true, false, false);
-    paymentMethods.value = methods || [];
+    const { data } = await getAll('payment-methods', { per_page: -1 }, true, false, false);
+    paymentMethods.value = data || [];
 
-    const cashMethod = methods.find(method => method.code?.trim().toLowerCase() === 'cash');
+    const cashMethod = data.find(method => method.code?.trim().toLowerCase() === 'cash');
     if (cashMethod) {
       payData.value.payment_method_id = cashMethod.id;
     }

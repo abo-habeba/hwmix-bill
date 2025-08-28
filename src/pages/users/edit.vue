@@ -90,7 +90,7 @@ function loadUserData() {
 
   getOne('user', userId.value)
     .then(res => {
-      user.value = res;
+      user.value = res.data;
       console.log('user ', res);
       console.log('user.value.companies:', user.value.companies);
       mergedCompanies();

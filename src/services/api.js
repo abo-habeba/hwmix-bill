@@ -63,15 +63,35 @@ const handleSuccess = (response, log, userStore, loading, type, showToast) => {
   if (loading) userStore.loadingApi = false;
   if (showToast && resData.message) toast.success(resData.message);
 
-  // ✅ استخدام hasOwnProperty بدل فحص القيمة نفسها
+  // ✅ تجهيز النتيجة بشكل متوافق مع v-data-table-server
+  let normalized = {
+    data: [],
+    total: 0,
+    message: resData.message ?? '',
+    status: resData.status ?? true,
+  };
+
   if (resData.hasOwnProperty('total')) {
-    console.log(`${type} Paginator:`, resData);
-
-    return resData;
+    // حالة الباجينيشن أو per_page=-1
+    normalized.data = resData.data ?? [];
+    normalized.total = resData.total ?? normalized.data.length;
+  } else if (Array.isArray(resData.data)) {
+    // حالة إرجاع مصفوفة فقط
+    normalized.data = resData.data;
+    normalized.total = resData.data.length;
+  } else if (resData.data) {
+    // حالة Single Resource
+    normalized.data = [resData.data];
+    normalized.total = 1;
+  } else if (Array.isArray(resData)) {
+    // حالة API بيرجع Array مباشر
+    normalized.data = resData;
+    normalized.total = resData.length;
   }
-  console.log(`${type} data:`, resData.data);
 
-  return resData.data ?? resData;
+  if (log) console.log(`${type} normalized:`, normalized);
+
+  return normalized;
 };
 
 // تم تعديل الدالة لتقبل showToast

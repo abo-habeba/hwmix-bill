@@ -3,20 +3,41 @@
   <!-- <AdvancedSearch ref="advancedSearch" v-model="filters" :fields="fields" /> -->
   <!-- Deleted Item -->
 
-  <DeletedItem @update-items="removeDeletedItems" api="users/delete"
-    :dataDelete="{ items: deletedUsers, key: 'nickname' }" />
+  <DeletedItem @update-items="removeDeletedItems" api="users/delete" :dataDelete="{ items: deletedUsers, key: 'nickname' }" />
   <!-- Data Table Server -->
   <div id="dataTable" style="position: relative !important">
-    <v-btn v-if="selectedUsers.length" class="text-center my-2 mx-10" density="compact" variant="flat"
+    <v-btn
+      v-if="selectedUsers.length"
+      class="text-center my-2 mx-10"
+      density="compact"
+      variant="flat"
       style="background-color: #dc3545 !important; color: white; position: absolute; top: -30px; z-index: 10"
-      prepend-icon="ri-delete-bin-line" @click="deleteUser">
+      prepend-icon="ri-delete-bin-line"
+      @click="deleteUser"
+    >
       حذف عدد {{ selectedUsers.length }} من العناصر
     </v-btn>
-    <v-data-table-server item-value="id" v-model:items-per-page="itemsPerPage" v-model:options="options"
-      :headers="headers" :items="users" :items-length="total" :loading="loading" hover show-current-page
-      :row-props="getRowProps" v-model="selectedUsers" show-select item-selectable loading-text=" جاري تحمل البيانات "
-      no-data-text=" لا توجد بيانات " items-per-page-text="عدد الصفوف في الصفحة" @update:options="fetchUsers"
-      @contextmenu:row="showContextMenu" @click="colsContextMenu">
+    <v-data-table-server
+      item-value="id"
+      v-model:items-per-page="itemsPerPage"
+      v-model:options="options"
+      :headers="headers"
+      :items="users"
+      :items-length="total"
+      :loading="loading"
+      hover
+      show-current-page
+      :row-props="getRowProps"
+      v-model="selectedUsers"
+      show-select
+      item-selectable
+      loading-text=" جاري تحمل البيانات "
+      no-data-text=" لا توجد بيانات "
+      items-per-page-text="عدد الصفوف في الصفحة"
+      @update:options="fetchUsers"
+      @contextmenu:row="showContextMenu"
+      @click="colsContextMenu"
+    >
       <!-- عمود التسلسل -->
       <template #item.index="{ index }">
         {{ index + 1 }}
@@ -24,8 +45,7 @@
 
       <!-- عمود الإجراءات -->
       <template #item.action="{ item }">
-        <v-btn density="compact" variant="text" color="#0086CD" prepend-icon="ri-more-2-fill"
-          @click.stop="event => showContextMenu(event, { item })">
+        <v-btn density="compact" variant="text" color="#0086CD" prepend-icon="ri-more-2-fill" @click.stop="event => showContextMenu(event, { item })">
         </v-btn>
       </template>
     </v-data-table-server>
@@ -134,35 +154,35 @@ watch(
     availableActions.value = [
       !selectedUsers.value.length && canUpdate
         ? {
-          title: Number(newUser?.status) === 1 ? 'تعطيل' : 'تفعيل',
-          color: Number(newUser?.status) === 1 ? '#ffc107' : '#28a745',
-          icon: Number(newUser?.status) === 1 ? 'ri-toggle-line' : 'ri-toggle-fill',
-          callback: activeUser.value,
-        }
+            title: Number(newUser?.status) === 1 ? 'تعطيل' : 'تفعيل',
+            color: Number(newUser?.status) === 1 ? '#ffc107' : '#28a745',
+            icon: Number(newUser?.status) === 1 ? 'ri-toggle-line' : 'ri-toggle-fill',
+            callback: activeUser.value,
+          }
         : null,
       !selectedUsers.value.length && canUpdate
         ? {
-          title: 'تعديل',
-          color: '#007bff',
-          icon: 'ri-pencil-line',
-          callback: editUser.value,
-        }
+            title: 'تعديل',
+            color: '#007bff',
+            icon: 'ri-pencil-line',
+            callback: editUser.value,
+          }
         : null,
       canDelete
         ? {
-          title: 'حذف',
-          color: '#dc3545',
-          icon: 'ri-delete-bin-line',
-          callback: deleteUser.value,
-        }
+            title: 'حذف',
+            color: '#dc3545',
+            icon: 'ri-delete-bin-line',
+            callback: deleteUser.value,
+          }
         : null,
       !selectedUsers.value.length && canView
         ? {
-          title: 'عرض',
-          color: '#17a2b8',
-          icon: 'ri-eye-line',
-          callback: viewUser.value,
-        }
+            title: 'عرض',
+            color: '#17a2b8',
+            icon: 'ri-eye-line',
+            callback: viewUser.value,
+          }
         : null,
     ].filter(Boolean);
   },
@@ -176,7 +196,7 @@ watchEffect(() => {
         title: 'لا تملك إجراءات',
         color: '#6c757d',
         icon: 'ri-spam-3-line',
-        callback: () => { },
+        callback: () => {},
       },
     ];
   } else {

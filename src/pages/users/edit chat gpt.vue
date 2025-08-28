@@ -24,7 +24,7 @@ onMounted(() => {
     loading.value = true;
     getOne('user', userId.value)
       .then(res => {
-        user.value = res;
+        user.value = res.data;
         userCompanies.value = res.companies;
         getAll('roles').then(data => {
           roles.value = data.data;

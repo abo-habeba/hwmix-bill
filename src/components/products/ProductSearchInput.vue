@@ -108,7 +108,7 @@ async function loadProducts(reset = false) {
     const params = { search: searchText.value, per_page: 20, page: page.value };
     const res = await getAll('product-variants/search-by-product', params, false, false, false);
 
-    products.value = res;
+    products.value = res.data;
   } catch (e) {
     console.error('فشل تحميل المنتجات:', e);
   } finally {
