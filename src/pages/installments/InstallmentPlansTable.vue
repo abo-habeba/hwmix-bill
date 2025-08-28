@@ -33,7 +33,7 @@
             hide-details
             clearable
             class="ma-10"
-            max-width="200"
+            max-width="330"
             rounded
             @input="onSearch"
             :rules="[v => (v && v.length >= 3) || 'ادخل 3 حروف على الاقل']"
