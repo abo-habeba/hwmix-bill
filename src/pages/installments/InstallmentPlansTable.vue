@@ -2,7 +2,6 @@
   <!-- جدول خطط التقسيط -->
   <v-card class="pa-2">
     <v-data-table-server
-      fixed-header
       v-model:items-per-page="itemsPerPage"
       v-model:options="options"
       :headers="headers"
@@ -10,9 +9,8 @@
       :items-length="total"
       :loading="loading"
       hover
+      striped="even"
       show-current-page
-      show-select
-      item-selectable
       item-value="id"
       :row-props="getInstallmentRowProps"
       class="elevation-1"
@@ -41,7 +39,9 @@
         </v-toolbar>
       </template>
       <template #item.actions="{ item }">
-        <v-btn color="primary" density="compact" @click.stop="openInstallmentsDialog(item)">عرض الأقساط</v-btn>
+        <div style="position: sticky !important; left: 0; background: white">
+          <v-btn color="primary" density="compact" @click.stop="openInstallmentsDialog(item)">عرض الأقساط</v-btn>
+        </div>
       </template>
       <!-- قالب لعمود "النسبة المدفوعة" كشريط تقدم -->
       <template #item.paid_percentage="{ item }">
@@ -79,7 +79,6 @@
   <v-dialog v-model="installmentsDialog" max-width="900px" scrollable persistent>
     <v-card>
       <v-card-title class="bg-primary text-white"> تفاصيل خطة التقسيط </v-card-title>
-
       <v-card-text style="max-height: 70vh; overflow-y: auto">
         <!-- ملخص الخطة -->
         <v-row class="px-4 pt-4" dense>
@@ -188,7 +187,7 @@ const headers = [
   { title: 'المستخدم', key: 'user.nickname', sortable: false },
   { title: 'المبلغ الإجمالي', key: 'total_amount' },
   { title: 'الدفعة الأولى', key: 'down_payment' },
-  { title: 'الإجراءات', key: 'actions', sortable: false },
+  { title: 'الإجراءات', key: 'actions', sortable: false, class: 'sticky-action-column' },
 ];
 
 const selectedRowId = ref(null);
@@ -389,9 +388,15 @@ onMounted(fetchInstallmentPlans);
   font-weight: bold;
   font-size: 0.8rem;
 }
+.sticky-action-column {
+  position: sticky !important;
+  right: 0; /* لو LTR خليها left: 0 */
+  z-index: 3; /* عشان يبقى فوق الأعمدة التانية */
+  background: white; /* عشان ميبانش متداخل */
+}
 
 .active-row {
-  background-color: #e0f7fa !important; /* اللون اللي تحبه */
+  background-color: #e0f7fa !important;
 }
 /* تنسيقات شريط التقدم */
 .progress-bar-container {

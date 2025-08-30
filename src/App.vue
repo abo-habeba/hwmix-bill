@@ -127,4 +127,18 @@ body {
 }
 
 /* تأكد من أن حقول الإدخال تتبع نفس النمط */
+.v-data-table__tr:nth-child(even) {
+  background-color: #e3f2fd; /* أزرق سماوي لطيف */
+}
+
+.v-data-table__tr:nth-child(odd) {
+  background-color: #ffffff; /* أبيض */
+}
+.v-table__wrapper tbody tr:nth-child(even) {
+  background-color: #e3f2fd; /* أزرق سماوي لطيف */
+}
+
+.v-table__wrapper tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* أبيض */
+}
 </style>
