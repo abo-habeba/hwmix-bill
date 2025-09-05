@@ -114,7 +114,7 @@ textarea {
 /* تنسيق عام لجعل الأرقام إنجليزية في كامل المشروع */
 body {
   /* الطريقة الأفضل والموصى بها: */
-  font-variant-numeric: tabular-nums; /* يجعل الأرقام متساوية العرض (مجدولة) وتظهر بالإنجليزية */
+  font-variant-numeric: tabular-nums;
   /* يمكنك أيضًا تجربة oldstyle-nums إذا كنت تفضل هذا النمط */
 
   /* بديل أقل تفضيلاً ولكن قد يعمل في بعض الخطوط والسياقات: */
@@ -135,10 +135,22 @@ body {
   background-color: #ffffff; /* أبيض */
 }
 .v-table__wrapper tbody tr:nth-child(even) {
-  background-color: #e3f2fd; /* أزرق سماوي لطيف */
+  background-color: #e3f2fd;
 }
 
 .v-table__wrapper tbody tr:nth-child(odd) {
   background-color: #ffffff; /* أبيض */
+}
+.v-table__wrapper {
+  position: relative !important;
+  overflow-x: auto !important;
+}
+
+.sticky-column {
+  position: sticky !important;
+  left: 500px;
+  background: #fff;
+  z-index: 15;
+  min-width: 150px;
 }
 </style>

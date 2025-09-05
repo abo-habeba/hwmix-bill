@@ -38,9 +38,13 @@
           ></v-text-field>
         </v-toolbar>
       </template>
+      <template #header.actions>
+        <th class="sticky-column">الإجراءات</th>
+      </template>
+
       <template #item.actions="{ item }">
-        <div style="position: sticky !important; left: 0; background: white">
-          <v-btn color="primary" density="compact" @click.stop="openInstallmentsDialog(item)">عرض الأقساط</v-btn>
+        <div class="sticky-column">
+          <v-btn color="primary" density="compact" @click.stop="openInstallmentsDialog(item)"> عرض الأقساط </v-btn>
         </div>
       </template>
       <!-- قالب لعمود "النسبة المدفوعة" كشريط تقدم -->
@@ -187,7 +191,7 @@ const headers = [
   { title: 'المستخدم', key: 'user.nickname', sortable: false },
   { title: 'المبلغ الإجمالي', key: 'total_amount' },
   { title: 'الدفعة الأولى', key: 'down_payment' },
-  { title: 'الإجراءات', key: 'actions', sortable: false, class: 'sticky-action-column' },
+  { title: 'الإجراءات', key: 'actions', sortable: false, class: 'sticky-column' },
 ];
 
 const selectedRowId = ref(null);
@@ -387,12 +391,6 @@ onMounted(fetchInstallmentPlans);
 .v-chip {
   font-weight: bold;
   font-size: 0.8rem;
-}
-.sticky-action-column {
-  position: sticky !important;
-  right: 0; /* لو LTR خليها left: 0 */
-  z-index: 3; /* عشان يبقى فوق الأعمدة التانية */
-  background: white; /* عشان ميبانش متداخل */
 }
 
 .active-row {
