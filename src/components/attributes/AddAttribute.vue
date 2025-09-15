@@ -74,7 +74,7 @@ async function handleSubmit() {
   try {
     const editId = props.editAttribute?.id ?? false;
     response = await saveItem('attribute', payload, editId, false, true, true);
-    emit('update:attributes', response);
+    emit('update:attributes', response.data);
     closeDialog(null);
   } catch (e) {
     errorMessage.value = e?.message || 'حدث خطأ أثناء حفظ الخاصية';

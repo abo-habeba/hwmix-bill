@@ -244,7 +244,7 @@ function deleteAttribute(id) {
 // دالة جلب الخصائص
 function getAttributes() {
   getAll('attributes', null, true, false).then(res => {
-    attributes.value = res;
+    attributes.value = res.data;
   });
 }
 
@@ -274,6 +274,8 @@ const updateAttributes = attribute => {
 };
 
 function openValuesDialog(attr) {
+  console.log('Opening values for attribute:', attr);
+
   selectedAttributeForValues.value = attr;
   valuesDialog.value = true;
 }

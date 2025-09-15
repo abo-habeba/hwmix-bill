@@ -204,7 +204,7 @@ async function saveValue() {
 
   try {
     const response = await saveItem('attribute-value', attributeValue.value, attributeValue.value.id, true);
-    emit(isEditMode.value ? 'value-edited' : 'value-added', response);
+    emit(isEditMode.value ? 'value-edited' : 'value-added', response.data);
     closeDialog();
   } catch (e) {
     console.error('Error saving:', e);
