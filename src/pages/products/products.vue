@@ -51,7 +51,6 @@ const variantHeaders = [
 ];
 
 onMounted(() => {
-  // fetchProducts();
   fetchAttributes();
 });
 

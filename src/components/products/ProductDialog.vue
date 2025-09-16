@@ -5,7 +5,7 @@ import { getAll, saveItem } from '@/services/api'; // تأكد من أن الم�
 import ProductGeneralInfoForm from './ProductGeneralInfoForm.vue';
 import ProductVariantForm from './ProductVariantForm.vue';
 import ProductVariantAttributesForm from './ProductVariantAttributesForm.vue'; // تأكد من استيراد المكون
-
+import { useUserStore } from '@/stores/user';
 const props = defineProps({
   dialog: Boolean,
   product: Object,
@@ -172,17 +172,33 @@ watch(
   }
 );
 
+const userStore = useUserStore();
 onMounted(async () => {
-  await Promise.all([getBrands(), getAttributes(), getWarehouses(), getCategories()]);
-  if (!props.isEditMode) {
-    setInitialWarehouseForFirstStock();
+  // 1. تفعيل حالة التحميل قبل بدء العمليات
+  userStore.loadingApi = true;
+
+  try {
+    // 2. استخدام await للانتظار حتى تكتمل كل الـ Promises
+    await Promise.all([getBrands(), getAttributes(), getWarehouses(), getCategories()]);
+    console.log('All initial data fetched successfully!');
+  } catch (error) {
+    // 3. التعامل مع الأخطاء إذا حدثت
+    console.error('An error occurred during data fetching:', error);
+  } finally {
+    // 4. إيقاف حالة التحميل بعد انتهاء العمليات (سواء بنجاح أو فشل)
+    userStore.loadingApi = false;
+
+    // 5. تنفيذ منطق تهيئة المخزن بعد انتهاء التحميل
+    if (!props.isEditMode) {
+      setInitialWarehouseForFirstStock();
+    }
   }
 });
 
 async function getBrands() {
   try {
     const res = await getAll('brands', null, true, false);
-    brands.value = res;
+    brands.value = res.data;
   } catch (error) {
     console.error('Error fetching brands:', error);
   }
@@ -191,7 +207,7 @@ async function getBrands() {
 async function getAttributes() {
   try {
     const res = await getAll('attributes', null, true, false);
-    attributes.value = res;
+    attributes.value = res.data;
   } catch (error) {
     console.error('Error fetching attributes:', error);
   }
@@ -201,9 +217,10 @@ async function getWarehouses() {
   try {
     const res = await getAll('warehouses', null, true, false);
     warehouses.value = res.data;
-    if (!props.isEditMode) {
-      setInitialWarehouseForFirstStock();
-    }
+
+    // if (!props.isEditMode) {
+    //   setInitialWarehouseForFirstStock();
+    // }
   } catch (error) {
     console.error('Error fetching warehouses:', error);
   }
@@ -212,7 +229,7 @@ async function getWarehouses() {
 async function getCategories() {
   try {
     const res = await getAll('categories', null, true, false);
-    categories.value = res;
+    categories.value = res.data;
   } catch (error) {
     console.error('Error fetching categories:', error);
   }

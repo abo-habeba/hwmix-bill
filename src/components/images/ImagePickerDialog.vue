@@ -47,7 +47,7 @@
               outlined
               class="image-card d-flex flex-column"
               :class="{ 'selected-card': isSelected(image.id) }"
-              @click="toggleSelection(image.id)"
+              @click="toggleSelection(image)"
               rounded="md"
               elevation="2"
             >
@@ -113,20 +113,11 @@ const newImages = ref([]);
 const loading = ref(false);
 const uploading = ref(false);
 const fileInputRef = ref(null);
-////////////////////////////
-// الاستخدام
-// <ImagePickerDialog v-model="showImageDialog" @close="onImagesSelected" />
-// import ImagePickerDialog from '@/components/images/ImagePickerDialog.vue';
-// const showImageDialog = ref(false);
-// const selectedImageIds = ref([]);
-// const onImagesSelected = ids => {
-//   selectedImageIds.value = ids;
-//   user.value.images_ids = ids;
-// };
-///////////////////////
+
 onMounted(() => {
   loadImages();
 });
+
 // مزامنة فتح/غلق الدايلوج
 watch(
   () => props.modelValue,
@@ -148,9 +139,9 @@ const closeDialog = () => {
 
 // تأكيد التحديد وإغلاق الدايلوج
 const confirmSelection = () => {
-  // بناءً على وضع الاختيار (فردي/متعدد)
   const selectedResult = props.multiple ? selected.value : selected.value[0];
-  emit('close', [selectedResult]);
+  console.log('Selected images:', selectedResult);
+  emit('close', selectedResult);
   closeDialog();
 };
 
@@ -159,7 +150,7 @@ const loadImages = async () => {
   loading.value = true;
   try {
     const res = await getAll('images', { is_temp: 1 });
-    images.value = res;
+    images.value = res.data;
   } catch (error) {
     console.error('خطأ في تحميل الصور:', error);
   } finally {
@@ -171,8 +162,9 @@ const loadImages = async () => {
 const deleteSelected = async () => {
   if (!selected.value.length) return;
   try {
-    await deleteAll('images/delete', { ids: selected.value });
-    images.value = images.value.filter(image => !selected.value.includes(image.id));
+    const selectedIds = selected.value.map(image => image.id);
+    await deleteAll('images/delete', { ids: selectedIds });
+    images.value = images.value.filter(image => !selectedIds.includes(image.id));
     selected.value = [];
   } catch (error) {
     console.error('خطأ في حذف الصور:', error);
@@ -196,11 +188,13 @@ const uploadImages = async () => {
   if (!newImages.value.length) return;
   uploading.value = true;
   try {
-    const response = await saveItem('image', { images: newImages.value });
-    if (response && Array.isArray(response)) {
-      images.value.unshift(...response);
-    } else if (response) {
-      images.value.unshift(response);
+    const { data } = await saveItem('image', { images: newImages.value });
+    console.log('Upload response data:', data);
+
+    if (data && Array.isArray(data)) {
+      images.value.unshift(...data);
+    } else if (data) {
+      images.value.unshift(data);
     }
     newImages.value = [];
   } catch (error) {
@@ -212,21 +206,21 @@ const uploadImages = async () => {
 
 // التحقق مما إذا كانت الصورة محددة
 const isSelected = imageId => {
-  return selected.value.includes(imageId);
+  return selected.value.some(image => image.id === imageId);
 };
 
 // تبديل تحديد الصورة بناءً على وضع الاختيار (فردي/متعدد)
-const toggleSelection = imageId => {
+const toggleSelection = image => {
   if (props.multiple) {
-    const index = selected.value.indexOf(imageId);
+    const index = selected.value.findIndex(item => item.id === image.id);
     if (index > -1) {
       selected.value.splice(index, 1); // إلغاء التحديد
     } else {
-      selected.value.push(imageId); // تحديد
+      selected.value.push(image); // تحديد
     }
   } else {
     // وضع الاختيار الفردي
-    selected.value = selected.value[0] === imageId ? [] : [imageId];
+    selected.value = selected.value[0]?.id === image.id ? [] : [image];
   }
 };
 

@@ -49,6 +49,8 @@ const phoneRules = [v => !!v || 'رقم الهاتف مطلوب'];
 const companiesRules = [v => (Array.isArray(v) && v.length > 0) || 'حدد شركة واحدة على الأقل'];
 const emailRules = [v => !v || /.+@.+\..+/.test(v) || 'البريد الإلكتروني يجب أن يكون صالحًا'];
 const passwordRules = [v => !!v || 'كلمة المرور مطلوبة', v => v.length >= 6 || 'كلمة المرور يجب أن لا تقل عن 6 أحرف'];
+const selectedImage = ref(null);
+const imagePreview = ref(null);
 
 watch(
   () => userStore.user,
@@ -92,7 +94,10 @@ function loadUserData() {
     .then(res => {
       user.value = res.data;
       console.log('user ', res);
-      console.log('user.value.companies:', user.value.companies);
+      console.log('user.value.companies:', user.value);
+      if (user.value.avatar_url) {
+        imagePreview.value = user.value.avatar_url;
+      }
       mergedCompanies();
     })
     .finally(() => {
@@ -153,6 +158,9 @@ async function sendData() {
   user.value.companies = null;
   delete user.value.roles;
   delete user.value.permissions;
+  if (selectedImageIds.value) {
+    user.value.images_ids = [selectedImageIds.value];
+  }
 
   saveItem('user', user.value, route.params.id).then(() => {
     setTimeout(() => {
@@ -172,9 +180,19 @@ import ImagePickerDialog from '@/components/images/ImagePickerDialog.vue';
 const showImageDialog = ref(false);
 const selectedImageIds = ref([]);
 
-const onImagesSelected = ids => {
-  selectedImageIds.value = ids;
-  user.value.images_ids = ids;
+const onImagesSelected = image => {
+  // `image` هو الآن كائن الصورة بالكامل وليس المعرف فقط
+  if (image) {
+    selectedImage.value = image;
+    selectedImageIds.value = image.id;
+    imagePreview.value = image.url; // نستخدم رابط الصورة الجديدة للمعاين
+  } else {
+    // في حالة عدم اختيار أي صورة
+    selectedImage.value = null;
+    selectedImageIds.value = null;
+    // يمكنك هنا إبقاء الشعار القديم أو مسحه
+    // imagePreview.value = null;
+  }
 };
 </script>
 
@@ -248,10 +266,14 @@ const onImagesSelected = ids => {
                       ></v-select>
                     </VCol>
 
-                    <VCol cols="12">
-                      <ImagePickerDialog v-model="showImageDialog" @close="onImagesSelected" />
+                    <VCol cols="12" sm="6" md="4">
+                      <div v-if="imagePreview">
+                        <v-img :src="imagePreview" class="mb-2" aspect-ratio="1" cover></v-img>
+                      </div>
+                      <v-col cols="12">
+                        <ImagePickerDialog v-model="showImageDialog" @close="onImagesSelected" button-text="تغيير الشعار" />
+                      </v-col>
                     </VCol>
-
                     <v-divider style="width: 50%" :thickness="2" class="border-opacity-100" color="warning"></v-divider>
                     <VCol cols="12" sm="6" md="4">
                       <VTextField
