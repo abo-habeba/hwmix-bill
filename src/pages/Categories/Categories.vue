@@ -110,7 +110,7 @@ function buildTree(categoriesList) {
 }
 function getCategories() {
   getAll('categories').then(res => {
-    categories.value = res;
+    categories.value = res.data;
     console.log(categories.value);
 
     treeCategories.value = buildTree(categories.value);
