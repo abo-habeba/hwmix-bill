@@ -126,7 +126,7 @@ function deleteBrand(id) {
 
 function getBrands() {
   getAll('brands').then(res => {
-    brands.value = res;
+    brands.value = res.data;
   });
 }
 
