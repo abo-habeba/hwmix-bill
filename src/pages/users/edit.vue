@@ -158,10 +158,17 @@ async function sendData() {
   user.value.companies = null;
   delete user.value.roles;
   delete user.value.permissions;
-  if (selectedImageIds.value) {
-    user.value.images_ids = [selectedImageIds.value];
+  console.log('user to save:', user.value);
+  console.log('selectedImageIds to save:', selectedImageIds.value);
+  if (Array.isArray(selectedImageIds.value) && selectedImageIds.value.length > 0) {
+    user.value.images_ids = selectedImageIds.value;
+  } else {
+    delete user.value.images_ids;
   }
+  console.log('selectedImageIds to save:', selectedImageIds.value);
+  console.log('user to save:', user.value);
 
+  console.log('user to save:', user.value);
   saveItem('user', user.value, route.params.id).then(() => {
     setTimeout(() => {
       router.go(-1);
@@ -181,11 +188,10 @@ const showImageDialog = ref(false);
 const selectedImageIds = ref([]);
 
 const onImagesSelected = image => {
-  // `image` هو الآن كائن الصورة بالكامل وليس المعرف فقط
   if (image) {
     selectedImage.value = image;
-    selectedImageIds.value = image.id;
-    imagePreview.value = image.url; // نستخدم رابط الصورة الجديدة للمعاين
+    selectedImageIds.value = [image.id];
+    imagePreview.value = image.url;
   } else {
     // في حالة عدم اختيار أي صورة
     selectedImage.value = null;
@@ -271,7 +277,7 @@ const onImagesSelected = image => {
                         <v-img :src="imagePreview" class="mb-2" aspect-ratio="1" cover></v-img>
                       </div>
                       <v-col cols="12">
-                        <ImagePickerDialog v-model="showImageDialog" @close="onImagesSelected" button-text="تغيير الشعار" />
+                        <ImagePickerDialog v-model="showImageDialog" @close="onImagesSelected" button-text="الصورة الشخصية " />
                       </v-col>
                     </VCol>
                     <v-divider style="width: 50%" :thickness="2" class="border-opacity-100" color="warning"></v-divider>
