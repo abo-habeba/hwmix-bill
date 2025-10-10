@@ -15,7 +15,7 @@
     </div>
     <v-row dense>
       <v-col cols="12" sm="12">
-        <v-text-field v-model="modelValue.name" label="اسم المنتج" :rules="productRules.name" required hide-details="auto" />
+        <ProductFreeTextInput v-model="modelValue.name" />
       </v-col>
       <v-col cols="12" sm="6">
         <v-select v-model="modelValue.category_id" :items="categories" item-value="id" item-title="name" label="القسم" required hide-details="auto" />

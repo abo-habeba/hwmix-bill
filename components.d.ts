@@ -61,6 +61,7 @@ declare module 'vue' {
     PaymentForm: typeof import('./src/components/forms/PaymentForm.vue')['default']
     PhoneNumberInput: typeof import('./src/components/users/PhoneNumberInput.vue')['default']
     ProductDialog: typeof import('./src/components/products/ProductDialog.vue')['default']
+    ProductFreeTextInput: typeof import('./src/components/products/ProductFreeTextInput.vue')['default']
     ProductGeneralInfoForm: typeof import('./src/components/products/ProductGeneralInfoForm.vue')['default']
     ProductSearchInput: typeof import('./src/components/products/ProductSearchInput.vue')['default']
     ProductStickerDialog: typeof import('./src/components/products/ProductStickerDialog.vue')['default']
