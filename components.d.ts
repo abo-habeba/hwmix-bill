@@ -75,6 +75,7 @@ declare module 'vue' {
     RoleDetails: typeof import('./src/components/roles/RoleDetails.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SearchAndCreateSelect: typeof import('./src/components/products/SearchAndCreateSelect.vue')['default']
     SelectedCashBox: typeof import('./src/components/cashboxs/SelectedCashBox.vue')['default']
     SerialOrBarcodeInput: typeof import('./src/components/products/SerialOrBarcodeInput.vue')['default']
     ServiceForm: typeof import('./src/components/forms/ServiceForm.vue')['default']

@@ -19,12 +19,23 @@
         </v-row>
 
         <v-row dense class="my-2">
-          <v-col cols="12" class="pa-1">
+          <v-col cols="6" class="pa-1">
             <v-text-field
               inputmode="numeric"
               hide-details="auto"
               v-model="downPayment"
               label="المقدم المدفوع"
+              @input="calculateInstallment"
+              outlined
+              dense
+            />
+          </v-col>
+          <v-col cols="6" class="pa-1">
+            <v-text-field
+              inputmode="numeric"
+              hide-details="auto"
+              v-model="yearRate"
+              label="نسبة الفائدة السنوية"
               @input="calculateInstallment"
               outlined
               dense
@@ -41,11 +52,11 @@
         <v-row dense class="my-2">
           <v-col cols="6" sm="6" md="4" v-for="(item, index) in previewPlan" :key="index">
             <v-card :color="item.color" class="d-flex align-center flex-column justify-center elevation-6" dark>
-              <v-sheet class="d-flex align-center mb-0">
+              <v-sheet class="d-flex align-center mb-0" :color="item.color">
                 <v-icon class="mx-2" size="default">{{ item.icon }}</v-icon>
                 <span class="text-subtitle-1 font-weight-medium">{{ item.label }}</span>
               </v-sheet>
-              <v-sheet class="text-h5 align-center font-weight-bold">
+              <v-sheet class="text-h5 align-center font-weight-bold py-2" :color="item.color">
                 <span class="text-center">
                   {{ item.format === 'currency' ? formatCurrency(item.value) : item.value }}
                 </span>
@@ -70,7 +81,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue'; // 💡 تم إضافة 'computed'
 import dayjs from 'dayjs';
 
 const props = defineProps({
@@ -82,6 +93,7 @@ const emit = defineEmits(['installment-saved', 'update:visible']);
 // == Refs ==
 const downPayment = ref(0);
 const months = ref(12);
+const yearRate = ref(38);
 const monthlyInstallment = ref(0);
 const totalAfterInstallment = ref(0);
 const startDate = ref(dayjs().format('YYYY-MM-DD'));
@@ -97,6 +109,8 @@ watch(
       months.value = +plan.number_of_installments || 12;
       startDate.value = plan.start_date?.substring(0, 10) || dayjs().format('YYYY-MM-DD');
       roundStep.value = +plan.round_step || 10;
+      // 💡 يتم تحميل yearRate إذا كان موجودًا في خطة التقسيط
+      yearRate.value = +plan.annual_rate || 38;
 
       calculateInstallment();
     }
@@ -105,7 +119,8 @@ watch(
 );
 
 // == Watchers لأي تغيير في القيم المهمة ==
-watch([downPayment, months, () => props.form.net_amount, roundStep], calculateInstallment, {
+// 💡 تم إضافة yearRate إلى قائمة المشاهدين
+watch([downPayment, months, yearRate, () => props.form.net_amount, roundStep], calculateInstallment, {
   immediate: true,
 });
 
@@ -121,10 +136,19 @@ function calculateInstallment() {
   const step = +roundStep.value || 10;
 
   const remaining = net - down;
-  const monthlyRate = 0.025;
-  const interest = remaining * monthlyRate * monthsCount;
-  const total = remaining + interest;
 
+  // 1. تحويل النسبة السنوية المدخلة (مثلاً 40) إلى كسر عشري (0.40)
+  const annualRate = +yearRate.value / 100;
+
+  // 2. حساب المدة الزمنية بالنسبة للسنوات (12 شهر = 1.0 سنة)
+  const timeInYears = monthsCount / 12;
+
+  // 3. حساب الفائدة: الرصيد المتبقي × النسبة السنوية × المدة بالسنوات
+  const interest = remaining * annualRate * timeInYears;
+
+  const total = remaining + interest; // الإجمالي الممول = الأصل + الفائدة
+
+  // حساب القسط الشهري والقيمة الإجمالية للدفع
   monthlyInstallment.value = +(total / monthsCount).toFixed(2);
   totalAfterInstallment.value = +(total + down).toFixed(2);
 }
@@ -136,8 +160,12 @@ const previewPlan = computed(() => {
   const n = +months.value;
   const start = dayjs(startDate.value);
 
+  // 💡 المتبقي للتقسيط (الأصل + الفائدة المضافة)
   const remaining = +(total - down).toFixed(2);
+  // 💡 متوسط القسط الشهري قبل التقريب
   const avg = +(remaining / n).toFixed(2);
+
+  // 💡 تطبيق التقريب على متوسط القسط الشهري
   const stdInst = +ceilTo(avg, step).toFixed(2);
 
   const installments = [];
@@ -145,18 +173,22 @@ const previewPlan = computed(() => {
   for (let i = 1; i <= n; i++) {
     const left = +(remaining - paid).toFixed(2);
     if (left <= 0) break;
-    const amount = stdInst > left || i === n ? left : stdInst;
+
+    // القسط الأخير يأخذ المبلغ المتبقي لضمان الإغلاق الدقيق
+    const amount = i === n || stdInst > left ? left : stdInst;
+
     const due = start.add(i, 'month').format('YYYY-MM-DD');
     installments.push({ installment_number: i, due_date: due, amount: amount.toFixed(2) });
     paid = +(paid + amount).toFixed(2);
   }
 
   const lastInstallmentAmount = installments.at(-1)?.amount || null;
+  const totalPaidAfterRounding = +down + +paid; // الإجمالي الفعلي بعد التقريب
 
   return [
     {
       label: 'سعر التقسيط',
-      value: total.toFixed(2),
+      value: totalPaidAfterRounding.toFixed(2), // 💡 عرض الإجمالي بعد التقريب
       icon: 'ri-file-paper-2-line',
       color: 'blue-darken-2',
       format: 'currency',
@@ -195,11 +227,13 @@ function saveInstallment() {
     installment_plan: {
       down_payment: +downPayment.value || 0,
       number_of_installments: +months.value || 1,
-      installment_amount: +monthlyInstallment.value || 0,
-      total_amount: +totalAfterInstallment.value || 0,
+      // 💡 استخدام القيمة من previewPlan (stdInst) لضمان حفظ القسط المقرب
+      installment_amount: +previewPlan.value[2].value || 0,
+      total_amount: +previewPlan.value[0].value || 0, // 💡 حفظ الإجمالي بعد التقريب
       start_date: startDate.value,
       due_date: dayjs(startDate.value).add(months.value, 'month').format('YYYY-MM-DD'),
       round_step: +roundStep.value || 10,
+      annual_rate: +yearRate.value || 0, // 💡 حفظ النسبة السنوية
     },
   };
   emit('installment-saved', data);
